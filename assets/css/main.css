@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/*
+  Scoreboard palette — grounded in a manual ballpark scoreboard:
+  Green-Monster field green, chalk-white lines, warning-track clay,
+  and the amber "lamp" of a lit scoreboard bulb for emphasis.
+  In Tailwind v4, tokens declared here generate utilities automatically
+  (e.g. --color-field -> bg-field / text-field / border-field).
+*/
+@theme {
+  --color-field: #0b3d2e;
+  --color-field-deep: #072a20;
+  --color-panel: #0e4735;
+  --color-line: #17513c;
+  --color-chalk: #f4f1e8;
+  --color-chalk-dim: #9fb4a8;
+  --color-bulb: #e8b04b;
+  --color-clay: #c05a34;
+
+  --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --font-body: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-field);
+  color: var(--color-chalk);
+  font-family: var(--font-body);
+  /* Faint chalk-line texture, like the crosshatch of an outfield grass cut. */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Condensed nameplate treatment for headings and data. */
+.nameplate {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

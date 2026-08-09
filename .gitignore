@@ -1,0 +1,11 @@
+node_modules
+.nuxt
+.output
+.data
+dist
+.env
+*.log
+.DS_Store
+
+# Local, machine-specific Claude Code settings
+.claude/settings.local.json
