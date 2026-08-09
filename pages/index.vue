@@ -10,6 +10,18 @@ const { data, pending, error, refresh } = await useFetch<StandingsResponse>(
   '/api/standings',
   { query: { season } },
 )
+
+// Split the board into labeled sections — the Mexican leagues, then MLB — each
+// with its own divider. A section only appears when it has divisions for the
+// requested season (LMP, a winter league, is often absent).
+const MEXICAN = new Set(['LMB', 'LMP'])
+const sections = computed(() => {
+  const divisions = data.value?.divisions ?? []
+  return [
+    { key: 'mex', label: 'Ligas Mexicanas', divisions: divisions.filter(d => MEXICAN.has(d.league)) },
+    { key: 'mlb', label: 'Major League Baseball', divisions: divisions.filter(d => !MEXICAN.has(d.league)) },
+  ].filter(s => s.divisions.length > 0)
+})
 </script>
 
 <template>
@@ -76,13 +88,26 @@ const { data, pending, error, refresh } = await useFetch<StandingsResponse>(
       </button>
     </div>
 
-    <!-- The board -->
-    <div v-else-if="data" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <DivisionTable
-        v-for="division in data.divisions"
-        :key="division.divisionId"
-        :division="division"
-      />
+    <!-- The board, split into league sections -->
+    <div v-else-if="data" class="space-y-10">
+      <section v-for="section in sections" :key="section.key">
+        <!-- Section banner: painted label with a metal divider rule -->
+        <div class="mb-4 flex items-center gap-3">
+          <span class="bulb inline-block h-2 w-2 shrink-0" aria-hidden="true" />
+          <h2 class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk">
+            {{ section.label }}
+          </h2>
+          <span class="h-0.5 flex-1 bg-seam" aria-hidden="true" />
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <DivisionTable
+            v-for="division in section.divisions"
+            :key="division.divisionId"
+            :division="division"
+          />
+        </div>
+      </section>
     </div>
   </div>
 </template>

@@ -55,9 +55,9 @@ export default defineEventHandler(async (event): Promise<StandingsResponse> => {
     }
   })
 
-  // Group the board AL first, then NL East/Central/West, then the Mexican
-  // leagues (LMB Norte/Sur, then LMP) last.
-  const order = [201, 202, 200, 204, 205, 203, 222, 223, 132]
+  // Group the board Mexican leagues first (LMB Norte/Sur, then LMP), then the
+  // MLB divisions AL East/Central/West, NL East/Central/West.
+  const order = [222, 223, 132, 201, 202, 200, 204, 205, 203]
   divisions.sort((a, b) => order.indexOf(a.divisionId) - order.indexOf(b.divisionId))
 
   return { season, divisions }
