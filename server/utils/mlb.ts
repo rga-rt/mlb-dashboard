@@ -1,6 +1,7 @@
 // Server-only helpers for talking to the MLB Stats API.
 // Runs inside Nitro (server), so there is no CORS restriction here — the
 // browser only ever talks to our own /api routes.
+import type { League } from '~/types/mlb'
 
 /** Fetch a path off the MLB base URL and return parsed JSON. */
 export async function mlbFetch<T = any>(
@@ -26,8 +27,6 @@ export function pick<T = any>(obj: any, key: string, fallback: T | null = null):
   }
   return fallback
 }
-
-import type { League } from '~/types/mlb'
 
 // Division ids are stable. Mapping them here means we don't have to hydrate
 // division names on every standings call. Includes the two Mexican League
