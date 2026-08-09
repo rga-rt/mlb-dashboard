@@ -2,6 +2,11 @@
 import type { Division } from '~/types/mlb'
 
 defineProps<{ division: Division }>()
+
+// Hide the logo slot if a team's CDN logo ever fails to load.
+function hideBrokenLogo(e: Event) {
+  ;(e.target as HTMLImageElement).style.visibility = 'hidden'
+}
 </script>
 
 <template>
@@ -48,8 +53,17 @@ defineProps<{ division: Division }>()
             <span v-else class="digit text-xs text-chalk-dim">{{ team.divisionRank }}</span>
           </span>
 
-          <span class="truncate">
-            <span class="nameplate text-[15px] tracking-wide text-chalk">{{ team.name }}</span>
+          <span class="flex min-w-0 items-center gap-2">
+            <img
+              :src="teamLogo(team.teamId)"
+              alt=""
+              width="20"
+              height="20"
+              loading="lazy"
+              class="h-5 w-5 shrink-0 object-contain"
+              @error="hideBrokenLogo"
+            >
+            <span class="nameplate truncate text-[15px] tracking-wide text-chalk">{{ team.name }}</span>
           </span>
 
           <!-- Wins are the headline digit; the leader's total is lit -->

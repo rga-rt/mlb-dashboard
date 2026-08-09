@@ -33,6 +33,11 @@ const player = ref<PlayerResponse | null>(null)
 const playerPending = ref(false)
 const playerError = ref(false)
 
+// Hide the logo if the team's CDN logo ever fails to load.
+function hideBrokenLogo(e: Event) {
+  ;(e.target as HTMLImageElement).style.visibility = 'hidden'
+}
+
 async function selectPlayer(id: number) {
   selectedId.value = id
   playerPending.value = true
@@ -63,9 +68,20 @@ async function selectPlayer(id: number) {
     </div>
 
     <div v-else>
-      <h1 class="nameplate mb-6 text-5xl leading-[0.85] text-chalk md:text-6xl">
-        {{ roster?.teamName ?? 'Loading…' }}
-      </h1>
+      <div class="mb-6 flex items-center gap-4">
+        <img
+          v-if="roster?.teamId"
+          :src="teamLogo(roster.teamId)"
+          alt=""
+          width="64"
+          height="64"
+          class="h-14 w-14 shrink-0 object-contain md:h-16 md:w-16"
+          @error="hideBrokenLogo"
+        >
+        <h1 class="nameplate text-5xl leading-[0.85] text-chalk md:text-6xl">
+          {{ roster?.teamName ?? 'Loading…' }}
+        </h1>
+      </div>
 
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <!-- Lineup card: grouped roster -->
