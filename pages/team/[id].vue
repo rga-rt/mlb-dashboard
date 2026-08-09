@@ -4,8 +4,15 @@ import type { PlayerResponse, RosterPlayer, RosterResponse } from '~/types/mlb'
 const route = useRoute()
 const teamId = computed(() => route.params.id as string)
 
+// Season carries over from the board link (?season=YYYY) and can be changed
+// here. Clamp to the same last-five-years list the dropdown offers.
+const seasons = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)
+const qSeason = Number(route.query.season)
+const season = ref(seasons.includes(qSeason) ? qSeason : seasons[0])
+
+// Season is in the URL itself so useFetch refetches whenever it changes.
 const { data: roster, pending, error } = await useFetch<RosterResponse>(
-  () => `/api/roster/${teamId.value}`,
+  () => `/api/roster/${teamId.value}?season=${season.value}`,
 )
 
 // Group the roster into lineup-card sections by position type.
@@ -44,13 +51,21 @@ async function selectPlayer(id: number) {
   playerError.value = false
   player.value = null
   try {
-    player.value = await $fetch<PlayerResponse>(`/api/player/${id}`)
+    player.value = await $fetch<PlayerResponse>(`/api/player/${id}`, {
+      query: { season: season.value },
+    })
   } catch {
     playerError.value = true
   } finally {
     playerPending.value = false
   }
 }
+
+// Changing the season refetches the roster (via useFetch) — reload the open
+// player's stats for that season too, keeping the selection.
+watch(season, () => {
+  if (selectedId.value !== null) selectPlayer(selectedId.value)
+})
 </script>
 
 <template>
@@ -68,19 +83,31 @@ async function selectPlayer(id: number) {
     </div>
 
     <div v-else>
-      <div class="mb-6 flex items-center gap-4">
-        <img
-          v-if="roster?.teamId"
-          :src="teamLogo(roster.teamId)"
-          alt=""
-          width="64"
-          height="64"
-          class="h-14 w-14 shrink-0 object-contain md:h-16 md:w-16"
-          @error="hideBrokenLogo"
-        >
-        <h1 class="nameplate text-5xl leading-[0.85] text-chalk md:text-6xl">
-          {{ roster?.teamName ?? 'Loading…' }}
-        </h1>
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <img
+            v-if="roster?.teamId"
+            :src="teamLogo(roster.teamId)"
+            alt=""
+            width="64"
+            height="64"
+            class="h-14 w-14 shrink-0 object-contain md:h-16 md:w-16"
+            @error="hideBrokenLogo"
+          >
+          <h1 class="nameplate text-5xl leading-[0.85] text-chalk md:text-6xl">
+            {{ roster?.teamName ?? 'Loading…' }}
+          </h1>
+        </div>
+        <div class="flex items-stretch gap-2">
+          <label class="sr-only" for="season">Season</label>
+          <select
+            id="season"
+            v-model.number="season"
+            class="nameplate border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk transition-colors hover:border-bulb focus:border-bulb focus:outline-none"
+          >
+            <option v-for="yr in seasons" :key="yr" :value="yr">{{ yr }}</option>
+          </select>
+        </div>
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">

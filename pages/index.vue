@@ -105,6 +105,7 @@ const sections = computed(() => {
             v-for="division in section.divisions"
             :key="division.divisionId"
             :division="division"
+            :season="data.season"
           />
         </div>
       </section>

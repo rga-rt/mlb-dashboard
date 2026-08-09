@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Division } from '~/types/mlb'
 
-defineProps<{ division: Division }>()
+// `season` is carried into the team link so a team opens on the same season
+// the board is showing.
+defineProps<{ division: Division; season: number }>()
 
 // Hide the logo slot if a team's CDN logo ever fails to load.
 function hideBrokenLogo(e: Event) {
@@ -39,7 +41,7 @@ function hideBrokenLogo(e: Event) {
     <ul class="divide-y divide-seam">
       <li v-for="team in division.teams" :key="team.teamId">
         <NuxtLink
-          :to="`/team/${team.teamId}`"
+          :to="`/team/${team.teamId}?season=${season}`"
           class="grid grid-cols-[1.25rem_1fr_2.25rem_2rem_3rem_2.75rem] items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-field-deep focus:bg-field-deep focus:outline-none"
           :class="team.divisionLeader ? 'bg-bulb/5' : ''"
         >

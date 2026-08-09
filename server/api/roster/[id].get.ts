@@ -1,17 +1,20 @@
 import type { RosterPlayer, RosterResponse } from '~/types/mlb'
-import { mlbFetch, pick } from '~/server/utils/mlb'
+import { currentSeason, mlbFetch, pick } from '~/server/utils/mlb'
 
-// GET /api/roster/112  -> flattened active roster for team 112 (Cubs)
+// GET /api/roster/112?season=2025  -> flattened roster for team 112 (Cubs).
+// For the current season this is the tidy active roster; for a past season the
+// MLB feed returns that year's fuller roster.
 export default defineEventHandler(async (event): Promise<RosterResponse> => {
   const teamId = Number(getRouterParam(event, 'id'))
   if (!teamId) {
     throw createError({ statusCode: 400, statusMessage: 'A numeric team id is required.' })
   }
+  const season = Number(getQuery(event).season) || currentSeason()
 
   // Fetch roster + the team name (one small extra call for a nicer header).
   const [rosterRaw, teamRaw] = await Promise.all([
-    mlbFetch<any>(`/teams/${teamId}/roster`, { rosterType: 'active' }),
-    mlbFetch<any>(`/teams/${teamId}`),
+    mlbFetch<any>(`/teams/${teamId}/roster`, { rosterType: 'active', season }),
+    mlbFetch<any>(`/teams/${teamId}`, { season }),
   ])
 
   const teamName =
