@@ -1,21 +1,23 @@
 @import "tailwindcss";
 
 /*
-  Scoreboard palette — grounded in a manual ballpark scoreboard:
-  Green-Monster field green, chalk-white lines, warning-track clay,
-  and the amber "lamp" of a lit scoreboard bulb for emphasis.
+  Scoreboard system — grounded in Fenway's Green Monster manual board:
+  enamel field green, chalk paint, dark metal seams between the number slots,
+  and the amber lamp of a lit incandescent bulb as the one accent.
   In Tailwind v4, tokens declared here generate utilities automatically
   (e.g. --color-field -> bg-field / text-field / border-field).
 */
 @theme {
-  --color-field: #0b3d2e;
-  --color-field-deep: #072a20;
-  --color-panel: #0e4735;
-  --color-line: #17513c;
-  --color-chalk: #f4f1e8;
-  --color-chalk-dim: #9fb4a8;
-  --color-bulb: #e8b04b;
-  --color-clay: #c05a34;
+  --color-field: #0a3527;       /* enamel field green */
+  --color-field-deep: #052018;  /* shaded panel header / recessed slot */
+  --color-panel: #0c3e2e;       /* raised number-card panel */
+  --color-line: #185639;        /* painted hairline */
+  --color-seam: #04140d;        /* dark metal channel between slots */
+  --color-chalk: #f5f2e9;       /* painted chalk */
+  --color-chalk-dim: #90a99b;   /* weathered chalk */
+  --color-bulb: #f0b64e;        /* bulb glass amber (lit) */
+  --color-bulb-core: #ffdd94;   /* hot filament */
+  --color-clay: #c85a34;        /* warning-track clay (errors) */
 
   --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
   --font-body: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
@@ -29,19 +31,50 @@ body {
   background-color: var(--color-field);
   color: var(--color-chalk);
   font-family: var(--font-body);
-  /* Faint chalk-line texture, like the crosshatch of an outfield grass cut. */
+  /* Faint crosshatch, like the mowed pattern of outfield grass. */
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 44px 44px;
+    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+  background-size: 46px 46px;
 }
 
-/* Condensed nameplate treatment for headings and data. */
+/* Painted-sign lettering for headings and labels. */
 .nameplate {
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+/* Scoreboard digits: condensed, tabular, evenly set — the data is the star. */
+.digit {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: 0.01em;
+}
+
+/*
+  The one accent the whole board leans on: a lit incandescent bulb.
+  Size it with Tailwind (e.g. h-3 w-3); this paints the glass, filament glow,
+  and the socket ring only.
+*/
+.bulb {
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 35% 30%,
+      var(--color-bulb-core) 0%,
+      var(--color-bulb) 55%,
+      #a8722a 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 0 10px 2px rgba(240, 182, 78, 0.55);
+}
+
+/* Text rendered as a lit filament — reserved for the single key readout. */
+.lit {
+  color: var(--color-bulb);
+  text-shadow: 0 0 10px rgba(240, 182, 78, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {

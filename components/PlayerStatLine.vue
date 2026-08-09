@@ -49,7 +49,7 @@ function value(line: StatLine, key: string): string {
   <div class="space-y-5">
     <div
       v-if="player.lines.length === 0"
-      class="rounded-sm border border-dashed border-line px-4 py-6 text-center text-sm text-chalk-dim"
+      class="border border-dashed border-line px-4 py-6 text-center text-sm text-chalk-dim"
     >
       No {{ player.name.split(' ')[0] }} stat lines for this season yet.
     </div>
@@ -57,10 +57,11 @@ function value(line: StatLine, key: string): string {
     <div
       v-for="line in player.lines"
       :key="line.group"
-      class="overflow-hidden rounded-sm border border-line bg-panel"
+      class="border border-seam bg-panel"
     >
-      <div class="flex items-center justify-between border-b border-line bg-field-deep px-4 py-2">
-        <h4 class="nameplate text-xs tracking-widest text-bulb">
+      <div class="flex items-center justify-between border-b-2 border-seam bg-field-deep px-4 py-2.5">
+        <h4 class="nameplate flex items-center gap-2 text-xs tracking-widest text-chalk">
+          <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
           {{ line.group }} · {{ line.season }}
         </h4>
       </div>
@@ -83,8 +84,8 @@ function value(line: StatLine, key: string): string {
               <td
                 v-for="col in columnsFor(line)"
                 :key="col.key"
-                class="px-3 py-2.5 text-right tabular-nums text-sm text-chalk first:pl-4 last:pr-4"
-                :class="['avg', 'obp', 'slg', 'ops', 'era', 'whip'].includes(col.key) ? 'text-bulb' : ''"
+                class="digit px-3 py-2.5 text-right text-sm first:pl-4 last:pr-4"
+                :class="['avg', 'obp', 'slg', 'ops', 'era', 'whip'].includes(col.key) ? 'lit' : 'text-chalk'"
               >
                 {{ value(line, col.key) }}
               </td>

@@ -57,13 +57,13 @@ async function selectPlayer(id: number) {
       ← Back to the board
     </NuxtLink>
 
-    <div v-if="error" class="rounded-sm border border-clay/60 bg-panel px-5 py-6">
+    <div v-if="error" class="border-l-4 border-clay border-y border-r border-y-seam border-r-seam bg-panel px-5 py-6">
       <h1 class="nameplate text-lg text-clay">Couldn’t load that roster</h1>
       <p class="mt-1 text-sm text-chalk-dim">The team id may be wrong, or the API is unreachable.</p>
     </div>
 
     <div v-else>
-      <h1 class="nameplate mb-6 text-4xl leading-none text-chalk md:text-5xl">
+      <h1 class="nameplate mb-6 text-5xl leading-[0.85] text-chalk md:text-6xl">
         {{ roster?.teamName ?? 'Loading…' }}
       </h1>
 
@@ -71,30 +71,30 @@ async function selectPlayer(id: number) {
         <!-- Lineup card: grouped roster -->
         <div class="space-y-5">
           <div v-if="pending" class="space-y-3">
-            <div v-for="n in 8" :key="n" class="h-10 animate-pulse rounded-sm bg-panel/50" />
+            <div v-for="n in 8" :key="n" class="h-10 animate-pulse border border-seam bg-panel/50" />
           </div>
 
           <section
             v-for="group in groups"
             v-else
             :key="group.type"
-            class="overflow-hidden rounded-sm border border-line bg-panel"
+            class="border border-seam bg-panel"
           >
             <h2
-              class="nameplate border-b border-line bg-field-deep px-4 py-2 text-xs tracking-widest text-chalk-dim"
+              class="nameplate border-b-2 border-seam bg-field-deep px-4 py-2.5 text-xs tracking-widest text-chalk-dim"
             >
               {{ group.type }}
             </h2>
-            <ul>
+            <ul class="divide-y divide-seam">
               <li v-for="p in group.list" :key="p.personId">
                 <button
-                  class="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-field-deep/70 focus:bg-field-deep focus:outline-none"
-                  :class="selectedId === p.personId ? 'bg-field-deep' : ''"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-field-deep focus:bg-field-deep focus:outline-none"
+                  :class="selectedId === p.personId ? 'bg-bulb/5' : ''"
                   @click="selectPlayer(p.personId)"
                 >
                   <span
-                    class="nameplate w-8 shrink-0 text-right text-sm tabular-nums"
-                    :class="selectedId === p.personId ? 'text-bulb' : 'text-chalk-dim'"
+                    class="digit w-8 shrink-0 text-right text-sm"
+                    :class="selectedId === p.personId ? 'lit' : 'text-chalk-dim'"
                   >
                     {{ p.jersey || '–' }}
                   </span>
@@ -102,7 +102,7 @@ async function selectPlayer(id: number) {
                     {{ p.name }}
                   </span>
                   <span
-                    class="nameplate shrink-0 rounded-sm border border-line px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"
+                    class="nameplate shrink-0 border border-line px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"
                   >
                     {{ p.positionAbbr }}
                   </span>
@@ -116,7 +116,7 @@ async function selectPlayer(id: number) {
         <div class="lg:sticky lg:top-6 lg:self-start">
           <div
             v-if="!selectedId"
-            class="flex h-full min-h-48 items-center justify-center rounded-sm border border-dashed border-line px-6 py-10 text-center"
+            class="flex h-full min-h-48 items-center justify-center border border-dashed border-line px-6 py-10 text-center"
           >
             <p class="text-sm text-chalk-dim">
               Pick a player from the lineup to light up their stat line.
@@ -125,19 +125,19 @@ async function selectPlayer(id: number) {
 
           <div v-else>
             <div v-if="playerPending" class="space-y-4">
-              <div class="h-8 w-2/3 animate-pulse rounded-sm bg-panel/60" />
-              <div class="h-32 animate-pulse rounded-sm bg-panel/50" />
+              <div class="h-8 w-2/3 animate-pulse border border-seam bg-panel/60" />
+              <div class="h-32 animate-pulse border border-seam bg-panel/50" />
             </div>
 
             <div
               v-else-if="playerError"
-              class="rounded-sm border border-clay/60 bg-panel px-5 py-6 text-sm text-chalk-dim"
+              class="border-l-4 border-clay border-y border-r border-y-seam border-r-seam bg-panel px-5 py-6 text-sm text-chalk-dim"
             >
               Couldn’t load that player’s stats. Try another, or refresh.
             </div>
 
             <div v-else-if="player">
-              <div class="mb-4">
+              <div class="mb-4 border-l-2 border-bulb pl-3">
                 <h3 class="nameplate text-2xl leading-none text-chalk">{{ player.name }}</h3>
                 <p class="mt-1 text-xs text-chalk-dim">
                   {{ player.position }}
