@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { PlayerResponse, RosterPlayer, RosterResponse } from '~/types/mlb'
+import type { PlayerResponse, RosterPlayer, RosterResponse, StatLine, TeamStatEntry, TeamStatsResponse } from '~/types/mlb'
+import { HITTING_COMPARE, PITCHING_COMPARE, compareToTeam } from '~/utils/playerStats'
+import { isActive } from '~/utils/roster'
 
 const route = useRoute()
 const teamId = computed(() => route.params.id as string)
@@ -15,10 +17,9 @@ const { data: roster, pending, error } = await useFetch<RosterResponse>(
   () => `/api/roster/${teamId.value}?season=${season.value}`,
 )
 
-// Group the roster into lineup-card sections by position type.
+// Group a set of players into lineup-card sections by position type.
 const GROUP_ORDER = ['Pitcher', 'Catcher', 'Infielder', 'Outfielder', 'Two-Way Player', 'Hitter']
-const groups = computed(() => {
-  const players = roster.value?.players ?? []
+function groupByPosition(players: RosterPlayer[]) {
   const byType = new Map<string, RosterPlayer[]>()
   for (const p of players) {
     const key = p.positionType || 'Other'
@@ -32,13 +33,78 @@ const groups = computed(() => {
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
     })
     .map(([type, list]) => ({ type, list: list.sort((x, y) => x.name.localeCompare(y.name)) }))
-})
+}
+
+// Split the full-season roster: the active 26 ("regular players") vs everyone
+// else (injured, optioned to the minors, traded away, ...).
+const activeGroups = computed(() => groupByPosition((roster.value?.players ?? []).filter(isActive)))
+const reserveGroups = computed(() => groupByPosition((roster.value?.players ?? []).filter((p: RosterPlayer) => !isActive(p))))
 
 // Selected player + their stats (fetched on demand).
 const selectedId = ref<number | null>(null)
 const player = ref<PlayerResponse | null>(null)
 const playerPending = ref(false)
 const playerError = ref(false)
+
+// Team-wide season stats for the "team rank" panel. Fetched once per
+// group+season and cached, so switching players doesn't refetch the pool.
+const teamStatsCache = ref<Record<string, TeamStatEntry[]>>({})
+const teamStats = ref<TeamStatEntry[] | null>(null)
+const teamStatsPending = ref(false)
+
+// Rank a pitcher on pitching, everyone else on hitting — whichever line they
+// actually have.
+const compareGroup = computed<'hitting' | 'pitching' | null>(() => {
+  const groups = player.value?.lines.map((l: StatLine) => l.group) ?? []
+  if (player.value?.positionAbbr === 'P' && groups.includes('pitching')) return 'pitching'
+  if (groups.includes('hitting')) return 'hitting'
+  if (groups.includes('pitching')) return 'pitching'
+  return null
+})
+
+// The pool to rank against: the fetched team, plus the selected player folded
+// in from their own line if the team-stats call happened to omit them.
+const comparePool = computed<TeamStatEntry[]>(() => {
+  const pool = teamStats.value ?? []
+  const id = selectedId.value
+  const group = compareGroup.value
+  if (!id || !group) return pool
+  if (pool.some((p: TeamStatEntry) => p.personId === id)) return pool
+  const line = player.value?.lines.find((l: StatLine) => l.group === group)
+  return line ? [...pool, { personId: id, name: player.value!.name, stats: line.stats }] : pool
+})
+
+const compareRows = computed(() => {
+  const group = compareGroup.value
+  if (!group || !selectedId.value || comparePool.value.length === 0) return []
+  return compareToTeam(comparePool.value, selectedId.value, group === 'pitching' ? PITCHING_COMPARE : HITTING_COMPARE)
+})
+
+async function loadTeamStats() {
+  const group = compareGroup.value
+  if (!group) {
+    teamStats.value = null
+    return
+  }
+  const sportId = roster.value?.sportId ?? 1
+  const key = `${group}:${season.value}:${sportId}`
+  if (teamStatsCache.value[key]) {
+    teamStats.value = teamStatsCache.value[key]
+    return
+  }
+  teamStatsPending.value = true
+  try {
+    const res = await $fetch<TeamStatsResponse>(`/api/team-stats/${teamId.value}`, {
+      query: { season: season.value, group, sportId },
+    })
+    teamStatsCache.value[key] = res.players
+    teamStats.value = res.players
+  } catch {
+    teamStats.value = null
+  } finally {
+    teamStatsPending.value = false
+  }
+}
 
 // Hide the logo if the team's CDN logo ever fails to load.
 function hideBrokenLogo(e: Event) {
@@ -50,10 +116,13 @@ async function selectPlayer(id: number) {
   playerPending.value = true
   playerError.value = false
   player.value = null
+  teamStats.value = null
   try {
     player.value = await $fetch<PlayerResponse>(`/api/player/${id}`, {
       query: { season: season.value, sportId: roster.value?.sportId ?? 1 },
     })
+    // compareGroup now reflects the loaded player; pull the pool to rank against.
+    await loadTeamStats()
   } catch {
     playerError.value = true
   } finally {
@@ -112,47 +181,44 @@ watch(season, () => {
 
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <!-- Lineup card: grouped roster -->
-        <div class="space-y-5">
+        <div class="space-y-6">
           <div v-if="pending" class="space-y-3">
             <div v-for="n in 8" :key="n" class="h-10 animate-pulse border border-seam bg-panel/50" />
           </div>
 
-          <section
-            v-for="group in groups"
-            v-else
-            :key="group.type"
-            class="border border-seam bg-panel"
-          >
-            <h2
-              class="nameplate border-b-2 border-seam bg-field-deep px-4 py-2.5 text-xs tracking-widest text-chalk-dim"
-            >
-              {{ group.type }}
-            </h2>
-            <ul class="divide-y divide-seam">
-              <li v-for="p in group.list" :key="p.personId">
-                <button
-                  class="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-field-deep focus:bg-field-deep focus:outline-none"
-                  :class="selectedId === p.personId ? 'bg-bulb/5' : ''"
-                  @click="selectPlayer(p.personId)"
-                >
-                  <span
-                    class="digit w-8 shrink-0 text-right text-sm"
-                    :class="selectedId === p.personId ? 'lit' : 'text-chalk-dim'"
-                  >
-                    {{ p.jersey || '–' }}
-                  </span>
-                  <span class="nameplate flex-1 truncate text-[15px] tracking-wide text-chalk">
-                    {{ p.name }}
-                  </span>
-                  <span
-                    class="nameplate shrink-0 border border-line px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"
-                  >
-                    {{ p.positionAbbr }}
-                  </span>
-                </button>
-              </li>
-            </ul>
-          </section>
+          <template v-else>
+            <!-- Active roster: the regular players -->
+            <div class="space-y-5">
+              <div class="flex items-center gap-3">
+                <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
+                <h2 class="nameplate text-xs tracking-[0.25em] text-chalk-dim">Active Roster</h2>
+                <span class="h-px flex-1 bg-seam" aria-hidden="true" />
+              </div>
+              <RosterGroup
+                v-for="group in activeGroups"
+                :key="`a-${group.type}`"
+                :group="group"
+                :selected-id="selectedId"
+                @select="selectPlayer"
+              />
+            </div>
+
+            <!-- Everyone else on the season roster -->
+            <div v-if="reserveGroups.length" class="space-y-5">
+              <div class="flex items-center gap-3">
+                <span class="inline-block h-1.5 w-1.5 bg-chalk-dim/50" aria-hidden="true" />
+                <h2 class="nameplate text-xs tracking-[0.25em] text-chalk-dim">Reserves &amp; Inactive</h2>
+                <span class="h-px flex-1 bg-seam" aria-hidden="true" />
+              </div>
+              <RosterGroup
+                v-for="group in reserveGroups"
+                :key="`r-${group.type}`"
+                :group="group"
+                :selected-id="selectedId"
+                @select="selectPlayer"
+              />
+            </div>
+          </template>
         </div>
 
         <!-- Detail panel: selected player's stat lines -->
@@ -191,6 +257,15 @@ watch(season, () => {
                 </p>
               </div>
               <PlayerStatLine :player="player" />
+
+              <div v-if="teamStatsPending" class="mt-6 h-40 animate-pulse border border-seam bg-panel/50" />
+              <TeamRankPanel
+                v-else-if="compareRows.length"
+                class="mt-6"
+                :rows="compareRows"
+                :team-name="roster?.teamName ?? 'team'"
+                :group="compareGroup ?? ''"
+              />
             </div>
           </div>
         </div>

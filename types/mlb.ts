@@ -65,3 +65,18 @@ export interface PlayerResponse {
   throws: string | null
   lines: StatLine[]
 }
+
+// One player's season stats for a group, as returned by /api/team-stats —
+// the pool a selected player is ranked against.
+export interface TeamStatEntry {
+  personId: number
+  name: string
+  stats: Record<string, string | number>
+}
+
+export interface TeamStatsResponse {
+  teamId: number
+  season: number
+  group: 'hitting' | 'pitching'
+  players: TeamStatEntry[]
+}
