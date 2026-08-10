@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PlayerResponse, RosterPlayer, RosterResponse, StatLine, TeamInfoResponse, TeamStatEntry, TeamStatsResponse } from '~/types/mlb'
+import type { PlayerAdvancedResponse, PlayerResponse, RosterPlayer, RosterResponse, StatLine, TeamInfoResponse, TeamStatEntry, TeamStatsResponse } from '~/types/mlb'
 import { HITTING_COMPARE, PITCHING_COMPARE, compareToTeam } from '~/utils/playerStats'
 import { isActive } from '~/utils/roster'
 
@@ -49,6 +49,7 @@ const reserveGroups = computed(() => groupByPosition((roster.value?.players ?? [
 // Selected player + their stats (fetched on demand).
 const selectedId = ref<number | null>(null)
 const player = ref<PlayerResponse | null>(null)
+const advanced = ref<PlayerAdvancedResponse | null>(null)
 const playerPending = ref(false)
 const playerError = ref(false)
 
@@ -112,6 +113,24 @@ async function loadTeamStats() {
   }
 }
 
+// Advanced sabermetrics + ZiPS for the open player. Rank/forecast use the same
+// group, so key off compareGroup; a null result just hides the panel.
+async function loadAdvanced(id: number) {
+  const group = compareGroup.value
+  if (!group) {
+    advanced.value = null
+    return
+  }
+  try {
+    const res = await $fetch<PlayerAdvancedResponse>(`/api/player-advanced/${id}`, {
+      query: { season: season.value, group, sportId: roster.value?.sportId ?? 1 },
+    })
+    if (selectedId.value === id) advanced.value = res
+  } catch {
+    if (selectedId.value === id) advanced.value = null
+  }
+}
+
 // Hide the logo if the team's CDN logo ever fails to load.
 function hideBrokenLogo(e: Event) {
   ;(e.target as HTMLImageElement).style.visibility = 'hidden'
@@ -122,6 +141,7 @@ async function selectPlayer(id: number) {
   playerPending.value = true
   playerError.value = false
   player.value = null
+  advanced.value = null
   teamStats.value = null
   try {
     player.value = await $fetch<PlayerResponse>(`/api/player/${id}`, {
@@ -129,6 +149,9 @@ async function selectPlayer(id: number) {
     })
     // compareGroup now reflects the loaded player; pull the pool to rank against.
     await loadTeamStats()
+    // Advanced metrics + ZiPS are a bonus panel — a failure here shouldn't
+    // knock out the whole player view, so load them separately and swallow.
+    loadAdvanced(id)
   } catch {
     playerError.value = true
   } finally {
@@ -267,6 +290,16 @@ watch(season, () => {
               </div>
               <PlayerStatLine :player="player" />
 
+              <AdvancedPanel
+                v-if="advanced"
+                class="mt-6"
+                :group="advanced.group"
+                :year="advanced.year"
+                :sabermetrics="advanced.sabermetrics"
+                :standard="advanced.standard"
+                :expected="advanced.expected"
+              />
+
               <div v-if="teamStatsPending" class="mt-6 h-40 animate-pulse border border-seam bg-panel/50" />
               <TeamRankPanel
                 v-else-if="compareRows.length"
@@ -274,6 +307,16 @@ watch(season, () => {
                 :rows="compareRows"
                 :team-name="roster?.teamName ?? 'team'"
                 :group="compareGroup ?? ''"
+              />
+
+              <ForecastSection
+                v-if="compareGroup"
+                :key="`${player.personId}-${compareGroup}`"
+                class="mt-6"
+                :person-id="player.personId"
+                :group="compareGroup"
+                :sport-id="roster?.sportId ?? 1"
+                :projection="advanced?.projection"
               />
             </div>
           </div>

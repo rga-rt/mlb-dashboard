@@ -101,6 +101,37 @@ export interface Venue {
   dimensions: FieldDimensions
 }
 
+// One season of a player's stats, for the year-by-year forecast series.
+export interface SeasonStat {
+  season: number
+  stats: Record<string, string | number>
+}
+
+export interface PlayerHistoryResponse {
+  personId: number
+  group: 'hitting' | 'pitching'
+  seasons: SeasonStat[]
+}
+
+// A ZiPS full-season projection (projected_Zips) for the season it names.
+export interface ZipsProjection {
+  season: number
+  stats: Record<string, string | number>
+}
+
+// Advanced context for the selected player + season: sabermetrics (WAR, wRC+,
+// FIP…), the actual standard line and Statcast expected line (for the luck
+// read), and the ZiPS projection. Any block may be null when the feed omits it.
+export interface PlayerAdvancedResponse {
+  personId: number
+  group: 'hitting' | 'pitching'
+  year: number
+  sabermetrics: Record<string, string | number> | null
+  standard: Record<string, string | number> | null
+  expected: Record<string, string | number> | null
+  projection: ZipsProjection | null
+}
+
 // Club + ballpark info shown on the team page header.
 export interface TeamInfoResponse {
   teamId: number
