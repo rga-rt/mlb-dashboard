@@ -229,8 +229,9 @@ watch(season, () => {
           </template>
         </div>
 
-        <!-- Detail panel: selected player's stat lines -->
-        <div class="lg:sticky lg:top-6 lg:self-start">
+        <!-- Detail panel: selected player's stat lines. Pinned and independently
+             scrollable on wide screens so it doesn't run past the viewport. -->
+        <div class="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1">
           <div
             v-if="!selectedId"
             class="flex h-full min-h-48 items-center justify-center border border-dashed border-line px-6 py-10 text-center"
