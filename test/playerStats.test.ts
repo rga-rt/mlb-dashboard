@@ -17,6 +17,15 @@ describe('columnsFor', () => {
   })
 })
 
+describe('column definitions', () => {
+  it('every column has a label and a non-empty description for the key', () => {
+    for (const col of [...HITTING_COLUMNS, ...PITCHING_COLUMNS]) {
+      expect(col.label).toBeTruthy()
+      expect(col.description.length).toBeGreaterThan(0)
+    }
+  })
+})
+
 describe('statValue', () => {
   const l = line('hitting', { homeRuns: 15, avg: '.291', rbi: 0, empty: '' })
 

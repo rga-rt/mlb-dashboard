@@ -33,6 +33,7 @@ defineProps<{ player: PlayerResponse }>()
               <th
                 v-for="col in columnsFor(line)"
                 :key="col.key"
+                :title="col.description"
                 class="px-3 py-1.5 text-right font-medium first:pl-4 last:pr-4"
               >
                 {{ col.label }}
@@ -52,6 +53,17 @@ defineProps<{ player: PlayerResponse }>()
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Box-score key: what each abbreviation means -->
+      <div class="border-t border-seam bg-field-deep/40 px-4 py-3">
+        <p class="nameplate mb-2 text-[10px] tracking-[0.25em] text-chalk-dim">Key</p>
+        <dl class="flex flex-wrap gap-x-5 gap-y-1.5">
+          <div v-for="col in columnsFor(line)" :key="col.key" class="flex items-baseline gap-1.5">
+            <dt class="nameplate text-[10px] tracking-wider text-chalk">{{ col.label }}</dt>
+            <dd class="text-[11px] leading-none text-chalk-dim">{{ col.description }}</dd>
+          </div>
+        </dl>
       </div>
     </div>
   </div>
