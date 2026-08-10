@@ -8,10 +8,14 @@ export default defineEventHandler(async (event): Promise<PlayerResponse> => {
     throw createError({ statusCode: 400, statusMessage: 'A numeric player id is required.' })
   }
   const season = Number(getQuery(event).season) || currentSeason()
+  // Which league's season the stats come from: MLB=1 (default), LMB=23, LMP=17.
+  // Season stats are scoped to a sport, so a Mexican-league player returns no
+  // lines unless we ask for their sport.
+  const sportId = Number(getQuery(event).sportId) || 1
 
   // One hydrated call gets bio + season hitting & pitching in a single trip.
   const raw = await mlbFetch<any>(`/people/${personId}`, {
-    hydrate: `currentTeam,stats(group=[hitting,pitching],type=[season],season=${season})`,
+    hydrate: `currentTeam,stats(group=[hitting,pitching],type=[season],season=${season},sportId=${sportId})`,
   })
 
   const person = (pick(raw, 'people', []) as any[])[0] ?? {}

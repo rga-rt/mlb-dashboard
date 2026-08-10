@@ -42,6 +42,9 @@ export interface RosterPlayer {
 export interface RosterResponse {
   teamId: number
   teamName: string
+  // MLB=1, Mexican League (LMB)=23, LMP=17. Needed to fetch a player's stats
+  // from the right sport — season stats default to MLB otherwise.
+  sportId: number
   players: RosterPlayer[]
 }
 

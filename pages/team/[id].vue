@@ -52,7 +52,7 @@ async function selectPlayer(id: number) {
   player.value = null
   try {
     player.value = await $fetch<PlayerResponse>(`/api/player/${id}`, {
-      query: { season: season.value },
+      query: { season: season.value, sportId: roster.value?.sportId ?? 1 },
     })
   } catch {
     playerError.value = true

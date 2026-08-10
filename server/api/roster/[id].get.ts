@@ -17,8 +17,10 @@ export default defineEventHandler(async (event): Promise<RosterResponse> => {
     mlbFetch<any>(`/teams/${teamId}`, { season }),
   ])
 
-  const teamName =
-    pick<string>((pick(teamRaw, 'teams', []) as any[])[0], 'name', 'Team') ?? 'Team'
+  const teamNode = (pick(teamRaw, 'teams', []) as any[])[0]
+  const teamName = pick<string>(teamNode, 'name', 'Team') ?? 'Team'
+  // The team's sport drives which league a player's stats come from.
+  const sportId = pick<number>(pick(teamNode, 'sport', {}), 'id', 1) as number
 
   const players: RosterPlayer[] = (pick(rosterRaw, 'roster', []) as any[]).map((row) => {
     const person = pick(row, 'person', {}) as any
@@ -35,5 +37,5 @@ export default defineEventHandler(async (event): Promise<RosterResponse> => {
     }
   })
 
-  return { teamId, teamName, players }
+  return { teamId, teamName, sportId, players }
 })
