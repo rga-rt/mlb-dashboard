@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PlayerResponse, RosterPlayer, RosterResponse, StatLine, TeamStatEntry, TeamStatsResponse } from '~/types/mlb'
+import type { PlayerResponse, RosterPlayer, RosterResponse, StatLine, TeamInfoResponse, TeamStatEntry, TeamStatsResponse } from '~/types/mlb'
 import { HITTING_COMPARE, PITCHING_COMPARE, compareToTeam } from '~/utils/playerStats'
 import { isActive } from '~/utils/roster'
 
@@ -15,6 +15,12 @@ const season = ref(seasons.includes(qSeason) ? qSeason : seasons[0])
 // Season is in the URL itself so useFetch refetches whenever it changes.
 const { data: roster, pending, error } = await useFetch<RosterResponse>(
   () => `/api/roster/${teamId.value}?season=${season.value}`,
+)
+
+// Club + ballpark info for the header panel. Independent of the roster, so a
+// failure here just hides the panel rather than blocking the page.
+const { data: teamInfo } = await useFetch<TeamInfoResponse>(
+  () => `/api/team/${teamId.value}?season=${season.value}`,
 )
 
 // Group a set of players into lineup-card sections by position type.
@@ -178,6 +184,8 @@ watch(season, () => {
           </select>
         </div>
       </div>
+
+      <BallparkPanel v-if="teamInfo" :info="teamInfo" class="mb-6" />
 
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <!-- Lineup card: grouped roster -->

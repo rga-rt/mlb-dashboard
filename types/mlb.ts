@@ -80,3 +80,35 @@ export interface TeamStatsResponse {
   group: 'hitting' | 'pitching'
   players: TeamStatEntry[]
 }
+
+// Outfield wall distances, in feet. Any may be null — the feed details them
+// for MLB parks but often not for Mexican-league venues.
+export interface FieldDimensions {
+  leftLine: number | null
+  leftCenter: number | null
+  center: number | null
+  rightCenter: number | null
+  rightLine: number | null
+}
+
+export interface Venue {
+  name: string | null
+  city: string | null
+  state: string | null // state abbreviation when available
+  capacity: number | null
+  turf: string | null // e.g. "Grass"
+  roof: string | null // e.g. "Open"
+  dimensions: FieldDimensions
+}
+
+// Club + ballpark info shown on the team page header.
+export interface TeamInfoResponse {
+  teamId: number
+  name: string
+  abbreviation: string | null
+  location: string | null // e.g. "Bronx"
+  firstYearOfPlay: string | null
+  league: string | null // e.g. "American League"
+  division: string | null // e.g. "American League East"
+  venue: Venue
+}
