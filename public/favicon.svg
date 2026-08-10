@@ -1,0 +1,26 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scoreboard">
+  <defs>
+    <!-- Hot amber bulb glow for the leader lamp at home plate -->
+    <radialGradient id="lamp" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffdd94" />
+      <stop offset="55%" stop-color="#f0b64e" />
+      <stop offset="100%" stop-color="#c98a24" />
+    </radialGradient>
+  </defs>
+
+  <!-- Scoreboard panel: recessed slot with a dark metal seam border -->
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="#052018" stroke="#04140d" stroke-width="3" />
+  <rect x="7" y="7" width="50" height="50" rx="8" fill="#0a3527" />
+
+  <!-- Infield diamond: chalk basepaths -->
+  <path d="M32 15 L49 32 L32 49 L15 32 Z" fill="none" stroke="#f5f2e9" stroke-width="2.5" stroke-linejoin="round" />
+
+  <!-- Bases (2nd, 3rd, 1st) as weathered-chalk squares -->
+  <rect x="29.5" y="12.5" width="5" height="5" rx="1" transform="rotate(45 32 15)" fill="#90a99b" />
+  <rect x="46.5" y="29.5" width="5" height="5" rx="1" transform="rotate(45 49 32)" fill="#90a99b" />
+  <rect x="12.5" y="29.5" width="5" height="5" rx="1" transform="rotate(45 15 32)" fill="#90a99b" />
+
+  <!-- Home plate: the lit amber leader lamp, with a soft halo -->
+  <circle cx="32" cy="49" r="10" fill="#f0b64e" opacity="0.18" />
+  <circle cx="32" cy="49" r="5.5" fill="url(#lamp)" stroke="#ffdd94" stroke-width="0.75" />
+</svg>
