@@ -2,8 +2,9 @@ import type { RosterPlayer, RosterResponse } from '~/types/mlb'
 import { currentSeason, mlbFetch, pick } from '~/server/utils/mlb'
 
 // GET /api/roster/112?season=2025  -> flattened roster for team 112 (Cubs).
-// For the current season this is the tidy active roster; for a past season the
-// MLB feed returns that year's fuller roster.
+// rosterType=fullSeason returns everyone who's appeared for the team that
+// season — not just the 26-man active roster (which, mid-current-season, hides
+// injured, optioned, and other 40-man players).
 export default defineEventHandler(async (event): Promise<RosterResponse> => {
   const teamId = Number(getRouterParam(event, 'id'))
   if (!teamId) {
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event): Promise<RosterResponse> => {
 
   // Fetch roster + the team name (one small extra call for a nicer header).
   const [rosterRaw, teamRaw] = await Promise.all([
-    mlbFetch<any>(`/teams/${teamId}/roster`, { rosterType: 'active', season }),
+    mlbFetch<any>(`/teams/${teamId}/roster`, { rosterType: 'fullSeason', season }),
     mlbFetch<any>(`/teams/${teamId}`, { season }),
   ])
 
