@@ -1,5 +1,5 @@
-import type { Division, StandingsResponse, TeamRecord } from '~/types/mlb'
-import { DIVISIONS, LEAGUES, currentSeason, mlbFetch, pick } from '~/server/utils/mlb'
+import type { StandingsResponse } from '~/types/mlb'
+import { currentSeason, flattenStandings, mlbFetch, orderDivisions, pick } from '~/server/utils/mlb'
 
 // GET /api/standings?season=2026
 // Returns every division with flattened team records: the six MLB divisions
@@ -17,48 +17,8 @@ export default defineEventHandler(async (event): Promise<StandingsResponse> => {
     standingsTypes: 'regularSeason',
   })
 
-  const records: any[] = pick(raw, 'records', []) as any[]
-
-  const divisions: Division[] = records.map((rec) => {
-    const divId = pick<number>(rec?.division, 'id', 0) as number
-    const leagueId = pick<number>(rec?.league, 'id', 0) as number
-    // Divisionless leagues (LMP) report a null division id — key those off the
-    // league id so they still get a name and a stable non-zero key.
-    const meta = DIVISIONS[divId] ?? LEAGUES[leagueId] ?? { name: 'Division', league: 'AL' as const }
-
-    const teams: TeamRecord[] = (pick(rec, 'teamRecords', []) as any[]).map((tr) => {
-      const team = pick(tr, 'team', {}) as any
-      const streak = pick(tr, 'streak', {}) as any
-      return {
-        teamId: pick<number>(team, 'id', 0) as number,
-        name: pick<string>(team, 'name', 'Unknown') as string,
-        wins: pick<number>(tr, 'wins', 0) as number,
-        losses: pick<number>(tr, 'losses', 0) as number,
-        pct: pick<string>(tr, 'winningPercentage', '.000') as string,
-        gamesBack: pick<string>(tr, 'gamesBack', '-') as string,
-        streak: pick<string>(streak, 'streakCode', '-') as string,
-        divisionRank: pick<string>(tr, 'divisionRank', '-') as string,
-        divisionLeader: pick<boolean>(tr, 'divisionLeader', false) as boolean,
-      }
-    })
-
-    // Order within a division by rank so the leader sits on top.
-    teams.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank))
-
-    return {
-      // Fall back to the league id so divisionless leagues (LMP) still key
-      // uniquely instead of colliding on 0.
-      divisionId: divId || leagueId,
-      divisionName: meta.name,
-      league: meta.league,
-      teams,
-    }
-  })
-
-  // Group the board Mexican leagues first (LMB Norte/Sur, then LMP), then the
-  // MLB divisions AL East/Central/West, NL East/Central/West.
-  const order = [222, 223, 132, 201, 202, 200, 204, 205, 203]
-  divisions.sort((a, b) => order.indexOf(a.divisionId) - order.indexOf(b.divisionId))
+  const records = pick(raw, 'records', []) as any[]
+  const divisions = orderDivisions(flattenStandings(records))
 
   return { season, divisions }
 })

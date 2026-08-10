@@ -9,11 +9,17 @@ npm run dev        # dev server at http://localhost:3000
 npm run build      # production build
 npm run preview    # preview the production build
 npm run generate   # static generation
+npm run lint       # eslint (npm run lint:fix to autofix)
+npm test           # vitest run (npm run test:watch for watch mode)
+npx vitest run test/mlb.test.ts   # a single test file
 ```
 
-There is no test runner or linter configured. Type-check with `npx vue-tsc --noEmit`.
+Type-check with `npx vue-tsc --noEmit`.
 
-Requires Node 18.18+ (Node 20+ recommended).
+Requires Node 18.18+ (Node 20+ recommended). ESLint is pinned to v9 and the
+flat config polyfills `Object.groupBy` for Node 20 — see `eslint.config.mjs`.
+Tests are plain Vitest unit tests over the pure utilities (`test/`); the HTTP
+route handlers aren't unit-tested (they need the Nitro runtime).
 
 ## Architecture
 

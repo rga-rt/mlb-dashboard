@@ -1,48 +1,8 @@
 <script setup lang="ts">
-import type { PlayerResponse, StatLine } from '~/types/mlb'
+import type { PlayerResponse } from '~/types/mlb'
+import { RATE_STATS, columnsFor, statValue } from '~/utils/playerStats'
 
 defineProps<{ player: PlayerResponse }>()
-
-// The stats worth surfacing per group, in scoreboard order.
-// key = field in the MLB stat object, label = column header shown.
-const HITTING: { key: string; label: string }[] = [
-  { key: 'gamesPlayed', label: 'G' },
-  { key: 'atBats', label: 'AB' },
-  { key: 'runs', label: 'R' },
-  { key: 'hits', label: 'H' },
-  { key: 'homeRuns', label: 'HR' },
-  { key: 'rbi', label: 'RBI' },
-  { key: 'baseOnBalls', label: 'BB' },
-  { key: 'strikeOuts', label: 'SO' },
-  { key: 'stolenBases', label: 'SB' },
-  { key: 'avg', label: 'AVG' },
-  { key: 'obp', label: 'OBP' },
-  { key: 'slg', label: 'SLG' },
-  { key: 'ops', label: 'OPS' },
-]
-
-const PITCHING: { key: string; label: string }[] = [
-  { key: 'wins', label: 'W' },
-  { key: 'losses', label: 'L' },
-  { key: 'era', label: 'ERA' },
-  { key: 'gamesPlayed', label: 'G' },
-  { key: 'gamesStarted', label: 'GS' },
-  { key: 'saves', label: 'SV' },
-  { key: 'inningsPitched', label: 'IP' },
-  { key: 'strikeOuts', label: 'SO' },
-  { key: 'baseOnBalls', label: 'BB' },
-  { key: 'whip', label: 'WHIP' },
-  { key: 'strikeoutsPer9Inn', label: 'K/9' },
-]
-
-function columnsFor(line: StatLine) {
-  return line.group === 'pitching' ? PITCHING : HITTING
-}
-
-function value(line: StatLine, key: string): string {
-  const v = line.stats[key]
-  return v === undefined || v === null || v === '' ? '—' : String(v)
-}
 </script>
 
 <template>
@@ -85,9 +45,9 @@ function value(line: StatLine, key: string): string {
                 v-for="col in columnsFor(line)"
                 :key="col.key"
                 class="digit px-3 py-2.5 text-right text-sm first:pl-4 last:pr-4"
-                :class="['avg', 'obp', 'slg', 'ops', 'era', 'whip'].includes(col.key) ? 'lit' : 'text-chalk'"
+                :class="RATE_STATS.includes(col.key) ? 'lit' : 'text-chalk'"
               >
-                {{ value(line, col.key) }}
+                {{ statValue(line, col.key) }}
               </td>
             </tr>
           </tbody>

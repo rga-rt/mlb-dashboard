@@ -1,7 +1,7 @@
 // Server-only helpers for talking to the MLB Stats API.
 // Runs inside Nitro (server), so there is no CORS restriction here — the
 // browser only ever talks to our own /api routes.
-import type { League } from '~/types/mlb'
+import type { Division, League, TeamRecord } from '~/types/mlb'
 
 /** Fetch a path off the MLB base URL and return parsed JSON. */
 export async function mlbFetch<T = any>(
@@ -52,4 +52,54 @@ export const LEAGUES: Record<number, { name: string; league: League }> = {
 /** Default to the season currently in progress. */
 export function currentSeason(): number {
   return new Date().getFullYear()
+}
+
+/**
+ * Flatten the raw MLB `/standings` records into our Division shape. Divisionless
+ * leagues (LMP) report a null division id, so we key their metadata and their
+ * stable divisionId off the league id instead. Teams are ordered by rank.
+ */
+export function flattenStandings(records: any[]): Division[] {
+  return records.map((rec) => {
+    const divId = pick<number>(rec?.division, 'id', 0) as number
+    const leagueId = pick<number>(rec?.league, 'id', 0) as number
+    const meta = DIVISIONS[divId] ?? LEAGUES[leagueId] ?? { name: 'Division', league: 'AL' as const }
+
+    const teams: TeamRecord[] = (pick(rec, 'teamRecords', []) as any[]).map((tr) => {
+      const team = pick(tr, 'team', {}) as any
+      const streak = pick(tr, 'streak', {}) as any
+      return {
+        teamId: pick<number>(team, 'id', 0) as number,
+        name: pick<string>(team, 'name', 'Unknown') as string,
+        wins: pick<number>(tr, 'wins', 0) as number,
+        losses: pick<number>(tr, 'losses', 0) as number,
+        pct: pick<string>(tr, 'winningPercentage', '.000') as string,
+        gamesBack: pick<string>(tr, 'gamesBack', '-') as string,
+        streak: pick<string>(streak, 'streakCode', '-') as string,
+        divisionRank: pick<string>(tr, 'divisionRank', '-') as string,
+        divisionLeader: pick<boolean>(tr, 'divisionLeader', false) as boolean,
+      }
+    })
+    teams.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank))
+
+    return {
+      // Fall back to the league id so divisionless leagues (LMP) still key
+      // uniquely instead of colliding on 0.
+      divisionId: divId || leagueId,
+      divisionName: meta.name,
+      league: meta.league,
+      teams,
+    }
+  })
+}
+
+// Board order: the Mexican leagues first (LMB Norte/Sur, then LMP), then the
+// MLB divisions AL East/Central/West, NL East/Central/West.
+export const DIVISION_ORDER = [222, 223, 132, 201, 202, 200, 204, 205, 203]
+
+/** Sort divisions into board order; unknown ids sort to the front. */
+export function orderDivisions(divisions: Division[]): Division[] {
+  return [...divisions].sort(
+    (a, b) => DIVISION_ORDER.indexOf(a.divisionId) - DIVISION_ORDER.indexOf(b.divisionId),
+  )
 }
