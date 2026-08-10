@@ -22,6 +22,14 @@ const sections = computed(() => {
     { key: 'mlb', label: 'Major League Baseball', divisions: divisions.filter(d => !MEXICAN.has(d.league)) },
   ].filter(s => s.divisions.length > 0)
 })
+
+// Key to the standings column abbreviations.
+const LEGEND = [
+  { abbr: 'W', label: 'Wins' },
+  { abbr: 'L', label: 'Losses' },
+  { abbr: 'PCT', label: 'Winning percentage' },
+  { abbr: 'GB', label: 'Games behind the leader' },
+]
 </script>
 
 <template>
@@ -57,10 +65,21 @@ const sections = computed(() => {
       </div>
     </div>
 
-    <p v-if="!error" class="mb-6 max-w-2xl text-sm text-chalk-dim">
+    <p v-if="!error" class="mb-4 max-w-2xl text-sm text-chalk-dim">
       Tap any team to see its roster and player stat lines. The amber lamp marks
       each division leader.
     </p>
+
+    <!-- Column legend: what each standings abbreviation means -->
+    <dl
+      v-if="!error"
+      class="mb-6 flex flex-wrap gap-x-5 gap-y-1.5 border-l-2 border-seam pl-3 text-xs"
+    >
+      <div v-for="item in LEGEND" :key="item.abbr" class="flex items-baseline gap-1.5">
+        <dt class="nameplate tracking-wider text-chalk">{{ item.abbr }}</dt>
+        <dd class="text-chalk-dim">{{ item.label }}</dd>
+      </div>
+    </dl>
 
     <!-- Loading -->
     <div v-if="pending && !data" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
