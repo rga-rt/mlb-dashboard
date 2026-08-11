@@ -65,14 +65,14 @@ const LEGEND = [
       </div>
     </div>
 
-    <p v-if="!error" class="mb-4 max-w-2xl text-sm text-chalk-dim">
+    <p v-if="!error || data" class="mb-4 max-w-2xl text-sm text-chalk-dim">
       Tap any team to see its roster and player stat lines. The amber lamp marks
       each division leader.
     </p>
 
     <!-- Column legend: what each standings abbreviation means -->
     <dl
-      v-if="!error"
+      v-if="!error || data"
       class="mb-6 flex flex-wrap gap-x-5 gap-y-1.5 border-l-2 border-seam pl-3 text-xs"
     >
       <div v-for="item in LEGEND" :key="item.abbr" class="flex items-baseline gap-1.5">
@@ -80,6 +80,29 @@ const LEGEND = [
         <dd class="text-chalk-dim">{{ item.label }}</dd>
       </div>
     </dl>
+
+    <!--
+      Refresh failed but we still have a board to show — never throw away good
+      standings for a transient error. A dismissible-feeling banner sits above
+      the still-visible board instead of replacing it.
+    -->
+    <div
+      v-if="error && data"
+      role="alert"
+      class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 border border-clay/50 bg-panel px-4 py-3"
+    >
+      <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-clay/80 ring-1 ring-clay" aria-hidden="true" />
+      <p class="min-w-0 flex-1 text-sm text-chalk-dim">
+        Couldn’t refresh just now — showing the {{ data.season }} board as last loaded.
+      </p>
+      <button
+        class="nameplate shrink-0 border border-seam bg-field-deep px-3 py-1.5 text-xs tracking-wider text-chalk transition-colors hover:border-bulb hover:text-bulb focus:border-bulb focus:text-bulb focus:outline-none"
+        :disabled="pending"
+        @click="refresh()"
+      >
+        {{ pending ? 'Refreshing…' : 'Try again' }}
+      </button>
+    </div>
 
     <!-- Loading -->
     <div v-if="pending && !data" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -90,21 +113,40 @@ const LEGEND = [
       />
     </div>
 
-    <!-- Error -->
+    <!-- Error on first load: no board to fall back to -->
     <div
-      v-else-if="error"
-      class="border-l-4 border-clay border-y border-r border-y-seam border-r-seam bg-panel px-5 py-6"
+      v-else-if="error && !data"
+      role="alert"
+      class="border border-clay/50 bg-panel px-5 py-6"
     >
-      <h2 class="nameplate text-lg text-clay">The board went dark</h2>
+      <h2 class="nameplate flex items-center gap-2 text-lg text-clay">
+        <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-clay/80 ring-1 ring-clay" aria-hidden="true" />
+        The board went dark
+      </h2>
       <p class="mt-1 text-sm text-chalk-dim">
         Couldn’t reach the MLB API just now. Check your connection and try again.
       </p>
       <button
-        class="nameplate mt-4 border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk transition-colors hover:border-bulb hover:text-bulb"
+        class="nameplate mt-4 border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk transition-colors hover:border-bulb hover:text-bulb focus:border-bulb focus:text-bulb focus:outline-none"
         @click="refresh()"
       >
         Try again
       </button>
+    </div>
+
+    <!-- Data loaded, but no divisions posted for this season -->
+    <div
+      v-else-if="data && !sections.length"
+      class="border border-seam bg-panel px-5 py-6"
+    >
+      <h2 class="nameplate flex items-center gap-2 text-lg text-chalk">
+        <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-seam ring-1 ring-line" aria-hidden="true" />
+        The board’s not lit yet
+      </h2>
+      <p class="mt-1 text-sm text-chalk-dim">
+        No standings are posted for the {{ data.season }} season yet. Pick another
+        year from the dropdown above.
+      </p>
     </div>
 
     <!-- The board, split into league sections -->
@@ -113,7 +155,10 @@ const LEGEND = [
         <!-- Section banner: painted label with a metal divider rule -->
         <div class="mb-4 flex items-center gap-3">
           <span class="bulb inline-block h-2 w-2 shrink-0" aria-hidden="true" />
-          <h2 class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk">
+          <h2
+            class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk"
+            :lang="section.key === 'mex' ? 'es' : undefined"
+          >
             {{ section.label }}
           </h2>
           <span class="h-0.5 flex-1 bg-seam" aria-hidden="true" />

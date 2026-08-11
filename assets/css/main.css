@@ -11,6 +11,7 @@
   --color-field: #0a3527;       /* enamel field green */
   --color-field-deep: #052018;  /* shaded panel header / recessed slot */
   --color-panel: #0c3e2e;       /* raised number-card panel */
+  --color-panel-lit: #305133;   /* the leader's slot, warmed by the lamp above it */
   --color-line: #185639;        /* painted hairline */
   --color-seam: #04140d;        /* dark metal channel between slots */
   --color-chalk: #f5f2e9;       /* painted chalk */
