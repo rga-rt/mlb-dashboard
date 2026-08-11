@@ -1,0 +1,156 @@
+{
+  "lang": {
+    "label": "Idioma",
+    "switchTo": "English"
+  },
+  "nav": {
+    "openBoard": "Abrir el tablero",
+    "exploreTeam": "Explorar un equipo"
+  },
+  "masthead": {
+    "subtitle": "MLB · Posiciones · Rosters · Estadísticas"
+  },
+  "footer": {
+    "app": "Datos de la API pública de MLB Stats · servidos vía proxy en el servidor para evitar CORS en el navegador.",
+    "landing": "Usa la API pública de MLB Stats. Sin afiliación ni respaldo de MLB ni de ningún club."
+  },
+  "landing": {
+    "heroTitle1": "Las posiciones,",
+    "heroTitleLit": "encendidas",
+    "heroTitle2": "como el Green Monster.",
+    "heroSubtext": "Posiciones de MLB en vivo y estadísticas de jugadores a fondo, pintadas como un tablero de estadio. Ordena el tablero, sigue a tu equipo, lee el pronóstico.",
+    "boardLive": "en vivo",
+    "boardLegend": "G / P / JD",
+    "boardSeeAll": "Ver las seis divisiones",
+    "boardDark": "El tablero está apagado ahora mismo. Se enciende en cuanto responde el feed.",
+    "featuresHeading": "Hecho para el fanático que lee el box score dos veces.",
+    "sortTitle": "Ordena el tablero como tú lo lees",
+    "sortBody": "Haz clic en cualquier columna para ordenar por ganados, porcentaje o juegos detrás. Tu orden, no el de la liga.",
+    "followTitle": "Sigue a tu equipo",
+    "followBody": "Fija tu equipo y flotará al tope de cada división, guardado en tu navegador entre visitas.",
+    "deepTitle": "Profundiza en cualquier jugador",
+    "deepBody": "Líneas completas de bateo y pícheo, estadísticas esperadas de Statcast, ranking del equipo y un pronóstico de temporada en una sola tarjeta.",
+    "feedTitle": "Directo del feed oficial",
+    "feedBody": "Números en vivo tomados de la API pública de MLB Stats mediante un proxy en el servidor, aplanados y actualizados a demanda.",
+    "deepDiveTitle1": "De una lucha divisional hasta",
+    "deepDiveTitleLit": "un solo turno al bate.",
+    "deepDiveBody": "Toca un equipo, recorre su roster como una alineación y abre a un jugador para ver los números detrás del número.",
+    "ctaTitle": "Sube al tablero.",
+    "ctaBody": "Seis divisiones, treinta equipos, cada línea de estadísticas. Sin cuenta, sin muro de pago."
+  },
+  "board": {
+    "eyebrow": "Temporada Regular",
+    "title": "Posiciones",
+    "season": "Temporada",
+    "refresh": "Actualizar",
+    "refreshing": "Actualizando…",
+    "posted": "Publicado {time}",
+    "intro": "Toca cualquier equipo para ver su roster y líneas de estadísticas, un encabezado de columna para ordenar, o la estrella para seguir a un equipo y llevarlo al tope. La lámpara ámbar marca al líder de cada división.",
+    "legendW": "Ganados",
+    "legendL": "Perdidos",
+    "legendPct": "Porcentaje de victorias",
+    "legendGb": "Juegos detrás del líder",
+    "refreshFailed": "No se pudo actualizar ahora mismo, mostrando el tablero de {season} tal como se cargó.",
+    "tryAgain": "Reintentar",
+    "errTitle": "El tablero se apagó",
+    "errBody": "No se pudo conectar con la API de MLB ahora mismo. Revisa tu conexión y reintenta.",
+    "emptyTitle": "El tablero aún no está encendido",
+    "emptyBody": "No hay posiciones publicadas para la temporada {season} todavía. Elige otro año en el menú de arriba.",
+    "sectionMexican": "Ligas Mexicanas",
+    "sectionMlb": "Grandes Ligas"
+  },
+  "division": {
+    "colTeam": "Equipo",
+    "caption": "Posiciones de {division}: ganados, perdidos, porcentaje de victorias y juegos detrás del líder",
+    "leader": "Líder de división",
+    "follow": "Seguir a {team}",
+    "unfollow": "Dejar de seguir a {team}",
+    "view": "Ver {team}"
+  },
+  "team": {
+    "back": "Volver al tablero",
+    "loading": "Cargando…",
+    "rosterErrTitle": "No se pudo cargar ese roster",
+    "rosterErrBody": "El id del equipo puede ser incorrecto, o la API no responde.",
+    "filterLabel": "Filtrar roster",
+    "filterPlaceholder": "Filtrar por nombre, número o posición…",
+    "noMatch": "Nadie en el roster coincide con «{q}».",
+    "activeRoster": "Roster Activo",
+    "reserves": "Reservas e Inactivos",
+    "emptyPrompt": "Elige un jugador de la alineación para encender su línea de estadísticas.",
+    "playerErr": "No se pudieron cargar las estadísticas de ese jugador.",
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "closeLabel": "Cerrar detalle del jugador",
+    "analytics": "Avanzadas · Ranking · Pronóstico",
+    "advancedFailed": "Las estadísticas avanzadas no cargaron.",
+    "ranksFailed": "El ranking del equipo no cargó.",
+    "bt": "B/L"
+  },
+  "positions": {
+    "Pitcher": "Lanzadores",
+    "Catcher": "Receptores",
+    "Infielder": "Infielders",
+    "Outfielder": "Jardineros",
+    "Two-Way Player": "Jugadores de Doble Vía",
+    "Hitter": "Bateadores",
+    "Other": "Otros"
+  },
+  "status": {
+    "IL": "LES",
+    "Minors": "Menores",
+    "DFA": "DFA",
+    "Traded": "Cambiado",
+    "FA": "AL",
+    "Restricted": "Restringido",
+    "Suspended": "Suspendido"
+  },
+  "groups": {
+    "hitting": "bateo",
+    "pitching": "pícheo"
+  },
+  "statline": {
+    "key": "Clave",
+    "empty": "Aún no hay líneas de estadísticas de {name} para esta temporada."
+  },
+  "advanced": {
+    "title": "Avanzadas",
+    "actualVsExpected": "Real vs Esperado",
+    "actual": "Real",
+    "expected": "Esperado",
+    "caption": "Ámbar = supera el contacto esperado (a menudo insostenible); arcilla = por debajo de lo esperado."
+  },
+  "rank": {
+    "onThe": "En los {team}",
+    "rank": "ranking de {group}"
+  },
+  "forecast": {
+    "title": "Pronóstico",
+    "zips": "proyección ZiPS",
+    "linear": "tendencia lineal · ilustrativa",
+    "notEnough": "No hay suficiente historial de {stat} para proyectar una tendencia.",
+    "projected": "Proyectado {year}",
+    "zipsSeason": "proyección ZiPS · {year}",
+    "source": "Fuente",
+    "sourceZips": "ZiPS",
+    "sourceLinear": "ajuste lineal",
+    "recentTrend": "Tendencia reciente",
+    "trendUp": "en alza",
+    "trendDown": "a la baja",
+    "trendSteady": "estable",
+    "trendFit": "Ajuste de tendencia",
+    "fitTf": "TensorFlow.js · {epochs} épocas",
+    "fitTraining": "entrenando…",
+    "fitLeastSquares": "mínimos cuadrados"
+  },
+  "ballpark": {
+    "title": "Estadio",
+    "default": "Estadio",
+    "founded": "Fundado",
+    "capacity": "Capacidad",
+    "surface": "Superficie",
+    "roof": "Techo",
+    "dimsLabel": "Dimensiones del jardín en pies",
+    "outfieldFt": "Jardín · ft"
+  }
+}

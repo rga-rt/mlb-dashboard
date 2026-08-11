@@ -58,7 +58,7 @@ function hideBrokenLogo(e: Event) {
     -->
     <table class="w-full table-fixed border-collapse">
       <caption class="sr-only">
-        {{ division.divisionName }} standings — wins, losses, winning percentage, and games behind the leader
+        {{ $t('division.caption', { division: division.divisionName }) }}
       </caption>
       <!--
         Number columns tighten on phones so the team name — the thing a fan
@@ -96,7 +96,7 @@ function hideBrokenLogo(e: Event) {
               :class="[col.justify, sort.key === col.key ? 'text-bulb' : '']"
               @click="sort = nextSort(sort, col.key)"
             >
-              <span>{{ col.label }}</span>
+              <span>{{ col.key === 'name' ? $t('division.colTeam') : col.label }}</span>
               <!-- Active column shows its live direction; inactive columns
                    reveal a faint caret on hover/focus so it's clear they sort. -->
               <span
@@ -144,10 +144,10 @@ function hideBrokenLogo(e: Event) {
               <span
                 v-if="team.divisionLeader"
                 class="inline-flex shrink-0 items-center"
-                title="Division leader"
+                :title="$t('division.leader')"
               >
                 <span class="bulb inline-block h-2 w-2" aria-hidden="true" />
-                <span class="sr-only">Division leader</span>
+                <span class="sr-only">{{ $t('division.leader') }}</span>
               </span>
               <img
                 :src="teamLogo(team.teamId)"
@@ -176,13 +176,13 @@ function hideBrokenLogo(e: Event) {
                   ? 'text-bulb opacity-100'
                   : 'text-chalk-dim opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-coarse:opacity-50'"
                 :aria-pressed="isPinned(team.teamId)"
-                :aria-label="`${isPinned(team.teamId) ? 'Unfollow' : 'Follow'} the ${team.name}`"
+                :aria-label="isPinned(team.teamId) ? $t('division.unfollow', { team: team.name }) : $t('division.follow', { team: team.name })"
                 @click="toggle(team.teamId)"
               >{{ isPinned(team.teamId) ? '★' : '☆' }}</button>
             </span>
             <NuxtLink
               :to="`/team/${team.teamId}?season=${season}`"
-              :aria-label="`View ${team.name}`"
+              :aria-label="$t('division.view', { team: team.name })"
               class="absolute inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-bulb"
             />
           </th>

@@ -8,6 +8,20 @@ defineProps<{
 }>()
 
 defineEmits<{ select: [id: number] }>()
+
+const { t, te } = useI18n()
+
+// Localize the position-group header and the status badge, falling back to the
+// raw MLB value when the feed sends something we don't have a translation for.
+function posLabel(type: string): string {
+  const key = `positions.${type}`
+  return te(key) ? t(key) : type
+}
+function statusLabel(status: string): string {
+  const abbr = rosterStatusLabel(status)
+  const key = `status.${abbr}`
+  return te(key) ? t(key) : abbr
+}
 </script>
 
 <template>
@@ -15,7 +29,7 @@ defineEmits<{ select: [id: number] }>()
     <h3
       class="nameplate border-b-2 border-seam bg-field-deep px-4 py-2.5 text-xs tracking-widest text-chalk-dim"
     >
-      {{ group.type }}
+      {{ posLabel(group.type) }}
     </h3>
     <ul class="divide-y divide-seam">
       <li v-for="p in group.list" :key="p.personId">
@@ -39,7 +53,7 @@ defineEmits<{ select: [id: number] }>()
             v-if="p.status !== 'Active'"
             class="nameplate shrink-0 border border-line/50 px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"
           >
-            {{ rosterStatusLabel(p.status) }}
+            {{ statusLabel(p.status) }}
           </span>
           <span
             class="nameplate shrink-0 border border-line px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"

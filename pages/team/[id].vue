@@ -278,18 +278,18 @@ function onAnalyticsToggle(e: Event) {
       to="/standings"
       class="nameplate mb-6 inline-flex items-center gap-2 text-xs tracking-wider text-chalk-dim transition-colors hover:text-bulb"
     >
-      ← Back to the board
+      ← {{ $t('team.back') }}
     </NuxtLink>
 
     <div v-if="error" class="border border-clay/50 bg-panel px-5 py-6">
-      <h1 class="nameplate text-lg text-clay">Couldn’t load that roster</h1>
-      <p class="mt-1 text-sm text-chalk-dim">The team id may be wrong, or the API is unreachable.</p>
+      <h1 class="nameplate text-lg text-clay">{{ $t('team.rosterErrTitle') }}</h1>
+      <p class="mt-1 text-sm text-chalk-dim">{{ $t('team.rosterErrBody') }}</p>
       <button
         type="button"
         class="nameplate mt-4 border border-line px-3 py-1.5 text-xs tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus-visible:border-bulb focus-visible:text-bulb focus:outline-none"
         @click="refresh()"
       >
-        Retry
+        {{ $t('team.retry') }}
       </button>
     </div>
 
@@ -306,11 +306,11 @@ function onAnalyticsToggle(e: Event) {
             @error="hideBrokenLogo"
           >
           <h1 class="nameplate text-5xl leading-[0.85] text-chalk md:text-6xl">
-            {{ roster?.teamName ?? 'Loading…' }}
+            {{ roster?.teamName ?? $t('team.loading') }}
           </h1>
         </div>
         <div class="flex items-stretch gap-2">
-          <label class="sr-only" for="season">Season</label>
+          <label class="sr-only" for="season">{{ $t('board.season') }}</label>
           <select
             id="season"
             v-model.number="season"
@@ -332,13 +332,13 @@ function onAnalyticsToggle(e: Event) {
 
           <template v-else>
             <div class="relative">
-              <label class="sr-only" for="roster-filter">Filter roster</label>
+              <label class="sr-only" for="roster-filter">{{ $t('team.filterLabel') }}</label>
               <input
                 id="roster-filter"
                 v-model="rosterFilter"
                 type="search"
                 inputmode="search"
-                placeholder="Filter by name, number, or position…"
+                :placeholder="$t('team.filterPlaceholder')"
                 class="nameplate w-full border border-seam bg-field-deep px-3 py-2.5 text-xs tracking-wider text-chalk placeholder:text-chalk-dim/70 placeholder:tracking-normal placeholder:normal-case transition-colors hover:border-line focus:border-bulb focus:outline-none"
               >
             </div>
@@ -347,14 +347,14 @@ function onAnalyticsToggle(e: Event) {
               v-if="rosterFilter.trim() && !hasFilterMatch"
               class="border border-dashed border-line px-4 py-6 text-center text-sm text-chalk-dim"
             >
-              No one on the roster matches “{{ rosterFilter.trim() }}”.
+              {{ $t('team.noMatch', { q: rosterFilter.trim() }) }}
             </p>
 
             <!-- Active roster: the regular players -->
             <div v-if="activeGroups.length" class="space-y-5">
               <div class="flex items-center gap-3">
                 <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-                <h2 class="nameplate text-xs tracking-[0.25em] text-chalk-dim">Active Roster</h2>
+                <h2 class="nameplate text-xs tracking-[0.25em] text-chalk-dim">{{ $t('team.activeRoster') }}</h2>
                 <span class="h-px flex-1 bg-seam" aria-hidden="true" />
               </div>
               <RosterGroup
@@ -370,7 +370,7 @@ function onAnalyticsToggle(e: Event) {
             <div v-if="reserveGroups.length" class="space-y-5">
               <div class="flex items-center gap-3">
                 <span class="inline-block h-1.5 w-1.5 bg-chalk-dim/50" aria-hidden="true" />
-                <h2 class="nameplate text-xs tracking-[0.25em] text-chalk-dim">Reserves &amp; Inactive</h2>
+                <h2 class="nameplate text-xs tracking-[0.25em] text-chalk-dim">{{ $t('team.reserves') }}</h2>
                 <span class="h-px flex-1 bg-seam" aria-hidden="true" />
               </div>
               <RosterGroup
@@ -396,7 +396,7 @@ function onAnalyticsToggle(e: Event) {
             class="flex h-full min-h-48 items-center justify-center border border-dashed border-line px-6 py-10 text-center"
           >
             <p class="text-sm text-chalk-dim">
-              Pick a player from the lineup to light up their stat line.
+              {{ $t('team.emptyPrompt') }}
             </p>
           </div>
 
@@ -410,13 +410,13 @@ function onAnalyticsToggle(e: Event) {
               v-else-if="playerError"
               class="border border-clay/50 bg-panel px-5 py-6"
             >
-              <p class="text-sm text-chalk-dim">Couldn’t load that player’s stats.</p>
+              <p class="text-sm text-chalk-dim">{{ $t('team.playerErr') }}</p>
               <button
                 type="button"
                 class="nameplate mt-4 border border-line px-3 py-1.5 text-xs tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus-visible:border-bulb focus-visible:text-bulb focus:outline-none"
                 @click="selectedId && selectPlayer(selectedId, { fromUrl: true })"
               >
-                Retry
+                {{ $t('team.retry') }}
               </button>
             </div>
 
@@ -427,18 +427,18 @@ function onAnalyticsToggle(e: Event) {
                   <p class="mt-1.5 text-xs text-chalk-dim">
                     {{ player.position }}
                     <template v-if="player.bats || player.throws">
-                      · B/T {{ player.bats ?? '–' }}/{{ player.throws ?? '–' }}
+                      · {{ $t('team.bt') }} {{ player.bats ?? '–' }}/{{ player.throws ?? '–' }}
                     </template>
                     <template v-if="player.teamName"> · {{ player.teamName }}</template>
                   </p>
                 </div>
                 <button
                   type="button"
-                  aria-label="Close player detail"
+                  :aria-label="$t('team.closeLabel')"
                   class="nameplate tap-target relative shrink-0 border border-line px-2.5 py-1 text-[11px] tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus-visible:border-bulb focus-visible:text-bulb focus:outline-none"
                   @click="deselect()"
                 >
-                  Close
+                  {{ $t('team.close') }}
                 </button>
               </div>
 
@@ -457,14 +457,14 @@ function onAnalyticsToggle(e: Event) {
                   class="nameplate flex cursor-pointer list-none items-center gap-2 border-b border-seam pb-2 text-[11px] tracking-[0.25em] text-chalk-dim transition-colors hover:text-chalk focus-visible:text-chalk focus-visible:outline-none"
                 >
                   <span class="text-[9px] leading-none transition-transform group-open/analytics:rotate-90" aria-hidden="true">▸</span>
-                  Advanced · Rank · Forecast
+                  {{ $t('team.analytics') }}
                 </summary>
 
                 <div class="mt-4 space-y-6">
                   <div v-if="advancedPending" class="h-40 animate-pulse border border-seam bg-panel/50" />
                   <PanelRetry
                     v-else-if="advancedError"
-                    label="Advanced stats didn’t load."
+                    :label="$t('team.advancedFailed')"
                     @retry="loadAdvanced(player.personId)"
                   />
                   <AdvancedPanel
@@ -479,7 +479,7 @@ function onAnalyticsToggle(e: Event) {
                   <div v-if="teamStatsPending" class="h-40 animate-pulse border border-seam bg-panel/50" />
                   <PanelRetry
                     v-else-if="teamStatsError"
-                    label="Team ranks didn’t load."
+                    :label="$t('team.ranksFailed')"
                     @retry="loadTeamStats()"
                   />
                   <TeamRankPanel

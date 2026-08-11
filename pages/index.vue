@@ -58,13 +58,14 @@ useHead({
             :to="`/team/${sampleTeamId}`"
             class="nameplate hidden px-3 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb sm:inline-block"
           >
-            Explore a team
+            {{ $t('nav.exploreTeam') }}
           </NuxtLink>
+          <LangSwitch />
           <NuxtLink
             to="/standings"
             class="nameplate border border-bulb bg-bulb px-3.5 py-2 text-[11px] tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
           >
-            Open the board
+            {{ $t('nav.openBoard') }}
           </NuxtLink>
         </div>
       </nav>
@@ -74,26 +75,25 @@ useHead({
     <section class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 md:px-6 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14 lg:py-0">
       <div class="reveal">
         <h1 class="nameplate text-4xl leading-[0.92] text-chalk md:text-5xl lg:text-6xl">
-          The standings,
-          <span class="lit flicker-on">lit up</span>
-          like the Green Monster.
+          {{ $t('landing.heroTitle1') }}
+          <span class="lit flicker-on">{{ $t('landing.heroTitleLit') }}</span>
+          {{ $t('landing.heroTitle2') }}
         </h1>
         <p class="mt-6 max-w-[46ch] text-base leading-relaxed text-chalk-dim">
-          Live MLB standings and deep player stats, painted like a ballpark scoreboard.
-          Sort the board, follow your club, read the forecast.
+          {{ $t('landing.heroSubtext') }}
         </p>
         <div class="mt-9 flex flex-wrap items-center gap-3">
           <NuxtLink
             to="/standings"
             class="nameplate border border-bulb bg-bulb px-6 py-3 text-xs tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
           >
-            Open the board
+            {{ $t('nav.openBoard') }}
           </NuxtLink>
           <NuxtLink
             :to="`/team/${sampleTeamId}`"
             class="nameplate border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
           >
-            Explore a team
+            {{ $t('nav.exploreTeam') }}
           </NuxtLink>
         </div>
       </div>
@@ -107,7 +107,7 @@ useHead({
               {{ heroDivision?.divisionName ?? 'The board' }}
             </h2>
             <span class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">
-              {{ standings?.season ?? '' }} · live
+              {{ standings?.season ?? '' }} · {{ $t('landing.boardLive') }}
             </span>
           </div>
 
@@ -130,13 +130,13 @@ useHead({
           </div>
 
           <div v-else class="px-4 py-12 text-center">
-            <p class="text-sm text-chalk-dim">The board is dark right now. It lights up the moment the feed answers.</p>
+            <p class="text-sm text-chalk-dim">{{ $t('landing.boardDark') }}</p>
           </div>
 
           <div class="flex items-center justify-between border-t border-seam bg-field-deep/50 px-4 py-2">
-            <span class="nameplate text-[10px] tracking-[0.3em] text-chalk-dim">W / L / GB</span>
+            <span class="nameplate text-[10px] tracking-[0.3em] text-chalk-dim">{{ $t('landing.boardLegend') }}</span>
             <NuxtLink to="/standings" class="nameplate text-[10px] tracking-[0.2em] text-bulb transition-opacity hover:opacity-80">
-              See all six divisions
+              {{ $t('landing.boardSeeAll') }}
             </NuxtLink>
           </div>
         </div>
@@ -147,16 +147,16 @@ useHead({
     <section class="border-t border-seam bg-field-deep/40">
       <div class="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28">
         <h2 class="reveal nameplate max-w-2xl text-3xl leading-tight text-chalk md:text-4xl">
-          Built for the fan who reads the box score twice.
+          {{ $t('landing.featuresHeading') }}
         </h2>
 
         <div class="reveal mt-12 grid gap-4 md:grid-cols-3">
           <!-- A: wide -->
           <article class="relative overflow-hidden border border-seam bg-panel p-7 md:col-span-2">
             <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(240,182,78,0.16),transparent_65%)]" aria-hidden="true" />
-            <h3 class="nameplate text-xl tracking-wide text-chalk">Sort the board the way you read it</h3>
+            <h3 class="nameplate text-xl tracking-wide text-chalk">{{ $t('landing.sortTitle') }}</h3>
             <p class="mt-3 max-w-md text-sm leading-relaxed text-chalk-dim">
-              Click any column to rank by wins, win percentage, or games back. Your reading order, not the league's default.
+              {{ $t('landing.sortBody') }}
             </p>
             <div class="mt-6 flex flex-wrap gap-2" aria-hidden="true">
               <span class="nameplate inline-flex items-center gap-1 border border-line px-2.5 py-1 text-[10px] tracking-widest text-bulb">W <span class="text-[8px]">▾</span></span>
@@ -169,26 +169,26 @@ useHead({
           <!-- B: narrow, amber-tinted -->
           <article class="relative overflow-hidden border border-seam bg-panel p-7">
             <span class="bulb mb-5 inline-block h-4 w-4" aria-hidden="true" />
-            <h3 class="nameplate text-xl tracking-wide text-chalk">Follow your club</h3>
+            <h3 class="nameplate text-xl tracking-wide text-chalk">{{ $t('landing.followTitle') }}</h3>
             <p class="mt-3 text-sm leading-relaxed text-chalk-dim">
-              Pin your team and it floats to the top of every division, saved in your browser between visits.
+              {{ $t('landing.followBody') }}
             </p>
           </article>
 
           <!-- C: narrow -->
           <article class="border border-seam bg-panel p-7">
-            <h3 class="nameplate text-xl tracking-wide text-chalk">Go deep on any player</h3>
+            <h3 class="nameplate text-xl tracking-wide text-chalk">{{ $t('landing.deepTitle') }}</h3>
             <p class="mt-3 text-sm leading-relaxed text-chalk-dim">
-              Full hitting and pitching lines, Statcast expected stats, team rank, and a season forecast on one card.
+              {{ $t('landing.deepBody') }}
             </p>
           </article>
 
           <!-- D: wide, real logo cluster -->
           <article class="flex flex-col justify-between gap-6 border border-seam bg-panel p-7 md:col-span-2">
             <div>
-              <h3 class="nameplate text-xl tracking-wide text-chalk">Straight from the official feed</h3>
+              <h3 class="nameplate text-xl tracking-wide text-chalk">{{ $t('landing.feedTitle') }}</h3>
               <p class="mt-3 max-w-md text-sm leading-relaxed text-chalk-dim">
-                Live numbers pulled from MLB's public Stats API through a server proxy, flattened and refreshed on demand.
+                {{ $t('landing.feedBody') }}
               </p>
             </div>
             <ul v-if="feedLogos.length" class="flex items-center gap-5">
@@ -216,17 +216,17 @@ useHead({
     <section class="border-b border-seam bg-panel">
       <div class="mx-auto max-w-4xl px-4 py-24 text-center md:px-6 md:py-32">
         <p class="reveal nameplate text-4xl leading-tight text-chalk md:text-5xl">
-          From a division race down to
-          <span class="lit">one at-bat.</span>
+          {{ $t('landing.deepDiveTitle1') }}
+          <span class="lit">{{ $t('landing.deepDiveTitleLit') }}</span>
         </p>
         <p class="reveal mx-auto mt-6 max-w-xl text-base leading-relaxed text-chalk-dim">
-          Tap a club, walk its roster like a lineup card, and open a player to see the numbers behind the number.
+          {{ $t('landing.deepDiveBody') }}
         </p>
         <NuxtLink
           :to="`/team/${sampleTeamId}`"
           class="reveal nameplate mt-9 inline-block border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
         >
-          Explore a team
+          {{ $t('nav.exploreTeam') }}
         </NuxtLink>
       </div>
     </section>
@@ -235,15 +235,15 @@ useHead({
     <section class="bg-field-deep">
       <div class="mx-auto max-w-3xl px-4 py-24 text-center md:px-6 md:py-32">
         <span class="bulb mx-auto mb-8 block h-5 w-5" aria-hidden="true" />
-        <h2 class="reveal nameplate text-4xl leading-none text-chalk md:text-6xl">Step up to the board.</h2>
+        <h2 class="reveal nameplate text-4xl leading-none text-chalk md:text-6xl">{{ $t('landing.ctaTitle') }}</h2>
         <p class="reveal mx-auto mt-5 max-w-md text-base text-chalk-dim">
-          Six divisions, thirty clubs, every stat line. No account, no paywall.
+          {{ $t('landing.ctaBody') }}
         </p>
         <NuxtLink
           to="/standings"
           class="reveal nameplate mt-10 inline-block border border-bulb bg-bulb px-8 py-4 text-sm tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
         >
-          Open the board
+          {{ $t('nav.openBoard') }}
         </NuxtLink>
       </div>
     </section>
@@ -256,7 +256,7 @@ useHead({
           <span class="nameplate text-xs tracking-[0.2em] text-chalk-dim">Scoreboard</span>
         </div>
         <p class="text-[11px] leading-relaxed text-chalk-dim/80">
-          Reads MLB's public Stats API. Not affiliated with, or endorsed by, MLB or any club.
+          {{ $t('footer.landing') }}
         </p>
       </div>
     </footer>

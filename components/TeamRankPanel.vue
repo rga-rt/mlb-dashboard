@@ -15,9 +15,9 @@ defineProps<{
     <div class="flex items-baseline justify-between border-b-2 border-seam bg-field-deep px-4 py-2.5">
       <h4 class="nameplate flex items-center gap-2 text-xs tracking-widest text-chalk">
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-        On the {{ teamName }}
+        {{ $t('rank.onThe', { team: teamName }) }}
       </h4>
-      <span class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">{{ group }} rank</span>
+      <span class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">{{ $t('rank.rank', { group: $t(`groups.${group}`) }) }}</span>
     </div>
 
     <ul class="divide-y divide-seam">

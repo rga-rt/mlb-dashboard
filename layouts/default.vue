@@ -10,9 +10,12 @@
             The Scoreboard
           </span>
         </NuxtLink>
-        <p class="nameplate hidden text-[11px] tracking-[0.25em] text-chalk-dim sm:block">
-          MLB · Standings · Rosters · Stats
-        </p>
+        <div class="flex items-center gap-4">
+          <p class="nameplate hidden text-[11px] tracking-[0.25em] text-chalk-dim sm:block">
+            {{ $t('masthead.subtitle') }}
+          </p>
+          <LangSwitch />
+        </div>
       </div>
     </header>
 
@@ -22,8 +25,7 @@
 
     <footer class="mt-4 border-t-2 border-seam py-6">
       <p class="mx-auto max-w-6xl px-4 text-center text-[11px] tracking-wider text-chalk-dim md:px-6">
-        Data from the public MLB Stats API · proxied server-side to keep the
-        browser CORS-free.
+        {{ $t('footer.app') }}
       </p>
     </footer>
   </div>

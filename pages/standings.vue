@@ -46,17 +46,18 @@ const MEXICAN = new Set(['LMB', 'LMP'])
 const sections = computed(() => {
   const divisions = data.value?.divisions ?? []
   return [
-    { key: 'mex', label: 'Ligas Mexicanas', divisions: divisions.filter(d => MEXICAN.has(d.league)) },
-    { key: 'mlb', label: 'Major League Baseball', divisions: divisions.filter(d => !MEXICAN.has(d.league)) },
+    { key: 'mex', divisions: divisions.filter(d => MEXICAN.has(d.league)) },
+    { key: 'mlb', divisions: divisions.filter(d => !MEXICAN.has(d.league)) },
   ].filter(s => s.divisions.length > 0)
 })
 
-// Key to the standings column abbreviations.
+// Key to the standings column abbreviations (abbrs stay universal; the
+// descriptions are localized).
 const LEGEND = [
-  { abbr: 'W', label: 'Wins' },
-  { abbr: 'L', label: 'Losses' },
-  { abbr: 'PCT', label: 'Winning percentage' },
-  { abbr: 'GB', label: 'Games behind the leader' },
+  { abbr: 'W', key: 'board.legendW' },
+  { abbr: 'L', key: 'board.legendL' },
+  { abbr: 'PCT', key: 'board.legendPct' },
+  { abbr: 'GB', key: 'board.legendGb' },
 ]
 </script>
 
@@ -67,16 +68,16 @@ const LEGEND = [
       <div>
         <p class="nameplate flex items-center gap-2 text-xs tracking-[0.3em] text-chalk-dim">
           <span class="bulb inline-block h-2 w-2" aria-hidden="true" />
-          Regular Season
+          {{ $t('board.eyebrow') }}
         </p>
         <h1 class="nameplate mt-2 flex items-baseline gap-3 text-5xl leading-[0.85] text-chalk md:text-6xl">
-          Standings
+          {{ $t('board.title') }}
           <span v-if="data" class="lit digit text-3xl md:text-4xl">’{{ String(data.season).slice(2) }}</span>
         </h1>
       </div>
       <div class="flex flex-col items-end gap-1.5">
         <div class="flex items-stretch gap-2">
-          <label class="sr-only" for="season">Season</label>
+          <label class="sr-only" for="season">{{ $t('board.season') }}</label>
           <select
             id="season"
             v-model.number="season"
@@ -89,7 +90,7 @@ const LEGEND = [
             :disabled="pending"
             @click="refresh()"
           >
-            {{ pending ? 'Refreshing…' : 'Refresh' }}
+            {{ pending ? $t('board.refreshing') : $t('board.refresh') }}
           </button>
         </div>
         <!-- Freshness stamp: names when the board last posted, and flashes amber
@@ -100,15 +101,13 @@ const LEGEND = [
           class="nameplate text-[11px] tracking-wider transition-colors duration-500"
           :class="justUpdated ? 'text-bulb' : 'text-chalk-dim'"
         >
-          Posted {{ postedLabel }}
+          {{ $t('board.posted', { time: postedLabel }) }}
         </p>
       </div>
     </div>
 
     <p v-if="!error || data" class="mb-4 max-w-2xl text-sm text-chalk-dim">
-      Tap any team for its roster and stat lines, a column heading to sort, or the
-      star to follow a team and float it to the top. The amber lamp marks each
-      division leader.
+      {{ $t('board.intro') }}
     </p>
 
     <!-- Column legend: what each standings abbreviation means -->
@@ -118,7 +117,7 @@ const LEGEND = [
     >
       <div v-for="item in LEGEND" :key="item.abbr" class="flex items-baseline gap-1.5">
         <dt class="nameplate tracking-wider text-chalk">{{ item.abbr }}</dt>
-        <dd class="text-chalk-dim">{{ item.label }}</dd>
+        <dd class="text-chalk-dim">{{ $t(item.key) }}</dd>
       </div>
     </dl>
 
@@ -134,14 +133,14 @@ const LEGEND = [
     >
       <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-clay/80 ring-1 ring-clay" aria-hidden="true" />
       <p class="min-w-0 flex-1 text-sm text-chalk-dim">
-        Couldn’t refresh just now — showing the {{ data.season }} board as last loaded.
+        {{ $t('board.refreshFailed', { season: data.season }) }}
       </p>
       <button
         class="nameplate shrink-0 border border-seam bg-field-deep px-3 py-1.5 text-xs tracking-wider text-chalk transition-colors hover:border-bulb hover:text-bulb focus:border-bulb focus:text-bulb focus:outline-none"
         :disabled="pending"
         @click="refresh()"
       >
-        {{ pending ? 'Refreshing…' : 'Try again' }}
+        {{ pending ? $t('board.refreshing') : $t('board.tryAgain') }}
       </button>
     </div>
 
@@ -162,16 +161,16 @@ const LEGEND = [
     >
       <h2 class="nameplate flex items-center gap-2 text-lg text-clay">
         <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-clay/80 ring-1 ring-clay" aria-hidden="true" />
-        The board went dark
+        {{ $t('board.errTitle') }}
       </h2>
       <p class="mt-1 text-sm text-chalk-dim">
-        Couldn’t reach the MLB API just now. Check your connection and try again.
+        {{ $t('board.errBody') }}
       </p>
       <button
         class="nameplate mt-4 border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk transition-colors hover:border-bulb hover:text-bulb focus:border-bulb focus:text-bulb focus:outline-none"
         @click="refresh()"
       >
-        Try again
+        {{ $t('board.tryAgain') }}
       </button>
     </div>
 
@@ -182,11 +181,10 @@ const LEGEND = [
     >
       <h2 class="nameplate flex items-center gap-2 text-lg text-chalk">
         <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-seam ring-1 ring-line" aria-hidden="true" />
-        The board’s not lit yet
+        {{ $t('board.emptyTitle') }}
       </h2>
       <p class="mt-1 text-sm text-chalk-dim">
-        No standings are posted for the {{ data.season }} season yet. Pick another
-        year from the dropdown above.
+        {{ $t('board.emptyBody', { season: data.season }) }}
       </p>
     </div>
 
@@ -196,11 +194,8 @@ const LEGEND = [
         <!-- Section banner: painted label with a metal divider rule -->
         <div class="mb-4 flex items-center gap-3">
           <span class="bulb inline-block h-2 w-2 shrink-0" aria-hidden="true" />
-          <h2
-            class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk"
-            :lang="section.key === 'mex' ? 'es' : undefined"
-          >
-            {{ section.label }}
+          <h2 class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk">
+            {{ $t(section.key === 'mex' ? 'board.sectionMexican' : 'board.sectionMlb') }}
           </h2>
           <span class="h-0.5 flex-1 bg-seam" aria-hidden="true" />
         </div>

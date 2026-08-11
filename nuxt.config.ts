@@ -5,9 +5,27 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxt/eslint', '@nuxt/test-utils/module'],
+  modules: ['@nuxt/eslint', '@nuxt/test-utils/module', '@nuxtjs/i18n'],
 
   css: ['~/assets/css/main.css'],
+
+  // Language switch (English / Spanish). no_prefix keeps the routes we settled
+  // (/, /standings, /team/:id) and persists the choice in a cookie instead of
+  // duplicating every route under /es.
+  i18n: {
+    langDir: 'locales',
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    locales: [
+      { code: 'en', name: 'English', language: 'en-US', file: 'en.json' },
+      { code: 'es', name: 'Español', language: 'es-ES', file: 'es.json' },
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_locale',
+      redirectOn: 'root',
+    },
+  },
 
   vite: {
     plugins: [tailwindcss()],

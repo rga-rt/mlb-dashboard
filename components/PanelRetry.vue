@@ -13,7 +13,7 @@ defineEmits<{ retry: [] }>()
       class="nameplate tap-target relative shrink-0 border border-line px-2.5 py-1 text-[11px] tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus-visible:border-bulb focus-visible:text-bulb focus:outline-none"
       @click="$emit('retry')"
     >
-      Retry
+      {{ $t('team.retry') }}
     </button>
   </div>
 </template>

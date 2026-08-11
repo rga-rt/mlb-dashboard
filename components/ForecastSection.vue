@@ -75,12 +75,13 @@ const forecast = computed<Point | null>(() => {
 })
 const source = computed(() => (zips.value ? 'ZiPS' : 'linear'))
 
+const { t } = useI18n()
 const trendLabel = computed(() => {
   const s = model.value.slope
-  if (Math.abs(s) < 1e-6) return 'holding steady'
-  return s > 0 ? 'trending up' : 'trending down'
+  if (Math.abs(s) < 1e-6) return t('forecast.trendSteady')
+  return s > 0 ? t('forecast.trendUp') : t('forecast.trendDown')
 })
-const fitLabel = computed(() => (tf.value ? `TensorFlow.js · ${tf.value.epochs} epochs` : tfPending.value ? 'training…' : 'least squares'))
+const fitLabel = computed(() => (tf.value ? t('forecast.fitTf', { epochs: tf.value.epochs }) : tfPending.value ? t('forecast.fitTraining') : t('forecast.fitLeastSquares')))
 </script>
 
 <template>
@@ -88,10 +89,10 @@ const fitLabel = computed(() => (tf.value ? `TensorFlow.js · ${tf.value.epochs}
     <div class="flex items-baseline justify-between border-b-2 border-seam bg-field-deep px-4 py-2.5">
       <h4 class="nameplate flex items-center gap-2 text-xs tracking-widest text-chalk">
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-        Forecast
+        {{ $t('forecast.title') }}
       </h4>
       <span class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">
-        {{ source === 'ZiPS' ? 'ZiPS projection' : 'linear trend · illustrative' }}
+        {{ source === 'ZiPS' ? $t('forecast.zips') : $t('forecast.linear') }}
       </span>
     </div>
 
@@ -111,7 +112,7 @@ const fitLabel = computed(() => (tf.value ? `TensorFlow.js · ${tf.value.epochs}
       <div v-if="pending" class="h-48 animate-pulse border border-seam bg-panel/50" />
 
       <p v-else-if="!forecast" class="border border-dashed border-line px-4 py-8 text-center text-sm text-chalk-dim">
-        Not enough {{ stat.label }} history to project a trend.
+        {{ $t('forecast.notEnough', { stat: stat.label }) }}
       </p>
 
       <template v-else>
@@ -120,7 +121,7 @@ const fitLabel = computed(() => (tf.value ? `TensorFlow.js · ${tf.value.epochs}
         <div class="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-seam pt-4">
           <div>
             <p class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">
-              {{ source === 'ZiPS' ? `ZiPS projection · ${forecast.x}` : `Projected ${forecast.x}` }}
+              {{ source === 'ZiPS' ? $t('forecast.zipsSeason', { year: forecast.x }) : $t('forecast.projected', { year: forecast.x }) }}
             </p>
             <p class="mt-0.5 flex items-baseline gap-2">
               <span class="digit lit text-3xl leading-none">{{ formatForecast(forecast.y, stat) }}</span>
@@ -128,11 +129,11 @@ const fitLabel = computed(() => (tf.value ? `TensorFlow.js · ${tf.value.epochs}
             </p>
           </div>
           <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-right">
-            <dt class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">Source</dt>
-            <dd class="text-sm text-chalk">{{ source === 'ZiPS' ? 'ZiPS' : 'linear fit' }}</dd>
-            <dt class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">Recent trend</dt>
+            <dt class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">{{ $t('forecast.source') }}</dt>
+            <dd class="text-sm text-chalk">{{ source === 'ZiPS' ? $t('forecast.sourceZips') : $t('forecast.sourceLinear') }}</dd>
+            <dt class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">{{ $t('forecast.recentTrend') }}</dt>
             <dd class="text-sm text-chalk">{{ trendLabel }}</dd>
-            <dt class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">Trend fit</dt>
+            <dt class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">{{ $t('forecast.trendFit') }}</dt>
             <dd class="text-sm text-chalk">{{ fitLabel }}</dd>
           </dl>
         </div>

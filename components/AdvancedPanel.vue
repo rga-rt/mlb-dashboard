@@ -22,7 +22,7 @@ const rows = computed(() => (props.group === 'hitting' ? expectedRows(props.stan
     <div class="flex items-baseline justify-between border-b-2 border-seam bg-field-deep px-4 py-2.5">
       <h4 class="nameplate flex items-center gap-2 text-xs tracking-widest text-chalk">
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-        Advanced
+        {{ $t('advanced.title') }}
       </h4>
       <span class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">{{ year }}</span>
     </div>
@@ -37,13 +37,13 @@ const rows = computed(() => (props.group === 'hitting' ? expectedRows(props.stan
 
       <!-- Statcast expected vs actual — the luck read (hitters). -->
       <div v-if="rows.length" class="mt-4 border-t border-seam pt-3">
-        <p class="nameplate mb-2 text-[10px] tracking-[0.2em] text-chalk-dim">Actual vs Expected</p>
+        <p class="nameplate mb-2 text-[10px] tracking-[0.2em] text-chalk-dim">{{ $t('advanced.actualVsExpected') }}</p>
         <table class="w-full text-sm">
           <thead>
             <tr class="nameplate text-[10px] tracking-wider text-chalk-dim">
               <th class="text-left font-medium" />
-              <th class="px-2 text-right font-medium">Actual</th>
-              <th class="px-2 text-right font-medium">Expected</th>
+              <th class="px-2 text-right font-medium">{{ $t('advanced.actual') }}</th>
+              <th class="px-2 text-right font-medium">{{ $t('advanced.expected') }}</th>
               <th class="pl-2 text-right font-medium">Δ</th>
             </tr>
           </thead>
@@ -62,7 +62,7 @@ const rows = computed(() => (props.group === 'hitting' ? expectedRows(props.stan
           </tbody>
         </table>
         <p class="mt-2 text-[11px] leading-snug text-chalk-dim">
-          Amber = out-performing expected contact (often unsustainable); clay = under-performing.
+          {{ $t('advanced.caption') }}
         </p>
       </div>
     </div>

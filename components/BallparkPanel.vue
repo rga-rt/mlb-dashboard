@@ -24,12 +24,13 @@ const hasDimensions = computed(() => points.value.length > 0)
 
 const place = computed(() => [venue.value.city, venue.value.state].filter(Boolean).join(', '))
 
+const { t, locale } = useI18n()
 const facts = computed(() => {
   const f: { label: string, value: string }[] = []
-  if (props.info.firstYearOfPlay) f.push({ label: 'Founded', value: props.info.firstYearOfPlay })
-  if (venue.value.capacity != null) f.push({ label: 'Capacity', value: venue.value.capacity.toLocaleString('en-US') })
-  if (venue.value.turf) f.push({ label: 'Surface', value: venue.value.turf })
-  if (venue.value.roof) f.push({ label: 'Roof', value: venue.value.roof })
+  if (props.info.firstYearOfPlay) f.push({ label: t('ballpark.founded'), value: props.info.firstYearOfPlay })
+  if (venue.value.capacity != null) f.push({ label: t('ballpark.capacity'), value: venue.value.capacity.toLocaleString(locale.value) })
+  if (venue.value.turf) f.push({ label: t('ballpark.surface'), value: venue.value.turf })
+  if (venue.value.roof) f.push({ label: t('ballpark.roof'), value: venue.value.roof })
   return f
 })
 </script>
@@ -39,7 +40,7 @@ const facts = computed(() => {
     <div class="flex items-baseline justify-between border-b-2 border-seam bg-field-deep px-4 py-2.5">
       <h2 class="nameplate flex items-center gap-2 text-xs tracking-widest text-chalk">
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-        Ballpark
+        {{ $t('ballpark.title') }}
       </h2>
       <span v-if="info.division" class="nameplate text-[10px] tracking-[0.2em] text-chalk-dim">
         {{ info.division }}
@@ -48,7 +49,7 @@ const facts = computed(() => {
 
     <div class="grid gap-6 px-4 py-5 md:grid-cols-[1fr_auto] md:items-center">
       <div>
-        <h3 class="nameplate text-2xl leading-none text-chalk">{{ venue.name ?? 'Ballpark' }}</h3>
+        <h3 class="nameplate text-2xl leading-none text-chalk">{{ venue.name ?? $t('ballpark.default') }}</h3>
         <p v-if="place" class="mt-1 text-xs text-chalk-dim">{{ place }}</p>
 
         <dl v-if="facts.length" class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-4">
@@ -61,7 +62,7 @@ const facts = computed(() => {
 
       <!-- Signature: the outfield wall, ticked with each known distance (ft). -->
       <figure v-if="hasDimensions" class="mx-auto w-full max-w-[320px] md:w-[300px]">
-        <svg viewBox="0 0 320 145" class="w-full" role="img" aria-label="Outfield dimensions in feet">
+        <svg viewBox="0 0 320 145" class="w-full" role="img" :aria-label="$t('ballpark.dimsLabel')">
           <!-- foul lines home -> poles -->
           <path d="M160 134 L36 110 M160 134 L284 110" fill="none" style="stroke: var(--color-seam)" stroke-width="1.5" />
           <!-- outfield wall -->
@@ -87,7 +88,7 @@ const facts = computed(() => {
           </g>
         </svg>
         <figcaption class="nameplate mt-1 text-center text-[10px] tracking-[0.25em] text-chalk-dim">
-          Outfield · ft
+          {{ $t('ballpark.outfieldFt') }}
         </figcaption>
       </figure>
     </div>

@@ -1,0 +1,156 @@
+{
+  "lang": {
+    "label": "Language",
+    "switchTo": "Español"
+  },
+  "nav": {
+    "openBoard": "Open the board",
+    "exploreTeam": "Explore a team"
+  },
+  "masthead": {
+    "subtitle": "MLB · Standings · Rosters · Stats"
+  },
+  "footer": {
+    "app": "Data from the public MLB Stats API · proxied server-side to keep the browser CORS-free.",
+    "landing": "Reads MLB's public Stats API. Not affiliated with, or endorsed by, MLB or any club."
+  },
+  "landing": {
+    "heroTitle1": "The standings,",
+    "heroTitleLit": "lit up",
+    "heroTitle2": "like the Green Monster.",
+    "heroSubtext": "Live MLB standings and deep player stats, painted like a ballpark scoreboard. Sort the board, follow your club, read the forecast.",
+    "boardLive": "live",
+    "boardLegend": "W / L / GB",
+    "boardSeeAll": "See all six divisions",
+    "boardDark": "The board is dark right now. It lights up the moment the feed answers.",
+    "featuresHeading": "Built for the fan who reads the box score twice.",
+    "sortTitle": "Sort the board the way you read it",
+    "sortBody": "Click any column to rank by wins, win percentage, or games back. Your reading order, not the league's default.",
+    "followTitle": "Follow your club",
+    "followBody": "Pin your team and it floats to the top of every division, saved in your browser between visits.",
+    "deepTitle": "Go deep on any player",
+    "deepBody": "Full hitting and pitching lines, Statcast expected stats, team rank, and a season forecast on one card.",
+    "feedTitle": "Straight from the official feed",
+    "feedBody": "Live numbers pulled from MLB's public Stats API through a server proxy, flattened and refreshed on demand.",
+    "deepDiveTitle1": "From a division race down to",
+    "deepDiveTitleLit": "one at-bat.",
+    "deepDiveBody": "Tap a club, walk its roster like a lineup card, and open a player to see the numbers behind the number.",
+    "ctaTitle": "Step up to the board.",
+    "ctaBody": "Six divisions, thirty clubs, every stat line. No account, no paywall."
+  },
+  "board": {
+    "eyebrow": "Regular Season",
+    "title": "Standings",
+    "season": "Season",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing…",
+    "posted": "Posted {time}",
+    "intro": "Tap any team for its roster and stat lines, a column heading to sort, or the star to follow a team and float it to the top. The amber lamp marks each division leader.",
+    "legendW": "Wins",
+    "legendL": "Losses",
+    "legendPct": "Winning percentage",
+    "legendGb": "Games behind the leader",
+    "refreshFailed": "Couldn't refresh just now, showing the {season} board as last loaded.",
+    "tryAgain": "Try again",
+    "errTitle": "The board went dark",
+    "errBody": "Couldn't reach the MLB API just now. Check your connection and try again.",
+    "emptyTitle": "The board's not lit yet",
+    "emptyBody": "No standings are posted for the {season} season yet. Pick another year from the dropdown above.",
+    "sectionMexican": "Mexican Leagues",
+    "sectionMlb": "Major League Baseball"
+  },
+  "division": {
+    "colTeam": "Team",
+    "caption": "{division} standings: wins, losses, winning percentage, and games behind the leader",
+    "leader": "Division leader",
+    "follow": "Follow the {team}",
+    "unfollow": "Unfollow the {team}",
+    "view": "View {team}"
+  },
+  "team": {
+    "back": "Back to the board",
+    "loading": "Loading…",
+    "rosterErrTitle": "Couldn't load that roster",
+    "rosterErrBody": "The team id may be wrong, or the API is unreachable.",
+    "filterLabel": "Filter roster",
+    "filterPlaceholder": "Filter by name, number, or position…",
+    "noMatch": "No one on the roster matches “{q}”.",
+    "activeRoster": "Active Roster",
+    "reserves": "Reserves & Inactive",
+    "emptyPrompt": "Pick a player from the lineup to light up their stat line.",
+    "playerErr": "Couldn't load that player's stats.",
+    "retry": "Retry",
+    "close": "Close",
+    "closeLabel": "Close player detail",
+    "analytics": "Advanced · Rank · Forecast",
+    "advancedFailed": "Advanced stats didn't load.",
+    "ranksFailed": "Team ranks didn't load.",
+    "bt": "B/T"
+  },
+  "positions": {
+    "Pitcher": "Pitchers",
+    "Catcher": "Catchers",
+    "Infielder": "Infielders",
+    "Outfielder": "Outfielders",
+    "Two-Way Player": "Two-Way Players",
+    "Hitter": "Hitters",
+    "Other": "Other"
+  },
+  "status": {
+    "IL": "IL",
+    "Minors": "Minors",
+    "DFA": "DFA",
+    "Traded": "Traded",
+    "FA": "FA",
+    "Restricted": "Restricted",
+    "Suspended": "Suspended"
+  },
+  "groups": {
+    "hitting": "hitting",
+    "pitching": "pitching"
+  },
+  "statline": {
+    "key": "Key",
+    "empty": "No {name} stat lines for this season yet."
+  },
+  "advanced": {
+    "title": "Advanced",
+    "actualVsExpected": "Actual vs Expected",
+    "actual": "Actual",
+    "expected": "Expected",
+    "caption": "Amber = out-performing expected contact (often unsustainable); clay = under-performing."
+  },
+  "rank": {
+    "onThe": "On the {team}",
+    "rank": "{group} rank"
+  },
+  "forecast": {
+    "title": "Forecast",
+    "zips": "ZiPS projection",
+    "linear": "linear trend · illustrative",
+    "notEnough": "Not enough {stat} history to project a trend.",
+    "projected": "Projected {year}",
+    "zipsSeason": "ZiPS projection · {year}",
+    "source": "Source",
+    "sourceZips": "ZiPS",
+    "sourceLinear": "linear fit",
+    "recentTrend": "Recent trend",
+    "trendUp": "trending up",
+    "trendDown": "trending down",
+    "trendSteady": "holding steady",
+    "trendFit": "Trend fit",
+    "fitTf": "TensorFlow.js · {epochs} epochs",
+    "fitTraining": "training…",
+    "fitLeastSquares": "least squares"
+  },
+  "ballpark": {
+    "title": "Ballpark",
+    "default": "Ballpark",
+    "founded": "Founded",
+    "capacity": "Capacity",
+    "surface": "Surface",
+    "roof": "Roof",
+    "dimsLabel": "Outfield dimensions in feet",
+    "outfieldFt": "Outfield · ft"
+  }
+}

@@ -11,7 +11,7 @@ defineProps<{ player: PlayerResponse }>()
       v-if="player.lines.length === 0"
       class="border border-dashed border-line px-4 py-6 text-center text-sm text-chalk-dim"
     >
-      No {{ player.name.split(' ')[0] }} stat lines for this season yet.
+      {{ $t('statline.empty', { name: player.name.split(' ')[0] }) }}
     </div>
 
     <div
@@ -22,7 +22,7 @@ defineProps<{ player: PlayerResponse }>()
       <div class="flex items-center justify-between border-b-2 border-seam bg-field-deep px-4 py-2.5">
         <h4 class="nameplate flex items-center gap-2 text-xs tracking-widest text-chalk">
           <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-          {{ line.group }} · {{ line.season }}
+          {{ $t(`groups.${line.group}`) }} · {{ line.season }}
         </h4>
       </div>
 
@@ -62,7 +62,7 @@ defineProps<{ player: PlayerResponse }>()
           class="nameplate flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 text-[10px] tracking-[0.25em] text-chalk-dim transition-colors hover:text-chalk focus-visible:text-chalk focus-visible:outline-none"
         >
           <span class="text-[8px] leading-none transition-transform group-open/key:rotate-90" aria-hidden="true">▸</span>
-          Key
+          {{ $t('statline.key') }}
         </summary>
         <dl class="flex flex-wrap gap-x-5 gap-y-1.5 px-4 pb-3">
           <div v-for="col in columnsFor(line)" :key="col.key" class="flex items-baseline gap-1.5">
