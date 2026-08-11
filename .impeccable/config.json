@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "assets/css/main.css"
+        ],
+        "createdAt": "2026-08-11T23:33:24.446Z",
+        "reason": "Intentional ~1.2% opacity outfield-grass crosshatch for the ballpark scoreboard theme; user-confirmed"
+      }
+    ]
+  }
+}

@@ -46,7 +46,12 @@ body {
   background-size: 46px 46px;
 }
 
-/* Painted-sign lettering for headings and labels. */
+/*
+  Painted-sign lettering for headings and labels. Deliberately kept as an
+  unlayered rule (not `@utility`): it sets letter-spacing, and moving it into
+  the utilities layer would let co-located `tracking-*` utilities win and shift
+  spacing across the app. Unlayered, its 0.02em is the intended baseline.
+*/
 .nameplate {
   font-family: var(--font-display);
   font-weight: 600;
@@ -54,11 +59,11 @@ body {
   text-transform: uppercase;
 }
 
-/* Scoreboard digits: condensed, tabular, evenly set — the data is the star. */
-.digit {
+/* Scoreboard digits: condensed, tabular, evenly set — the data is the star.
+   tabular-nums already forces `tnum`, so no font-feature-settings needed. */
+@utility digit {
   font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
   letter-spacing: 0.01em;
 }
 
@@ -67,7 +72,7 @@ body {
   Size it with Tailwind (e.g. h-3 w-3); this paints the glass, filament glow,
   and the socket ring only.
 */
-.bulb {
+@utility bulb {
   border-radius: 9999px;
   background:
     radial-gradient(circle at 35% 30%,
@@ -80,7 +85,7 @@ body {
 }
 
 /* Text rendered as a lit filament — reserved for the single key readout. */
-.lit {
+@utility lit {
   color: var(--color-bulb);
   text-shadow: 0 0 10px rgba(240, 182, 78, 0.35);
 }
@@ -91,14 +96,14 @@ body {
   glyph. Coarse-pointer only, so the mouse layout is untouched. The host element
   must be positioned (the follow star already is `relative z-10`).
 */
-@media (pointer: coarse) {
-  .tap-target {
+@utility tap-target {
+  @media (pointer: coarse) {
     min-height: 2.75rem;
-  }
-  .tap-target::after {
-    content: "";
-    position: absolute;
-    inset: 0 -0.75rem;
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0 -0.75rem;
+    }
   }
 }
 
