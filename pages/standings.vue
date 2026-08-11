@@ -42,13 +42,16 @@ const postedLabel = computed(() =>
 // Split the board into labeled sections — the Mexican leagues, then MLB — each
 // with its own divider. A section only appears when it has divisions for the
 // requested season (LMP, a winter league, is often absent).
+const { locale } = useI18n()
 const MEXICAN = new Set(['LMB', 'LMP'])
 const sections = computed(() => {
   const divisions = data.value?.divisions ?? []
-  return [
-    { key: 'mex', divisions: divisions.filter(d => MEXICAN.has(d.league)) },
-    { key: 'mlb', divisions: divisions.filter(d => !MEXICAN.has(d.league)) },
-  ].filter(s => s.divisions.length > 0)
+  const mex = { key: 'mex', divisions: divisions.filter(d => MEXICAN.has(d.league)) }
+  const mlb = { key: 'mlb', divisions: divisions.filter(d => !MEXICAN.has(d.league)) }
+  // Lead with the league that matters most to the reader: MLB for English,
+  // the Mexican leagues for Spanish.
+  const ordered = locale.value === 'es' ? [mex, mlb] : [mlb, mex]
+  return ordered.filter(s => s.divisions.length > 0)
 })
 
 // Key to the standings column abbreviations (abbrs stay universal; the
