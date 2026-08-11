@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Division } from '~/types/mlb'
 import type { SortKey, SortState } from '~/utils/teamOrder'
-import { DEFAULT_SORT, nextSort, orderTeams } from '~/utils/teamOrder'
+import { DEFAULT_DIR, DEFAULT_SORT, nextSort, orderTeams } from '~/utils/teamOrder'
 
 // `season` is carried into the team link so a team opens on the same season
 // the board is showing.
@@ -60,13 +60,18 @@ function hideBrokenLogo(e: Event) {
       <caption class="sr-only">
         {{ division.divisionName }} standings — wins, losses, winning percentage, and games behind the leader
       </caption>
+      <!--
+        Number columns tighten on phones so the team name — the thing a fan
+        actually scans for — keeps the width it deserves; desktop widths are
+        unchanged. table-fixed reads these col widths.
+      -->
       <colgroup>
-        <col style="width: 1.75rem">
+        <col class="w-7">
         <col>
-        <col style="width: 2.5rem">
-        <col style="width: 2.25rem">
-        <col style="width: 3.25rem">
-        <col style="width: 3rem">
+        <col class="w-8 sm:w-10">
+        <col class="w-8 sm:w-9">
+        <col class="w-11 sm:w-[3.25rem]">
+        <col class="w-9 sm:w-12">
       </colgroup>
 
       <!--
@@ -87,14 +92,23 @@ function hideBrokenLogo(e: Event) {
           >
             <button
               type="button"
-              class="flex w-full cursor-pointer items-center gap-1 tracking-wider transition-colors hover:text-chalk focus-visible:text-bulb focus:outline-none"
+              class="group/sort flex w-full cursor-pointer items-center gap-1 tracking-wider transition-colors hover:text-chalk focus-visible:text-bulb focus:outline-none"
               :class="[col.justify, sort.key === col.key ? 'text-bulb' : '']"
               @click="sort = nextSort(sort, col.key)"
             >
               <span>{{ col.label }}</span>
-              <span v-if="sort.key === col.key" aria-hidden="true" class="text-[8px] leading-none">
-                {{ sort.dir === 'asc' ? '▲' : '▼' }}
-              </span>
+              <!-- Active column shows its live direction; inactive columns
+                   reveal a faint caret on hover/focus so it's clear they sort. -->
+              <span
+                v-if="sort.key === col.key"
+                aria-hidden="true"
+                class="text-[8px] leading-none"
+              >{{ sort.dir === 'asc' ? '▲' : '▼' }}</span>
+              <span
+                v-else
+                aria-hidden="true"
+                class="text-[8px] leading-none opacity-0 transition-opacity group-hover/sort:opacity-60 group-focus-visible/sort:opacity-60"
+              >{{ DEFAULT_DIR[col.key] === 'asc' ? '▲' : '▼' }}</span>
             </button>
           </th>
         </tr>
@@ -108,13 +122,10 @@ function hideBrokenLogo(e: Event) {
           class="group relative border-b border-seam text-sm transition-colors last:border-b-0 hover:bg-field-deep focus-within:bg-field-deep"
           :class="team.divisionLeader ? 'bg-panel-lit' : ''"
         >
-          <!-- Rank cell doubles as the leader "lamp" -->
-          <td class="py-2.5 pl-4 text-center align-middle">
-            <span v-if="team.divisionLeader" class="inline-flex items-center justify-center">
-              <span class="bulb inline-block h-2.5 w-2.5" aria-hidden="true" />
-              <span class="sr-only">Division leader</span>
-            </span>
-            <span v-else class="digit text-xs text-chalk-dim">{{ team.divisionRank }}</span>
+          <!-- Rank number, shown for every row so the column stays uniform and
+               screen readers announce the leader's rank too. -->
+          <td class="py-2.5 pl-3 text-center align-middle sm:pl-4">
+            <span class="digit text-xs text-chalk-dim">{{ team.divisionRank }}</span>
           </td>
 
           <!-- Team name is the row's header. The visible name truncates on its
@@ -123,6 +134,16 @@ function hideBrokenLogo(e: Event) {
                keyboard-focusable target with a visible focus ring. -->
           <th scope="row" class="py-2.5 text-left align-middle font-normal">
             <span class="flex min-w-0 items-center gap-2">
+              <!-- The leader's plate is lit: one lamp, the board's sole glowing
+                   accent, marks the division leader (with panel-lit behind it). -->
+              <span
+                v-if="team.divisionLeader"
+                class="inline-flex shrink-0 items-center"
+                title="Division leader"
+              >
+                <span class="bulb inline-block h-2 w-2" aria-hidden="true" />
+                <span class="sr-only">Division leader</span>
+              </span>
               <img
                 :src="teamLogo(team.teamId)"
                 alt=""
@@ -137,19 +158,20 @@ function hideBrokenLogo(e: Event) {
                 class="nameplate min-w-0 flex-1 truncate text-[15px] tracking-wide text-chalk"
               >{{ team.name }}</span>
               <!--
-                Pin toggle: sits above the stretched row link (z-10) so clicking
-                the star toggles the follow instead of navigating. Filled + amber
-                when pinned; otherwise it stays out of sight until the row is
-                hovered or the button itself is focused, so the board reads clean.
+                Follow toggle: sits above the stretched row link (z-10) so a tap
+                toggles the follow instead of navigating. Amber when followed; on
+                hover-capable pointers it rests hidden and appears on row
+                hover/focus, but on touch (no hover) it keeps a faint resting
+                state and a 44px tap target so the feature stays discoverable.
               -->
               <button
                 type="button"
-                class="relative z-10 -my-1 -mr-1 shrink-0 cursor-pointer px-1.5 py-1 text-sm leading-none transition-opacity focus:outline-none focus-visible:opacity-100"
+                class="relative z-10 -my-1 inline-flex shrink-0 cursor-pointer items-center justify-center px-1.5 py-1 text-sm leading-none transition-opacity duration-150 focus:outline-none focus-visible:opacity-100 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                 :class="isPinned(team.teamId)
                   ? 'text-bulb opacity-100'
-                  : 'text-chalk-dim opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'"
+                  : 'text-chalk-dim opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-coarse:opacity-50'"
                 :aria-pressed="isPinned(team.teamId)"
-                :aria-label="`${isPinned(team.teamId) ? 'Unpin' : 'Pin'} the ${team.name}`"
+                :aria-label="`${isPinned(team.teamId) ? 'Unfollow' : 'Follow'} the ${team.name}`"
                 @click="toggle(team.teamId)"
               >{{ isPinned(team.teamId) ? '★' : '☆' }}</button>
             </span>
@@ -160,11 +182,9 @@ function hideBrokenLogo(e: Event) {
             />
           </th>
 
-          <!-- Wins are the headline digit; the leader's total is lit -->
-          <td
-            class="digit py-2.5 pr-1 text-right align-middle text-base leading-none"
-            :class="team.divisionLeader ? 'lit' : 'text-chalk'"
-          >{{ team.wins }}</td>
+          <!-- Wins are the headline digit. No glow: the lamp is the only lit
+               thing now, so its scarcity carries the leader cue. -->
+          <td class="digit py-2.5 pr-1 text-right align-middle text-base leading-none text-chalk">{{ team.wins }}</td>
           <!-- On the lit leader slot every readout reads a step brighter, so the
                leader's loss count is full chalk (also keeps AA contrast on panel-lit) -->
           <td
@@ -173,8 +193,8 @@ function hideBrokenLogo(e: Event) {
           >{{ team.losses }}</td>
           <td class="digit py-2.5 pr-1 text-right align-middle text-chalk">{{ team.pct }}</td>
           <td
-            class="digit py-2.5 pr-4 text-right align-middle"
-            :class="team.gamesBack === '-' ? 'lit' : 'text-chalk-dim'"
+            class="digit py-2.5 pr-3 text-right align-middle sm:pr-4"
+            :class="team.gamesBack === '-' ? 'text-chalk' : 'text-chalk-dim'"
           >{{ team.gamesBack }}</td>
         </tr>
       </tbody>

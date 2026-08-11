@@ -28,6 +28,13 @@
   color-scheme: dark;
 }
 
+/* Themed browser surface: the selection highlight belongs to the world, not
+   the OS default — a lit amber wash reading against the recessed field. */
+::selection {
+  background: var(--color-bulb);
+  color: var(--color-field-deep);
+}
+
 body {
   background-color: var(--color-field);
   color: var(--color-chalk);

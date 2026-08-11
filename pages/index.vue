@@ -11,6 +11,34 @@ const { data, pending, error, refresh } = await useFetch<StandingsResponse>(
   { query: { season } },
 )
 
+// "Posted HH:MM" freshness stamp. On a board reading a live API, freshness IS
+// the status — this is how a user knows a Refresh actually did something.
+// Set client-side only (onMounted + the pending true→false edge) so the time
+// string never mismatches between server and client render.
+const lastUpdated = ref<Date | null>(null)
+const justUpdated = ref(false)
+let flashTimer: ReturnType<typeof setTimeout> | undefined
+
+function markUpdated() {
+  if (error.value || !data.value) return
+  lastUpdated.value = new Date()
+  justUpdated.value = true
+  clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => (justUpdated.value = false), 1200)
+}
+
+onMounted(markUpdated)
+watch(pending, (now: boolean, was: boolean) => {
+  if (was && !now) markUpdated()
+})
+onBeforeUnmount(() => clearTimeout(flashTimer))
+
+const postedLabel = computed(() =>
+  lastUpdated.value
+    ? lastUpdated.value.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    : null,
+)
+
 // Split the board into labeled sections — the Mexican leagues, then MLB — each
 // with its own divider. A section only appears when it has divisions for the
 // requested season (LMP, a winter league, is often absent).
@@ -46,28 +74,41 @@ const LEGEND = [
           <span v-if="data" class="lit digit text-3xl md:text-4xl">’{{ String(data.season).slice(2) }}</span>
         </h1>
       </div>
-      <div class="flex items-stretch gap-2">
-        <label class="sr-only" for="season">Season</label>
-        <select
-          id="season"
-          v-model.number="season"
-          class="nameplate border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk transition-colors hover:border-bulb focus:border-bulb focus:outline-none"
+      <div class="flex flex-col items-end gap-1.5">
+        <div class="flex items-stretch gap-2">
+          <label class="sr-only" for="season">Season</label>
+          <select
+            id="season"
+            v-model.number="season"
+            class="nameplate border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk transition-colors hover:border-bulb focus:border-bulb focus:outline-none"
+          >
+            <option v-for="yr in seasons" :key="yr" :value="yr">{{ yr }}</option>
+          </select>
+          <button
+            class="nameplate border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus:border-bulb focus:text-bulb focus:outline-none"
+            :disabled="pending"
+            @click="refresh()"
+          >
+            {{ pending ? 'Refreshing…' : 'Refresh' }}
+          </button>
+        </div>
+        <!-- Freshness stamp: names when the board last posted, and flashes amber
+             for a beat when a refresh lands so a Refresh confirms it did work. -->
+        <p
+          v-if="postedLabel"
+          aria-live="polite"
+          class="nameplate text-[10px] tracking-wider transition-colors duration-500"
+          :class="justUpdated ? 'text-bulb' : 'text-chalk-dim'"
         >
-          <option v-for="yr in seasons" :key="yr" :value="yr">{{ yr }}</option>
-        </select>
-        <button
-          class="nameplate border border-seam bg-field-deep px-3 py-2 text-xs tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus:border-bulb focus:text-bulb focus:outline-none"
-          :disabled="pending"
-          @click="refresh()"
-        >
-          {{ pending ? 'Refreshing…' : 'Refresh' }}
-        </button>
+          Posted {{ postedLabel }}
+        </p>
       </div>
     </div>
 
     <p v-if="!error || data" class="mb-4 max-w-2xl text-sm text-chalk-dim">
-      Tap any team to see its roster and player stat lines. The amber lamp marks
-      each division leader.
+      Tap any team for its roster and stat lines, a column heading to sort, or the
+      star to follow a team and float it to the top. The amber lamp marks each
+      division leader.
     </p>
 
     <!-- Column legend: what each standings abbreviation means -->
