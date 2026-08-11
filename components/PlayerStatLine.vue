@@ -15,9 +15,10 @@ defineProps<{ player: PlayerResponse }>()
     </div>
 
     <div
-      v-for="line in player.lines"
+      v-for="(line, i) in player.lines"
       :key="line.group"
-      class="border border-seam bg-panel"
+      class="animate-post-in border border-seam bg-panel"
+      :style="{ animationDelay: `${i * 70}ms` }"
     >
       <div class="flex items-center justify-between border-b-2 border-seam bg-field-deep px-4 py-2.5">
         <h4 class="nameplate flex items-center gap-2 text-xs tracking-widest text-chalk">

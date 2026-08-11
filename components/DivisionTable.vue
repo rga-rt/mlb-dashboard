@@ -114,8 +114,10 @@ function hideBrokenLogo(e: Event) {
         </tr>
       </thead>
 
-      <!-- Each team is a number-card slot, divided by dark metal channels -->
-      <tbody>
+      <!-- Each team is a number-card slot, divided by dark metal channels.
+           TransitionGroup FLIPs the rows to their new positions when a sort or
+           a follow-pin reorders them, so the movement itself is legible. -->
+      <TransitionGroup tag="tbody" name="rowflip">
         <tr
           v-for="team in rows"
           :key="team.teamId"
@@ -202,7 +204,16 @@ function hideBrokenLogo(e: Event) {
             :class="team.gamesBack === '-' ? 'text-chalk' : 'text-chalk-dim'"
           >{{ team.gamesBack }}</td>
         </tr>
-      </tbody>
+      </TransitionGroup>
     </table>
   </section>
 </template>
+
+<style scoped>
+/* FLIP move for row reorders (sort / follow-pin). Kept scoped so its `[data-v]`
+   specificity beats the row's `transition-colors`; shares the theme easing
+   token. The global reduced-motion reset zeroes the duration, so it snaps. */
+.rowflip-move {
+  transition: transform 320ms var(--ease-out-expo);
+}
+</style>

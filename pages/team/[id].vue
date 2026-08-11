@@ -442,7 +442,7 @@ function onAnalyticsToggle(e: Event) {
                 </button>
               </div>
 
-              <PlayerStatLine :player="player" />
+              <PlayerStatLine :key="player.personId" :player="player" />
 
               <!-- Advanced · Rank · Forecast grouped under one disclosure, open by
                    default; collapsible so a scanner can trim the column, and the

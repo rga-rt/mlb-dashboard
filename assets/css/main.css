@@ -22,6 +22,22 @@
 
   --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
   --font-body: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+
+  /* Motion: one shared easing curve — referenced by scoped CSS via
+     var(--ease-out-expo) and by templates via the generated `ease-out-expo`
+     utility — plus the "post-in" tile-drop animation (`animate-post-in`). */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-post-in: post-in 380ms var(--ease-out-expo) both;
+  @keyframes post-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 :root {
