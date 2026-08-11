@@ -9,11 +9,14 @@ export async function mlbFetch<T = any>(
   query: Record<string, string | number> = {},
 ): Promise<T> {
   const base = useRuntimeConfig().mlbBase
-  return await $fetch<T>(`${base}${path}`, {
+  // $fetch is typed to return TypedInternalResponse<…, T, "get">, which the
+  // compiler won't narrow to a bare T; we own the shape via the caller's
+  // generic, so assert it back to T.
+  return await $fetch(`${base}${path}`, {
     query,
     // A UA header keeps some CDN edges happy; MLB's API is otherwise open.
     headers: { 'User-Agent': 'mlb-scoreboard-dashboard' },
-  })
+  }) as T
 }
 
 /**

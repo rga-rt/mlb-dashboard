@@ -1,0 +1,6 @@
+{
+  // Root project config so `vue-tsc --noEmit` (see CLAUDE.md) resolves a
+  // project in the working dir. Nuxt regenerates .nuxt/tsconfig.json on
+  // `nuxt prepare` (it's gitignored); this thin file extends it.
+  "extends": "./.nuxt/tsconfig.json"
+}
