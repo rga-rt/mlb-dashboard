@@ -1,9 +1,34 @@
 <script setup lang="ts">
 import type { Division } from '~/types/mlb'
+import type { SortKey, SortState } from '~/utils/teamOrder'
+import { DEFAULT_SORT, nextSort, orderTeams } from '~/utils/teamOrder'
 
 // `season` is carried into the team link so a team opens on the same season
 // the board is showing.
-defineProps<{ division: Division; season: number }>()
+const props = defineProps<{ division: Division; season: number }>()
+
+const { isPinned, toggle } = usePinnedTeams()
+
+// Sort is a per-division, in-session concern — it resets on reload. Pins float
+// on top of whatever sort is active (see orderTeams).
+const sort = ref<SortState>({ ...DEFAULT_SORT })
+const rows = computed(() => orderTeams(props.division.teams, sort.value, isPinned))
+
+// The printed column labels, doubling as sort buttons. Widths still come from
+// the <colgroup>; these classes only set padding + alignment per column.
+const COLUMNS: { key: SortKey; label: string; th: string; justify: string }[] = [
+  { key: 'rank', label: '#', th: 'pl-4 text-center', justify: 'justify-center' },
+  { key: 'name', label: 'Team', th: 'text-left', justify: 'justify-start' },
+  { key: 'wins', label: 'W', th: 'pr-1 text-right', justify: 'justify-end' },
+  { key: 'losses', label: 'L', th: 'pr-1 text-right', justify: 'justify-end' },
+  { key: 'pct', label: 'PCT', th: 'pr-1 text-right', justify: 'justify-end' },
+  { key: 'gamesBack', label: 'GB', th: 'pr-4 text-right', justify: 'justify-end' },
+]
+
+function ariaSort(key: SortKey): 'ascending' | 'descending' | 'none' {
+  if (sort.value.key !== key) return 'none'
+  return sort.value.dir === 'asc' ? 'ascending' : 'descending'
+}
 
 // Hide the logo slot if a team's CDN logo ever fails to load.
 function hideBrokenLogo(e: Event) {
@@ -44,24 +69,43 @@ function hideBrokenLogo(e: Event) {
         <col style="width: 3rem">
       </colgroup>
 
-      <!-- Column headers, like the printed labels on a standings board -->
+      <!--
+        Column headers double as sort buttons. Each <th> carries aria-sort so a
+        screen reader announces the active column + direction; the amber caret is
+        the sighted cue. Clicking the active column flips it; the # column
+        (standings rank) is the reset.
+      -->
       <thead>
         <tr class="nameplate border-b border-line/50 text-[10px] tracking-wider text-chalk-dim">
-          <th scope="col" class="py-1.5 pl-4 text-center font-medium">#</th>
-          <th scope="col" class="py-1.5 text-left font-medium">Team</th>
-          <th scope="col" class="py-1.5 pr-1 text-right font-medium">W</th>
-          <th scope="col" class="py-1.5 pr-1 text-right font-medium">L</th>
-          <th scope="col" class="py-1.5 pr-1 text-right font-medium">PCT</th>
-          <th scope="col" class="py-1.5 pr-4 text-right font-medium">GB</th>
+          <th
+            v-for="col in COLUMNS"
+            :key="col.key"
+            scope="col"
+            :aria-sort="ariaSort(col.key)"
+            class="py-1.5 font-medium"
+            :class="col.th"
+          >
+            <button
+              type="button"
+              class="flex w-full cursor-pointer items-center gap-1 tracking-wider transition-colors hover:text-chalk focus-visible:text-bulb focus:outline-none"
+              :class="[col.justify, sort.key === col.key ? 'text-bulb' : '']"
+              @click="sort = nextSort(sort, col.key)"
+            >
+              <span>{{ col.label }}</span>
+              <span v-if="sort.key === col.key" aria-hidden="true" class="text-[8px] leading-none">
+                {{ sort.dir === 'asc' ? '▲' : '▼' }}
+              </span>
+            </button>
+          </th>
         </tr>
       </thead>
 
       <!-- Each team is a number-card slot, divided by dark metal channels -->
       <tbody>
         <tr
-          v-for="team in division.teams"
+          v-for="team in rows"
           :key="team.teamId"
-          class="relative border-b border-seam text-sm transition-colors last:border-b-0 hover:bg-field-deep focus-within:bg-field-deep"
+          class="group relative border-b border-seam text-sm transition-colors last:border-b-0 hover:bg-field-deep focus-within:bg-field-deep"
           :class="team.divisionLeader ? 'bg-panel-lit' : ''"
         >
           <!-- Rank cell doubles as the leader "lamp" -->
@@ -90,8 +134,24 @@ function hideBrokenLogo(e: Event) {
               >
               <span
                 :title="team.name"
-                class="nameplate min-w-0 truncate text-[15px] tracking-wide text-chalk"
+                class="nameplate min-w-0 flex-1 truncate text-[15px] tracking-wide text-chalk"
               >{{ team.name }}</span>
+              <!--
+                Pin toggle: sits above the stretched row link (z-10) so clicking
+                the star toggles the follow instead of navigating. Filled + amber
+                when pinned; otherwise it stays out of sight until the row is
+                hovered or the button itself is focused, so the board reads clean.
+              -->
+              <button
+                type="button"
+                class="relative z-10 -my-1 -mr-1 shrink-0 cursor-pointer px-1.5 py-1 text-sm leading-none transition-opacity focus:outline-none focus-visible:opacity-100"
+                :class="isPinned(team.teamId)
+                  ? 'text-bulb opacity-100'
+                  : 'text-chalk-dim opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'"
+                :aria-pressed="isPinned(team.teamId)"
+                :aria-label="`${isPinned(team.teamId) ? 'Unpin' : 'Pin'} the ${team.name}`"
+                @click="toggle(team.teamId)"
+              >{{ isPinned(team.teamId) ? '★' : '☆' }}</button>
             </span>
             <NuxtLink
               :to="`/team/${team.teamId}?season=${season}`"
