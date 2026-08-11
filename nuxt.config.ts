@@ -9,12 +9,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  // Language switch (English / Spanish). no_prefix keeps the routes we settled
-  // (/, /standings, /team/:id) and persists the choice in a cookie instead of
-  // duplicating every route under /es.
+  // Language switch (English / Spanish). prefix_except_default keeps English at
+  // the bare routes (/, /standings, /team/:id) and serves Spanish under /es/*,
+  // so the language is shareable in the URL. Choice also persists in a cookie.
   i18n: {
     langDir: 'locales',
-    strategy: 'no_prefix',
+    strategy: 'prefix_except_default',
     defaultLocale: 'en',
     locales: [
       { code: 'en', name: 'English', language: 'en-US', file: 'en.json' },

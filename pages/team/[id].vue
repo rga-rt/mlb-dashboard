@@ -274,12 +274,12 @@ function onAnalyticsToggle(e: Event) {
 
 <template>
   <div>
-    <NuxtLink
+    <NuxtLinkLocale
       to="/standings"
       class="nameplate mb-6 inline-flex items-center gap-2 text-xs tracking-wider text-chalk-dim transition-colors hover:text-bulb"
     >
       ← {{ $t('team.back') }}
-    </NuxtLink>
+    </NuxtLinkLocale>
 
     <div v-if="error" class="border border-clay/50 bg-panel px-5 py-6">
       <h1 class="nameplate text-lg text-clay">{{ $t('team.rosterErrTitle') }}</h1>

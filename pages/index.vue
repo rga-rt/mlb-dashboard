@@ -49,24 +49,24 @@ useHead({
     <!-- Nav: single line, under 72px -->
     <header class="sticky top-0 z-40 border-b border-seam bg-field/85 backdrop-blur">
       <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <NuxtLink to="/" class="flex items-center gap-2.5">
+        <NuxtLinkLocale to="/" class="flex items-center gap-2.5">
           <span class="bulb inline-block h-3 w-3" aria-hidden="true" />
           <span class="nameplate text-sm tracking-[0.2em] text-chalk">Scoreboard</span>
-        </NuxtLink>
+        </NuxtLinkLocale>
         <div class="flex items-center gap-2">
-          <NuxtLink
+          <NuxtLinkLocale
             :to="`/team/${sampleTeamId}`"
             class="nameplate hidden px-3 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb sm:inline-block"
           >
             {{ $t('nav.exploreTeam') }}
-          </NuxtLink>
+          </NuxtLinkLocale>
           <LangSwitch />
-          <NuxtLink
+          <NuxtLinkLocale
             to="/standings"
             class="nameplate border border-bulb bg-bulb px-3.5 py-2 text-[11px] tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
           >
             {{ $t('nav.openBoard') }}
-          </NuxtLink>
+          </NuxtLinkLocale>
         </div>
       </nav>
     </header>
@@ -83,18 +83,18 @@ useHead({
           {{ $t('landing.heroSubtext') }}
         </p>
         <div class="mt-9 flex flex-wrap items-center gap-3">
-          <NuxtLink
+          <NuxtLinkLocale
             to="/standings"
             class="nameplate border border-bulb bg-bulb px-6 py-3 text-xs tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
           >
             {{ $t('nav.openBoard') }}
-          </NuxtLink>
-          <NuxtLink
+          </NuxtLinkLocale>
+          <NuxtLinkLocale
             :to="`/team/${sampleTeamId}`"
             class="nameplate border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
           >
             {{ $t('nav.exploreTeam') }}
-          </NuxtLink>
+          </NuxtLinkLocale>
         </div>
       </div>
 
@@ -135,9 +135,9 @@ useHead({
 
           <div class="flex items-center justify-between border-t border-seam bg-field-deep/50 px-4 py-2">
             <span class="nameplate text-[10px] tracking-[0.3em] text-chalk-dim">{{ $t('landing.boardLegend') }}</span>
-            <NuxtLink to="/standings" class="nameplate text-[10px] tracking-[0.2em] text-bulb transition-opacity hover:opacity-80">
+            <NuxtLinkLocale to="/standings" class="nameplate text-[10px] tracking-[0.2em] text-bulb transition-opacity hover:opacity-80">
               {{ $t('landing.boardSeeAll') }}
-            </NuxtLink>
+            </NuxtLinkLocale>
           </div>
         </div>
       </div>
@@ -222,12 +222,12 @@ useHead({
         <p class="reveal mx-auto mt-6 max-w-xl text-base leading-relaxed text-chalk-dim">
           {{ $t('landing.deepDiveBody') }}
         </p>
-        <NuxtLink
+        <NuxtLinkLocale
           :to="`/team/${sampleTeamId}`"
           class="reveal nameplate mt-9 inline-block border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
         >
           {{ $t('nav.exploreTeam') }}
-        </NuxtLink>
+        </NuxtLinkLocale>
       </div>
     </section>
 
@@ -239,12 +239,12 @@ useHead({
         <p class="reveal mx-auto mt-5 max-w-md text-base text-chalk-dim">
           {{ $t('landing.ctaBody') }}
         </p>
-        <NuxtLink
+        <NuxtLinkLocale
           to="/standings"
           class="reveal nameplate mt-10 inline-block border border-bulb bg-bulb px-8 py-4 text-sm tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
         >
           {{ $t('nav.openBoard') }}
-        </NuxtLink>
+        </NuxtLinkLocale>
       </div>
     </section>
 
