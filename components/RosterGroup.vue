@@ -20,8 +20,10 @@ defineEmits<{ select: [id: number] }>()
     <ul class="divide-y divide-seam">
       <li v-for="p in group.list" :key="p.personId">
         <button
-          class="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-field-deep focus:bg-field-deep focus:outline-none"
-          :class="selectedId === p.personId ? 'bg-bulb/5' : ''"
+          class="tap-target relative flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-field-deep focus-visible:bg-field-deep focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-bulb"
+          :class="selectedId === p.personId ? 'bg-panel-lit' : ''"
+          :aria-pressed="selectedId === p.personId"
+          :aria-current="selectedId === p.personId ? 'true' : undefined"
           @click="$emit('select', p.personId)"
         >
           <span
@@ -30,12 +32,12 @@ defineEmits<{ select: [id: number] }>()
           >
             {{ p.jersey || '–' }}
           </span>
-          <span class="nameplate flex-1 truncate text-[15px] tracking-wide text-chalk">
+          <span class="nameplate flex-1 truncate text-[15px] tracking-wide text-chalk" :title="p.name">
             {{ p.name }}
           </span>
           <span
             v-if="p.status !== 'Active'"
-            class="nameplate shrink-0 border border-line/50 px-1.5 py-0.5 text-[10px] tracking-wider text-clay/80"
+            class="nameplate shrink-0 border border-line/50 px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"
           >
             {{ rosterStatusLabel(p.status) }}
           </span>

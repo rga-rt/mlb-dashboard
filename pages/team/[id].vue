@@ -4,7 +4,18 @@ import { HITTING_COMPARE, PITCHING_COMPARE, compareToTeam } from '~/utils/player
 import { isActive } from '~/utils/roster'
 
 const route = useRoute()
+const router = useRouter()
 const teamId = computed(() => route.params.id as string)
+
+// Type-ahead over a ~40-name roster: match on name, jersey, or position.
+const rosterFilter = ref('')
+function matchesFilter(p: RosterPlayer): boolean {
+  const q = rosterFilter.value.trim().toLowerCase()
+  if (!q) return true
+  return p.name.toLowerCase().includes(q)
+    || String(p.jersey ?? '').includes(q)
+    || (p.positionAbbr?.toLowerCase().includes(q) ?? false)
+}
 
 // Season carries over from the board link (?season=YYYY) and can be changed
 // here. Clamp to the same last-five-years list the dropdown offers.
@@ -13,7 +24,7 @@ const qSeason = Number(route.query.season)
 const season = ref(seasons.includes(qSeason) ? qSeason : seasons[0])
 
 // Season is in the URL itself so useFetch refetches whenever it changes.
-const { data: roster, pending, error } = await useFetch<RosterResponse>(
+const { data: roster, pending, error, refresh } = await useFetch<RosterResponse>(
   () => `/api/roster/${teamId.value}?season=${season.value}`,
 )
 
@@ -42,9 +53,11 @@ function groupByPosition(players: RosterPlayer[]) {
 }
 
 // Split the full-season roster: the active 26 ("regular players") vs everyone
-// else (injured, optioned to the minors, traded away, ...).
-const activeGroups = computed(() => groupByPosition((roster.value?.players ?? []).filter(isActive)))
-const reserveGroups = computed(() => groupByPosition((roster.value?.players ?? []).filter((p: RosterPlayer) => !isActive(p))))
+// else (injured, optioned to the minors, traded away, ...). Both honor the
+// type-ahead filter.
+const activeGroups = computed(() => groupByPosition((roster.value?.players ?? []).filter((p: RosterPlayer) => isActive(p) && matchesFilter(p))))
+const reserveGroups = computed(() => groupByPosition((roster.value?.players ?? []).filter((p: RosterPlayer) => !isActive(p) && matchesFilter(p))))
+const hasFilterMatch = computed(() => activeGroups.value.length > 0 || reserveGroups.value.length > 0)
 
 // Selected player + their stats (fetched on demand).
 const selectedId = ref<number | null>(null)
@@ -52,12 +65,32 @@ const player = ref<PlayerResponse | null>(null)
 const advanced = ref<PlayerAdvancedResponse | null>(null)
 const playerPending = ref(false)
 const playerError = ref(false)
+// Advanced is a bonus panel: track its own pending/failed so a network error
+// reads as "retry", never as a silently missing panel (vs. genuine no-data).
+const advancedPending = ref(false)
+const advancedError = ref(false)
+
+// The detail column and a screen-reader status line: on mobile the panel
+// updates below the fold, so we scroll it into view and announce the change.
+const detailPanel = ref<HTMLElement | null>(null)
+// Advanced · Rank · Forecast are grouped under one disclosure, open by default;
+// collapsing is available but the analytics lead alongside the stat line.
+const analyticsOpen = ref(true)
+const selectedName = computed(() =>
+  roster.value?.players.find((p: RosterPlayer) => p.personId === selectedId.value)?.name ?? '')
+const statusMsg = computed(() => {
+  if (playerPending.value) return `Loading ${selectedName.value || 'player'}…`
+  if (playerError.value) return `Couldn’t load ${selectedName.value || 'that player'}`
+  if (player.value) return `${player.value.name} — stats loaded`
+  return ''
+})
 
 // Team-wide season stats for the "team rank" panel. Fetched once per
 // group+season and cached, so switching players doesn't refetch the pool.
 const teamStatsCache = ref<Record<string, TeamStatEntry[]>>({})
 const teamStats = ref<TeamStatEntry[] | null>(null)
 const teamStatsPending = ref(false)
+const teamStatsError = ref(false)
 
 // Rank a pitcher on pitching, everyone else on hitting — whichever line they
 // actually have.
@@ -89,6 +122,7 @@ const compareRows = computed(() => {
 
 async function loadTeamStats() {
   const group = compareGroup.value
+  teamStatsError.value = false
   if (!group) {
     teamStats.value = null
     return
@@ -108,6 +142,7 @@ async function loadTeamStats() {
     teamStats.value = res.players
   } catch {
     teamStats.value = null
+    teamStatsError.value = true
   } finally {
     teamStatsPending.value = false
   }
@@ -117,17 +152,24 @@ async function loadTeamStats() {
 // group, so key off compareGroup; a null result just hides the panel.
 async function loadAdvanced(id: number) {
   const group = compareGroup.value
+  advancedError.value = false
   if (!group) {
     advanced.value = null
     return
   }
+  advancedPending.value = true
   try {
     const res = await $fetch<PlayerAdvancedResponse>(`/api/player-advanced/${id}`, {
       query: { season: season.value, group, sportId: roster.value?.sportId ?? 1 },
     })
     if (selectedId.value === id) advanced.value = res
   } catch {
-    if (selectedId.value === id) advanced.value = null
+    if (selectedId.value === id) {
+      advanced.value = null
+      advancedError.value = true
+    }
+  } finally {
+    if (selectedId.value === id) advancedPending.value = false
   }
 }
 
@@ -136,13 +178,19 @@ function hideBrokenLogo(e: Event) {
   ;(e.target as HTMLImageElement).style.visibility = 'hidden'
 }
 
-async function selectPlayer(id: number) {
+async function selectPlayer(id: number, opts: { fromUrl?: boolean } = {}) {
   selectedId.value = id
   playerPending.value = true
   playerError.value = false
   player.value = null
   advanced.value = null
+  advancedError.value = false
   teamStats.value = null
+  teamStatsError.value = false
+  // Mirror the pick into the URL so it survives reload and is shareable, and
+  // bring the (mobile) detail panel into view — its skeleton is the feedback.
+  if (!opts.fromUrl) syncUrl('push')
+  revealDetail()
   try {
     player.value = await $fetch<PlayerResponse>(`/api/player/${id}`, {
       query: { season: season.value, sportId: roster.value?.sportId ?? 1 },
@@ -159,11 +207,69 @@ async function selectPlayer(id: number) {
   }
 }
 
+function deselect(opts: { fromUrl?: boolean } = {}) {
+  selectedId.value = null
+  player.value = null
+  advanced.value = null
+  advancedError.value = false
+  teamStats.value = null
+  teamStatsError.value = false
+  playerError.value = false
+  if (!opts.fromUrl) syncUrl('push')
+}
+
+// The lg:sticky panel stays visible on desktop; only the stacked mobile layout
+// hides the update below the fold, so scroll to it there (honoring reduced-motion).
+function revealDetail() {
+  if (!import.meta.client) return
+  if (window.matchMedia('(min-width: 1024px)').matches) return
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  nextTick(() => detailPanel.value?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }))
+}
+
+// Whole view state (season + open player) lives in the query string so links
+// are shareable and the browser back button steps through selections.
+function buildQuery(): Record<string, string> {
+  const q: Record<string, string> = { season: String(season.value) }
+  if (selectedId.value != null) q.player = String(selectedId.value)
+  return q
+}
+function syncUrl(mode: 'push' | 'replace') {
+  router[mode]({ query: buildQuery() })
+}
+
 // Changing the season refetches the roster (via useFetch) — reload the open
-// player's stats for that season too, keeping the selection.
+// player's stats for that season too, keeping the selection. Season swaps
+// replace (not push) so they don't stack history entries.
 watch(season, () => {
-  if (selectedId.value !== null) selectPlayer(selectedId.value)
+  if (selectedId.value !== null) selectPlayer(selectedId.value, { fromUrl: true })
+  syncUrl('replace')
 })
+
+// Reconcile browser back/forward: the URL is the source of truth for selection.
+watch(() => route.query.player, (val: unknown) => {
+  const id = Number(val)
+  if (val && Number.isFinite(id)) {
+    if (id !== selectedId.value) selectPlayer(id, { fromUrl: true })
+  } else if (selectedId.value !== null) {
+    deselect({ fromUrl: true })
+  }
+})
+watch(() => route.query.season, (val: unknown) => {
+  const n = Number(val)
+  if (val && seasons.includes(n) && n !== season.value) season.value = n
+})
+
+// Hydrate a shared/bookmarked selection once mounted (player stats are
+// client-fetched, so this stays out of SSR).
+onMounted(() => {
+  const id = Number(route.query.player)
+  if (route.query.player && Number.isFinite(id)) selectPlayer(id, { fromUrl: true })
+})
+
+function onAnalyticsToggle(e: Event) {
+  analyticsOpen.value = (e.target as HTMLDetailsElement).open
+}
 </script>
 
 <template>
@@ -175,9 +281,16 @@ watch(season, () => {
       ← Back to the board
     </NuxtLink>
 
-    <div v-if="error" class="border-l-4 border-clay border-y border-r border-y-seam border-r-seam bg-panel px-5 py-6">
+    <div v-if="error" class="border border-clay/50 bg-panel px-5 py-6">
       <h1 class="nameplate text-lg text-clay">Couldn’t load that roster</h1>
       <p class="mt-1 text-sm text-chalk-dim">The team id may be wrong, or the API is unreachable.</p>
+      <button
+        type="button"
+        class="nameplate mt-4 border border-line px-3 py-1.5 text-xs tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus-visible:border-bulb focus-visible:text-bulb focus:outline-none"
+        @click="refresh()"
+      >
+        Retry
+      </button>
     </div>
 
     <div v-else>
@@ -218,8 +331,27 @@ watch(season, () => {
           </div>
 
           <template v-else>
+            <div class="relative">
+              <label class="sr-only" for="roster-filter">Filter roster</label>
+              <input
+                id="roster-filter"
+                v-model="rosterFilter"
+                type="search"
+                inputmode="search"
+                placeholder="Filter by name, number, or position…"
+                class="nameplate w-full border border-seam bg-field-deep px-3 py-2.5 text-xs tracking-wider text-chalk placeholder:text-chalk-dim/70 placeholder:tracking-normal placeholder:normal-case transition-colors hover:border-line focus:border-bulb focus:outline-none"
+              >
+            </div>
+
+            <p
+              v-if="rosterFilter.trim() && !hasFilterMatch"
+              class="border border-dashed border-line px-4 py-6 text-center text-sm text-chalk-dim"
+            >
+              No one on the roster matches “{{ rosterFilter.trim() }}”.
+            </p>
+
             <!-- Active roster: the regular players -->
-            <div class="space-y-5">
+            <div v-if="activeGroups.length" class="space-y-5">
               <div class="flex items-center gap-3">
                 <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
                 <h2 class="nameplate text-xs tracking-[0.25em] text-chalk-dim">Active Roster</h2>
@@ -254,7 +386,11 @@ watch(season, () => {
 
         <!-- Detail panel: selected player's stat lines. Pinned and independently
              scrollable on wide screens so it doesn't run past the viewport. -->
-        <div class="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1">
+        <div
+          ref="detailPanel"
+          class="scroll-mt-4 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1"
+        >
+          <p class="sr-only" role="status" aria-live="polite">{{ statusMsg }}</p>
           <div
             v-if="!selectedId"
             class="flex h-full min-h-48 items-center justify-center border border-dashed border-line px-6 py-10 text-center"
@@ -272,52 +408,96 @@ watch(season, () => {
 
             <div
               v-else-if="playerError"
-              class="border-l-4 border-clay border-y border-r border-y-seam border-r-seam bg-panel px-5 py-6 text-sm text-chalk-dim"
+              class="border border-clay/50 bg-panel px-5 py-6"
             >
-              Couldn’t load that player’s stats. Try another, or refresh.
+              <p class="text-sm text-chalk-dim">Couldn’t load that player’s stats.</p>
+              <button
+                type="button"
+                class="nameplate mt-4 border border-line px-3 py-1.5 text-xs tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus-visible:border-bulb focus-visible:text-bulb focus:outline-none"
+                @click="selectedId && selectPlayer(selectedId, { fromUrl: true })"
+              >
+                Retry
+              </button>
             </div>
 
             <div v-else-if="player">
-              <div class="mb-4 border-l-2 border-bulb pl-3">
-                <h3 class="nameplate text-2xl leading-none text-chalk">{{ player.name }}</h3>
-                <p class="mt-1 text-xs text-chalk-dim">
-                  {{ player.position }}
-                  <template v-if="player.bats || player.throws">
-                    · B/T {{ player.bats ?? '–' }}/{{ player.throws ?? '–' }}
-                  </template>
-                  <template v-if="player.teamName"> · {{ player.teamName }}</template>
-                </p>
+              <div class="mb-5 flex items-start justify-between gap-4 border-b border-line pb-3">
+                <div class="min-w-0">
+                  <h3 class="nameplate text-3xl leading-[0.95] text-chalk">{{ player.name }}</h3>
+                  <p class="mt-1.5 text-xs text-chalk-dim">
+                    {{ player.position }}
+                    <template v-if="player.bats || player.throws">
+                      · B/T {{ player.bats ?? '–' }}/{{ player.throws ?? '–' }}
+                    </template>
+                    <template v-if="player.teamName"> · {{ player.teamName }}</template>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Close player detail"
+                  class="nameplate tap-target relative shrink-0 border border-line px-2.5 py-1 text-[11px] tracking-wider text-chalk-dim transition-colors hover:border-bulb hover:text-bulb focus-visible:border-bulb focus-visible:text-bulb focus:outline-none"
+                  @click="deselect()"
+                >
+                  Close
+                </button>
               </div>
+
               <PlayerStatLine :player="player" />
 
-              <AdvancedPanel
-                v-if="advanced"
-                class="mt-6"
-                :group="advanced.group"
-                :year="advanced.year"
-                :sabermetrics="advanced.sabermetrics"
-                :standard="advanced.standard"
-                :expected="advanced.expected"
-              />
-
-              <div v-if="teamStatsPending" class="mt-6 h-40 animate-pulse border border-seam bg-panel/50" />
-              <TeamRankPanel
-                v-else-if="compareRows.length"
-                class="mt-6"
-                :rows="compareRows"
-                :team-name="roster?.teamName ?? 'team'"
-                :group="compareGroup ?? ''"
-              />
-
-              <ForecastSection
+              <!-- Advanced · Rank · Forecast grouped under one disclosure, open by
+                   default; collapsible so a scanner can trim the column, and the
+                   open state persists across picks. -->
+              <details
                 v-if="compareGroup"
-                :key="`${player.personId}-${compareGroup}`"
-                class="mt-6"
-                :person-id="player.personId"
-                :group="compareGroup"
-                :sport-id="roster?.sportId ?? 1"
-                :projection="advanced?.projection"
-              />
+                class="group/analytics mt-6"
+                :open="analyticsOpen"
+                @toggle="onAnalyticsToggle"
+              >
+                <summary
+                  class="nameplate flex cursor-pointer list-none items-center gap-2 border-b border-seam pb-2 text-[11px] tracking-[0.25em] text-chalk-dim transition-colors hover:text-chalk focus-visible:text-chalk focus-visible:outline-none"
+                >
+                  <span class="text-[9px] leading-none transition-transform group-open/analytics:rotate-90" aria-hidden="true">▸</span>
+                  Advanced · Rank · Forecast
+                </summary>
+
+                <div class="mt-4 space-y-6">
+                  <div v-if="advancedPending" class="h-40 animate-pulse border border-seam bg-panel/50" />
+                  <PanelRetry
+                    v-else-if="advancedError"
+                    label="Advanced stats didn’t load."
+                    @retry="loadAdvanced(player.personId)"
+                  />
+                  <AdvancedPanel
+                    v-else-if="advanced"
+                    :group="advanced.group"
+                    :year="advanced.year"
+                    :sabermetrics="advanced.sabermetrics"
+                    :standard="advanced.standard"
+                    :expected="advanced.expected"
+                  />
+
+                  <div v-if="teamStatsPending" class="h-40 animate-pulse border border-seam bg-panel/50" />
+                  <PanelRetry
+                    v-else-if="teamStatsError"
+                    label="Team ranks didn’t load."
+                    @retry="loadTeamStats()"
+                  />
+                  <TeamRankPanel
+                    v-else-if="compareRows.length"
+                    :rows="compareRows"
+                    :team-name="roster?.teamName ?? 'team'"
+                    :group="compareGroup ?? ''"
+                  />
+
+                  <ForecastSection
+                    :key="`${player.personId}-${compareGroup}`"
+                    :person-id="player.personId"
+                    :group="compareGroup"
+                    :sport-id="roster?.sportId ?? 1"
+                    :projection="advanced?.projection"
+                  />
+                </div>
+              </details>
             </div>
           </div>
         </div>
