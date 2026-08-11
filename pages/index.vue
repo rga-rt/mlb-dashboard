@@ -97,7 +97,7 @@ const LEGEND = [
         <p
           v-if="postedLabel"
           aria-live="polite"
-          class="nameplate text-[10px] tracking-wider transition-colors duration-500"
+          class="nameplate text-[11px] tracking-wider transition-colors duration-500"
           :class="justUpdated ? 'text-bulb' : 'text-chalk-dim'"
         >
           Posted {{ postedLabel }}

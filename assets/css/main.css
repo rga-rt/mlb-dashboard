@@ -85,6 +85,23 @@ body {
   text-shadow: 0 0 10px rgba(240, 182, 78, 0.35);
 }
 
+/*
+  Enlarge a control's touch target to a comfortable 44px without reserving any
+  layout width: a transparent overlay extends the hit area past the visible
+  glyph. Coarse-pointer only, so the mouse layout is untouched. The host element
+  must be positioned (the follow star already is `relative z-10`).
+*/
+@media (pointer: coarse) {
+  .tap-target {
+    min-height: 2.75rem;
+  }
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    inset: 0 -0.75rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;

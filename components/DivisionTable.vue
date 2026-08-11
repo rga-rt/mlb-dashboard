@@ -44,7 +44,7 @@ function hideBrokenLogo(e: Event) {
         {{ division.divisionName }}
       </h2>
       <span
-        class="nameplate border border-line px-1.5 py-0.5 text-[10px] tracking-widest text-chalk-dim"
+        class="nameplate border border-line px-1.5 py-0.5 text-[11px] tracking-widest text-chalk-dim"
       >
         {{ division.league }}
       </span>
@@ -81,7 +81,7 @@ function hideBrokenLogo(e: Event) {
         (standings rank) is the reset.
       -->
       <thead>
-        <tr class="nameplate border-b border-line/50 text-[10px] tracking-wider text-chalk-dim">
+        <tr class="nameplate border-b border-line/50 text-[11px] tracking-wider text-chalk-dim">
           <th
             v-for="col in COLUMNS"
             :key="col.key"
@@ -107,7 +107,7 @@ function hideBrokenLogo(e: Event) {
               <span
                 v-else
                 aria-hidden="true"
-                class="text-[8px] leading-none opacity-0 transition-opacity group-hover/sort:opacity-60 group-focus-visible/sort:opacity-60"
+                class="text-[8px] leading-none opacity-0 transition-opacity group-hover/sort:opacity-60 group-focus-visible/sort:opacity-60 pointer-coarse:opacity-40"
               >{{ DEFAULT_DIR[col.key] === 'asc' ? '▲' : '▼' }}</span>
             </button>
           </th>
@@ -125,7 +125,12 @@ function hideBrokenLogo(e: Event) {
           <!-- Rank number, shown for every row so the column stays uniform and
                screen readers announce the leader's rank too. -->
           <td class="py-2.5 pl-3 text-center align-middle sm:pl-4">
-            <span class="digit text-xs text-chalk-dim">{{ team.divisionRank }}</span>
+            <!-- Full chalk on the leader's lighter panel-lit row to hold AA
+                 contrast, matching the losses/GB treatment; dim elsewhere. -->
+            <span
+              class="digit text-xs"
+              :class="team.divisionLeader ? 'text-chalk' : 'text-chalk-dim'"
+            >{{ team.divisionRank }}</span>
           </td>
 
           <!-- Team name is the row's header. The visible name truncates on its
@@ -166,7 +171,7 @@ function hideBrokenLogo(e: Event) {
               -->
               <button
                 type="button"
-                class="relative z-10 -my-1 inline-flex shrink-0 cursor-pointer items-center justify-center px-1.5 py-1 text-sm leading-none transition-opacity duration-150 focus:outline-none focus-visible:opacity-100 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+                class="tap-target relative z-10 -my-1 inline-flex shrink-0 cursor-pointer items-center justify-center px-1.5 py-1 text-sm leading-none transition-opacity duration-150 focus:outline-none focus-visible:opacity-100"
                 :class="isPinned(team.teamId)
                   ? 'text-bulb opacity-100'
                   : 'text-chalk-dim opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-coarse:opacity-50'"
