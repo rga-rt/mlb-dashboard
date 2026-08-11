@@ -323,7 +323,7 @@ function onAnalyticsToggle(e: Event) {
 
       <BallparkPanel v-if="teamInfo" :info="teamInfo" class="mb-6" />
 
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <!-- Lineup card: grouped roster -->
         <div class="space-y-6">
           <div v-if="pending" class="space-y-3">
