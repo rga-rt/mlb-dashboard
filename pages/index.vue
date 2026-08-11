@@ -60,13 +60,13 @@ useHead({
           >
             {{ $t('nav.exploreTeam') }}
           </NuxtLinkLocale>
-          <LangSwitch />
           <NuxtLinkLocale
             to="/standings"
             class="nameplate border border-bulb bg-bulb px-3.5 py-2 text-[11px] tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
           >
             {{ $t('nav.openBoard') }}
           </NuxtLinkLocale>
+          <LangSwitch class="lg:ml-4" />
         </div>
       </nav>
     </header>
