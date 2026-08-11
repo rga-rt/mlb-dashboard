@@ -275,7 +275,7 @@ function onAnalyticsToggle(e: Event) {
 <template>
   <div>
     <NuxtLink
-      to="/"
+      to="/standings"
       class="nameplate mb-6 inline-flex items-center gap-2 text-xs tracking-wider text-chalk-dim transition-colors hover:text-bulb"
     >
       ← Back to the board
