@@ -1,5 +1,6 @@
 # The Scoreboard — MLB Stats Dashboard
 
+[![CI](https://github.com/rga-rt/mlb-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/rga-rt/mlb-dashboard/actions/workflows/ci.yml)
 ![Nuxt](https://img.shields.io/badge/Nuxt-3-00DC82?logo=nuxtdotjs&logoColor=white)
 ![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vuedotjs&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)
