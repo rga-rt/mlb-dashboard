@@ -5,12 +5,23 @@ const props = defineProps<{ game: ScoreboardGame }>()
 
 const { t } = useI18n()
 
-// A game's start time, shown for scheduled games as the reader's local clock.
-const startLabel = computed(() =>
-  props.game.startTime
-    ? new Date(props.game.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-    : t('scoreboard.tbd'),
-)
+// A game's start time is the viewer's local clock, so it can only be resolved in
+// the browser — the server's timezone would differ. We hold off until mounted so
+// SSR and the first client render agree (both empty), then fill in the localized
+// time with a short zone label (e.g. "1:40 PM CDT") once we're on the client.
+const mounted = ref(false)
+onMounted(() => {
+  mounted.value = true
+})
+const startLabel = computed(() => {
+  if (!props.game.startTime) return t('scoreboard.tbd')
+  if (!mounted.value) return '' // filled in after mount; avoids a TZ hydration mismatch
+  return new Date(props.game.startTime).toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  })
+})
 
 // Half-inning arrow: ▲ top, ▼ bottom; middle/end fall back to a dash so the
 // slot never renders a misleading arrow between halves.
