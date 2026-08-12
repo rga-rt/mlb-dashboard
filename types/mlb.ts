@@ -212,6 +212,7 @@ export interface UpcomingResponse {
 // move link to the player's stats.
 export interface Transaction {
   id: number
+  league: 'MLB' | 'LMB' | 'LMP' // which league's wire this move came off
   date: string // YYYY-MM-DD
   type: string // typeDesc, e.g. "Trade", "Signed", "Status Change"
   typeCode: string // e.g. "TR", "SC", "OPT"

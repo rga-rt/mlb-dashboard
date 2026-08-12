@@ -264,11 +264,12 @@ export function sortScoreboard(games: ScoreboardGame[]): ScoreboardGame[] {
  * the acting/destination club (the team that made the move); `person` carries
  * the player's id + name so the move can link to their stats.
  */
-export function flattenTransaction(tx: any): Transaction {
+export function flattenTransaction(tx: any, league: Transaction['league']): Transaction {
   const person = pick(tx, 'person', {}) as any
   const toTeam = pick(tx, 'toTeam', {}) as any
   return {
     id: pick<number>(tx, 'id', 0) as number,
+    league,
     date: pick<string>(tx, 'date', '') as string,
     type: pick<string>(tx, 'typeDesc', '') as string,
     typeCode: pick<string>(tx, 'typeCode', '') as string,

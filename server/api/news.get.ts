@@ -1,11 +1,12 @@
 import type { NewsDay, NewsResponse, Transaction } from '~/types/mlb'
-import { flattenTransaction, mlbFetch, pick } from '~/server/utils/mlb'
+import { SCOREBOARD_SPORTS, flattenTransaction, mlbFetch, pick } from '~/server/utils/mlb'
 
 // GET /api/news?days=3
-// Recent MLB roster transactions (all types) over the last N days (default 3,
-// clamped 1-7), grouped by date newest-first. Straight from the /transactions
-// feed; each move keeps its ready-made description plus player/team ids so the
-// name can link to the player's stats. MLB-only — the feed is MLB-centric.
+// Recent roster transactions (all types) over the last N days (default 3,
+// clamped 1-7) across MLB and the Mexican leagues (LMB, LMP), grouped by date
+// newest-first. One /transactions call per league in parallel; a league that's
+// dark or errors just drops out. Each move keeps its ready-made description plus
+// player/team ids so the name can link to the player's stats.
 export default defineEventHandler(async (event): Promise<NewsResponse> => {
   const q = getQuery(event)
   // Clamp the window: "all transactions" is high-volume, so keep it bounded.
@@ -13,20 +14,23 @@ export default defineEventHandler(async (event): Promise<NewsResponse> => {
   const end = today()
   const start = addDays(end, -(span - 1))
 
-  // Fail soft: an unreachable feed yields an empty board, not a 500.
-  let raw: any
-  try {
-    raw = await mlbFetch<any>('/transactions', { sportId: 1, startDate: start, endDate: end })
-  } catch {
-    raw = {}
-  }
+  const results = await Promise.allSettled(
+    SCOREBOARD_SPORTS.map(sport =>
+      mlbFetch<any>('/transactions', { sportId: sport.id, startDate: start, endDate: end })
+        .then(raw => ({ raw, sport })),
+    ),
+  )
 
   const byDate = new Map<string, Transaction[]>()
-  for (const tx of (pick(raw, 'transactions', []) as any[])) {
-    const flat = flattenTransaction(tx)
-    if (!flat.date) continue
-    if (!byDate.has(flat.date)) byDate.set(flat.date, [])
-    byDate.get(flat.date)!.push(flat)
+  for (const r of results) {
+    if (r.status !== 'fulfilled') continue
+    const { raw, sport } = r.value
+    for (const tx of (pick(raw, 'transactions', []) as any[])) {
+      const flat = flattenTransaction(tx, sport.label)
+      if (!flat.date) continue
+      if (!byDate.has(flat.date)) byDate.set(flat.date, [])
+      byDate.get(flat.date)!.push(flat)
+    }
   }
 
   const days: NewsDay[] = [...byDate.entries()]

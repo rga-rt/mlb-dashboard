@@ -27,7 +27,9 @@ const link = computed(() =>
 </script>
 
 <template>
-  <div class="flex gap-3 px-1 py-2.5">
+  <div class="flex gap-2.5 px-1 py-2.5">
+    <!-- League tag: which wire this came off (MLB / LMB / LMP) -->
+    <span class="nameplate mt-1 w-9 shrink-0 text-[9px] tracking-widest text-chalk-dim/60">{{ tx.league }}</span>
     <span
       class="nameplate mt-0.5 h-fit shrink-0 border px-1.5 py-0.5 text-[10px] tracking-wider"
       :class="injury ? 'border-clay/60 text-clay' : 'border-line/50 text-chalk-dim'"

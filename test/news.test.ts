@@ -12,9 +12,10 @@ describe('flattenTransaction', () => {
       description: 'Boston Red Sox signed LHP Devin Futrell.',
       person: { id: 690001, fullName: 'Devin Futrell' },
       toTeam: { id: 111, name: 'Boston Red Sox' },
-    })
+    }, 'MLB')
     expect(tx).toEqual({
       id: 100,
+      league: 'MLB',
       date: '2024-07-30',
       type: 'Signed as Free Agent',
       typeCode: 'SFA',
@@ -26,8 +27,21 @@ describe('flattenTransaction', () => {
     })
   })
 
+  it('tags the move with the league it came from', () => {
+    const tx = flattenTransaction({
+      id: 7,
+      date: '2024-06-15',
+      typeCode: 'REL',
+      typeDesc: 'Released',
+      description: 'Diablos Rojos del Mexico released C Xavier Fernández.',
+      person: { id: 500, fullName: 'Xavier Fernández' },
+      toTeam: { id: 5000, name: 'Diablos Rojos del Mexico' },
+    }, 'LMB')
+    expect(tx.league).toBe('LMB')
+  })
+
   it('leaves player/team ids null when the feed omits them', () => {
-    const tx = flattenTransaction({ id: 1, date: '2024-07-30', typeCode: 'SC', typeDesc: 'Status Change', description: 'x' })
+    const tx = flattenTransaction({ id: 1, date: '2024-07-30', typeCode: 'SC', typeDesc: 'Status Change', description: 'x' }, 'MLB')
     expect(tx.playerId).toBeNull()
     expect(tx.teamId).toBeNull()
     expect(tx.playerName).toBeNull()
