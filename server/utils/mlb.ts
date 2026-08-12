@@ -1,7 +1,15 @@
 // Server-only helpers for talking to the MLB Stats API.
 // Runs inside Nitro (server), so there is no CORS restriction here — the
 // browser only ever talks to our own /api routes.
-import type { Division, League, TeamRecord } from '~/types/mlb'
+import type {
+  Division,
+  GameSide,
+  GameStatus,
+  League,
+  LiveState,
+  ScoreboardGame,
+  TeamRecord,
+} from '~/types/mlb'
 
 /** Fetch a path off the MLB base URL and return parsed JSON. */
 export async function mlbFetch<T = any>(
@@ -105,4 +113,106 @@ export function orderDivisions(divisions: Division[]): Division[] {
   return [...divisions].sort(
     (a, b) => DIVISION_ORDER.indexOf(a.divisionId) - DIVISION_ORDER.indexOf(b.divisionId),
   )
+}
+
+// --- Live Today (scoreboard) ---------------------------------------------
+
+// The leagues the scoreboard covers, each its own sportId in the schedule feed.
+// MLB=1, Mexican League (LMB)=23, LMP=17 — same ids the roster/stats routes use.
+export const SCOREBOARD_SPORTS = [
+  { id: 1, label: 'MLB' as const },
+  { id: 23, label: 'LMB' as const },
+  { id: 17, label: 'LMP' as const },
+]
+
+/**
+ * Map MLB's `status.abstractGameState` to our small enum. The feed reports
+ * "Live" / "Final" / "Preview"; anything else (Suspended, Postponed, …) lands
+ * in "other" so the card can still show a status detail without a live block.
+ */
+export function gameStatus(abstractGameState: string | null): GameStatus {
+  switch (abstractGameState) {
+    case 'Live': return 'live'
+    case 'Final': return 'final'
+    case 'Preview': return 'scheduled'
+    default: return 'other'
+  }
+}
+
+/** Read a side's flat shape off a raw schedule `game.teams.home|away` node. */
+function flattenSide(rawSide: any): GameSide {
+  const team = pick(rawSide, 'team', {}) as any
+  const probable = pick(rawSide, 'probablePitcher', null) as any
+  return {
+    teamId: pick<number>(team, 'id', 0) as number,
+    name: pick<string>(team, 'name', 'TBD') as string,
+    // Abbreviation isn't always hydrated for Mexican-league clubs; fall back to
+    // the full name so the row never renders blank.
+    abbr: (pick<string>(team, 'abbreviation', null)
+      ?? pick<string>(team, 'name', 'TBD')) as string,
+    runs: pick<number>(rawSide, 'score', null),
+    probablePitcher: pick<string>(probable, 'fullName', null),
+  }
+}
+
+/**
+ * Flatten one raw schedule game (hydrated with linescore, team, probablePitcher)
+ * into our ScoreboardGame. The live block is only built for in-progress games;
+ * runner presence is derived from whether offense.first|second|third exists.
+ */
+export function flattenScoreboardGame(
+  game: any,
+  sport: ScoreboardGame['sport'],
+): ScoreboardGame {
+  const status = gameStatus(pick<string>(game?.status, 'abstractGameState', null))
+  const line = pick(game, 'linescore', {}) as any
+  const offense = pick(line, 'offense', {}) as any
+  const defense = pick(line, 'defense', {}) as any
+
+  let live: LiveState | null = null
+  if (status === 'live') {
+    live = {
+      inning: pick<number>(line, 'currentInning', 0) as number,
+      inningState: pick<string>(line, 'inningState', '') as string,
+      balls: pick<number>(line, 'balls', 0) as number,
+      strikes: pick<number>(line, 'strikes', 0) as number,
+      outs: pick<number>(line, 'outs', 0) as number,
+      onFirst: pick(offense, 'first', null) != null,
+      onSecond: pick(offense, 'second', null) != null,
+      onThird: pick(offense, 'third', null) != null,
+      currentPitcher: pick<string>(pick(defense, 'pitcher', {}), 'fullName', null),
+      currentBatter: pick<string>(pick(offense, 'batter', {}), 'fullName', null),
+    }
+  }
+
+  return {
+    gamePk: pick<number>(game, 'gamePk', 0) as number,
+    status,
+    statusDetail: pick<string>(game?.status, 'detailedState', '') as string,
+    startTime: pick<string>(game, 'gameDate', null),
+    sport,
+    home: flattenSide(pick(game?.teams, 'home', {})),
+    away: flattenSide(pick(game?.teams, 'away', {})),
+    live,
+  }
+}
+
+// Board order for the day's games: live first, then scheduled (earliest start
+// first), then finals, then anything else. Used to key each group's rank.
+const STATUS_ORDER: Record<GameStatus, number> = {
+  live: 0,
+  scheduled: 1,
+  final: 2,
+  other: 3,
+}
+
+/** Sort the day's games: live first, upcoming by start time, finals last. */
+export function sortScoreboard(games: ScoreboardGame[]): ScoreboardGame[] {
+  return [...games].sort((a, b) => {
+    const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
+    if (byStatus !== 0) return byStatus
+    // Within scheduled games, earliest first; elsewhere start time is a stable
+    // tiebreak.
+    return (a.startTime ?? '').localeCompare(b.startTime ?? '')
+  })
 }

@@ -15,3 +15,6 @@ dist
 
 # Impeccable design-tooling: critique output, hook cache, and detector config
 .impeccable/
+
+# Local design/spec notes — kept off the public tree like the other tooling
+docs/

@@ -5,7 +5,31 @@
   },
   "nav": {
     "openBoard": "Open the board",
-    "exploreTeam": "Explore a team"
+    "exploreTeam": "Explore a team",
+    "primary": "Primary",
+    "board": "Board",
+    "liveToday": "Live Today"
+  },
+  "scoreboard": {
+    "eyebrow": "Around the League",
+    "title": "Live Today",
+    "intro": "Every game on today's card — live scores, the count, who's on and who's up. The board refreshes itself every 30 seconds while this tab is open.",
+    "live": "Live Now",
+    "upcoming": "Upcoming",
+    "final": "Final",
+    "liveTag": "LIVE",
+    "finalTag": "FINAL",
+    "pitcher": "P",
+    "batter": "AB",
+    "probable": "Probable pitchers",
+    "tbd": "TBD",
+    "basesEmpty": "bases empty",
+    "liveSummary": "{balls} balls, {strikes} strikes, {outs} out, {bases}.",
+    "emptyTitle": "No games on the card today",
+    "emptyBody": "Nothing is scheduled for today, or the first pitch hasn't been posted yet. Check back closer to game time.",
+    "refreshFailed": "Couldn't refresh just now — showing the board as last loaded.",
+    "errTitle": "The board went dark",
+    "errBody": "Couldn't reach the MLB API just now. Check your connection and try again."
   },
   "masthead": {
     "subtitle": "MLB · Standings · Rosters · Stats"
