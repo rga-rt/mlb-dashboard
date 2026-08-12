@@ -181,6 +181,7 @@ function flattenSide(rawSide: any): GameSide {
       ?? pick<string>(team, 'name', 'TBD')) as string,
     runs: pick<number>(rawSide, 'score', null),
     probablePitcher: pick<string>(probable, 'fullName', null),
+    probablePitcherId: pick<number>(probable, 'id', null),
   }
 }
 

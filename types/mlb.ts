@@ -144,6 +144,7 @@ export interface GameSide {
   abbr: string // e.g. "NYY" (falls back to name when the feed omits it)
   runs: number | null // null before first pitch
   probablePitcher: string | null // scheduled games only
+  probablePitcherId: number | null // personId, for linking to the player's stats
 }
 
 // A single TV / radio / streaming broadcast for a game. `medium` normalizes the

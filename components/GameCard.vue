@@ -201,8 +201,18 @@ function hideBrokenLogo(e: Event) {
       class="border-t border-seam bg-field-deep/50 px-3 py-2.5 text-[11px] leading-snug text-chalk-dim"
     >
       <p class="nameplate mb-1 text-[9px] tracking-widest text-chalk-dim">{{ $t('scoreboard.probable') }}</p>
-      <p class="truncate">{{ game.away.abbr }} · {{ game.away.probablePitcher ?? $t('scoreboard.tbd') }}</p>
-      <p class="truncate">{{ game.home.abbr }} · {{ game.home.probablePitcher ?? $t('scoreboard.tbd') }}</p>
+      <p v-for="side in (['away', 'home'] as const)" :key="side" class="truncate">
+        {{ game[side].abbr }} ·
+        <!-- Link the probable to their stats on the team page (deep-linked via
+             ?player=id) when we have their personId; plain text otherwise. -->
+        <NuxtLinkLocale
+          v-if="game[side].probablePitcher && game[side].probablePitcherId != null"
+          :to="{ path: `/team/${game[side].teamId}`, query: { player: String(game[side].probablePitcherId) } }"
+          class="underline decoration-dotted decoration-chalk-dim/50 underline-offset-2 transition-colors hover:text-bulb hover:decoration-bulb focus-visible:text-bulb focus:outline-none"
+          :aria-label="$t('scoreboard.viewPitcher', { name: game[side].probablePitcher })"
+        >{{ game[side].probablePitcher }}</NuxtLinkLocale>
+        <template v-else>{{ game[side].probablePitcher ?? $t('scoreboard.tbd') }}</template>
+      </p>
     </div>
 
     <!-- Where to watch/listen: its own strip so it shows for any game that has

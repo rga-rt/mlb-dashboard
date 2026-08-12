@@ -110,7 +110,7 @@ describe('flattenScoreboardGame', () => {
       gameDate: '2026-08-12T23:05:00Z',
       status: { abstractGameState: 'Preview', detailedState: 'Scheduled' },
       teams: {
-        away: { team: { id: 147, name: 'New York Yankees', abbreviation: 'NYY' }, probablePitcher: { fullName: 'Carlos Rodón' } },
+        away: { team: { id: 147, name: 'New York Yankees', abbreviation: 'NYY' }, probablePitcher: { id: 605400, fullName: 'Carlos Rodón' } },
         home: { team: { id: 111, name: 'Boston Red Sox', abbreviation: 'BOS' } },
       },
     }, 'MLB')
@@ -118,7 +118,9 @@ describe('flattenScoreboardGame', () => {
     expect(g.live).toBeNull()
     expect(g.away.runs).toBeNull()
     expect(g.away.probablePitcher).toBe('Carlos Rodón')
+    expect(g.away.probablePitcherId).toBe(605400)
     expect(g.home.probablePitcher).toBeNull()
+    expect(g.home.probablePitcherId).toBeNull()
   })
 
   it('falls back to the full name when a club has no abbreviation', () => {
@@ -142,8 +144,8 @@ describe('sortScoreboard', () => {
     statusDetail: '',
     startTime,
     sport: 'MLB',
-    home: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null },
-    away: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null },
+    home: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null, probablePitcherId: null },
+    away: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null, probablePitcherId: null },
     live: null,
     broadcasts: [],
     freeGame: false,

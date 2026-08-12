@@ -38,6 +38,7 @@
     "watchFree": "Free · MLB.TV",
     "watchFreeLabel": "Watch {matchup} free on MLB.TV",
     "probable": "Probable pitchers",
+    "viewPitcher": "View {name}'s stats",
     "tbd": "TBD",
     "basesEmpty": "bases empty",
     "liveSummary": "{balls} balls, {strikes} strikes, {outs} out, {bases}.",
