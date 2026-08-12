@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Division, StandingsResponse, TeamRecord } from '~/types/mlb'
+import type { Division, ScoreboardGame, ScoreboardResponse, StandingsResponse, TeamRecord } from '~/types/mlb'
 
 // The landing is the front door: it renders bare (its own nav + footer),
 // outside the app masthead/footer shell that wraps the board and team pages.
@@ -33,6 +33,17 @@ const marqueeTeams = computed(() => [...allTeams.value, ...allTeams.value]) // d
 const feedLogos = computed(() => allTeams.value.slice(0, 5))
 const sampleTeamId = computed(() => heroDivision.value?.teams[0]?.teamId ?? 147)
 
+// Today's live games power the "on the field right now" strip. Same fail-soft
+// contract as the hero board: if the feed is unreachable, `scoreboard` stays
+// null and the section hides itself entirely. When the feed answers but nothing
+// is in progress, the section shows a quiet line pointing to the full board.
+const { data: scoreboard } = await useFetch<ScoreboardResponse>('/api/scoreboard')
+const liveGames = computed<ScoreboardGame[]>(
+  () => (scoreboard.value?.games ?? []).filter(g => g.status === 'live'),
+)
+// Keep the landing tight: show at most three live cards, link out for the rest.
+const livePreview = computed(() => liveGames.value.slice(0, 3))
+
 useHead({
   title: 'Scoreboard - Live MLB standings & player stats',
   meta: [
@@ -59,6 +70,13 @@ useHead({
             class="nameplate hidden px-3 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb sm:inline-block"
           >
             {{ $t('nav.exploreTeam') }}
+          </NuxtLinkLocale>
+          <NuxtLinkLocale
+            to="/scoreboard"
+            class="nameplate flex items-center gap-1.5 px-3 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
+          >
+            <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
+            {{ $t('nav.liveToday') }}
           </NuxtLinkLocale>
           <NuxtLinkLocale
             to="/standings"
@@ -139,6 +157,49 @@ useHead({
               {{ $t('landing.boardSeeAll') }}
             </NuxtLinkLocale>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live now: today's in-progress games, straight from /api/scoreboard.
+         Fails soft — hidden entirely if the feed never answered. When it did
+         answer but nothing's live, a quiet line points at the full board. -->
+    <section v-if="scoreboard" class="border-t border-seam bg-field-deep/40">
+      <div class="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-20">
+        <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p class="nameplate flex items-center gap-2 text-xs tracking-[0.3em] text-chalk-dim">
+              <span class="bulb inline-block h-2 w-2" aria-hidden="true" />
+              {{ $t('landing.liveEyebrow') }}
+            </p>
+            <h2 class="nameplate mt-2 text-3xl leading-none text-chalk md:text-4xl">
+              {{ $t('landing.liveHeading') }}
+            </h2>
+          </div>
+          <NuxtLinkLocale
+            to="/scoreboard"
+            class="nameplate border border-line px-5 py-2.5 text-[11px] tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
+          >
+            {{ $t('landing.liveSeeAll') }}
+          </NuxtLinkLocale>
+        </div>
+
+        <!-- Games in progress: reuse the scoreboard card, capped at three -->
+        <div v-if="livePreview.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <GameCard v-for="game in livePreview" :key="game.gamePk" :game="game" />
+        </div>
+
+        <!-- Nothing live this minute: a quiet plate, not an empty hole -->
+        <div v-else class="flex flex-wrap items-center justify-between gap-4 border border-seam bg-panel px-6 py-8">
+          <p class="max-w-xl text-sm leading-relaxed text-chalk-dim">
+            {{ $t('landing.liveQuiet') }}
+          </p>
+          <NuxtLinkLocale
+            to="/scoreboard"
+            class="nameplate text-[11px] tracking-[0.2em] text-bulb transition-opacity hover:opacity-80"
+          >
+            {{ $t('landing.liveSeeSlate') }}
+          </NuxtLinkLocale>
         </div>
       </div>
     </section>
