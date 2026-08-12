@@ -132,6 +132,49 @@ export interface PlayerAdvancedResponse {
   projection: ZipsProjection | null
 }
 
+// --- Live Today (scoreboard) ---------------------------------------------
+// Flattened per-game state for the day's board. `live` is only populated for
+// games in progress; scheduled games carry probable pitchers, finals carry the
+// line score.
+export type GameStatus = 'live' | 'final' | 'scheduled' | 'other'
+
+export interface GameSide {
+  teamId: number
+  name: string
+  abbr: string // e.g. "NYY" (falls back to name when the feed omits it)
+  runs: number | null // null before first pitch
+  probablePitcher: string | null // scheduled games only
+}
+
+export interface LiveState {
+  inning: number
+  inningState: string // "Top" | "Bottom" | "Middle" | "End"
+  balls: number
+  strikes: number
+  outs: number
+  onFirst: boolean
+  onSecond: boolean
+  onThird: boolean
+  currentPitcher: string | null
+  currentBatter: string | null
+}
+
+export interface ScoreboardGame {
+  gamePk: number
+  status: GameStatus
+  statusDetail: string // e.g. "In Progress", "Final", "Warmup"
+  startTime: string | null // ISO start, for scheduled games
+  sport: 'MLB' | 'LMB' | 'LMP'
+  home: GameSide
+  away: GameSide
+  live: LiveState | null // present only when status === 'live'
+}
+
+export interface ScoreboardResponse {
+  date: string // YYYY-MM-DD
+  games: ScoreboardGame[]
+}
+
 // Club + ballpark info shown on the team page header.
 export interface TeamInfoResponse {
   teamId: number

@@ -5,7 +5,31 @@
   },
   "nav": {
     "openBoard": "Abrir el tablero",
-    "exploreTeam": "Explorar un equipo"
+    "exploreTeam": "Explorar un equipo",
+    "primary": "Principal",
+    "board": "Tablero",
+    "liveToday": "En Vivo Hoy"
+  },
+  "scoreboard": {
+    "eyebrow": "Alrededor de la Liga",
+    "title": "En Vivo Hoy",
+    "intro": "Cada juego de la cartelera de hoy — marcadores en vivo, la cuenta, quién está en base y quién batea. El tablero se actualiza solo cada 30 segundos mientras esta pestaña esté abierta.",
+    "live": "En Vivo",
+    "upcoming": "Próximos",
+    "final": "Finales",
+    "liveTag": "EN VIVO",
+    "finalTag": "FINAL",
+    "pitcher": "P",
+    "batter": "B",
+    "probable": "Pícheres probables",
+    "tbd": "Por definir",
+    "basesEmpty": "bases vacías",
+    "liveSummary": "{balls} bolas, {strikes} strikes, {outs} out, {bases}.",
+    "emptyTitle": "No hay juegos en la cartelera de hoy",
+    "emptyBody": "No hay nada programado para hoy, o aún no se ha publicado el primer lanzamiento. Vuelve más cerca de la hora del juego.",
+    "refreshFailed": "No se pudo actualizar ahora mismo — mostrando el tablero tal como se cargó.",
+    "errTitle": "El tablero se apagó",
+    "errBody": "No se pudo conectar con la API de MLB ahora mismo. Revisa tu conexión y reintenta."
   },
   "masthead": {
     "subtitle": "MLB · Posiciones · Rosters · Estadísticas"
@@ -19,6 +43,11 @@
     "heroTitleLit": "encendidas",
     "heroTitle2": "como el Green Monster.",
     "heroSubtext": "Posiciones de MLB en vivo y estadísticas de jugadores a fondo, pintadas como un tablero de estadio. Ordena el tablero, sigue a tu equipo, lee el pronóstico.",
+    "liveEyebrow": "Alrededor de la Liga",
+    "liveHeading": "En el terreno ahora mismo",
+    "liveSeeAll": "Marcador completo",
+    "liveQuiet": "No hay juegos en vivo en este momento. El tablero se enciende en cuanto se lanza el primer pitcheo — mientras tanto, mira lo que hay en la cartelera de hoy.",
+    "liveSeeSlate": "Ver la cartelera de hoy",
     "boardLive": "en vivo",
     "boardLegend": "G / P / JD",
     "boardSeeAll": "Ver las seis divisiones",

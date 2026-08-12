@@ -11,9 +11,23 @@
           </span>
         </NuxtLinkLocale>
         <div class="flex items-center gap-4">
-          <p class="nameplate hidden text-[11px] tracking-[0.25em] text-chalk-dim sm:block">
-            {{ $t('masthead.subtitle') }}
-          </p>
+          <nav class="flex items-center gap-1" :aria-label="$t('nav.primary')">
+            <NuxtLinkLocale
+              to="/standings"
+              class="nameplate px-2.5 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
+              active-class="text-bulb"
+            >
+              {{ $t('nav.board') }}
+            </NuxtLinkLocale>
+            <NuxtLinkLocale
+              to="/scoreboard"
+              class="nameplate flex items-center gap-1.5 px-2.5 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
+              active-class="text-bulb"
+            >
+              <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
+              {{ $t('nav.liveToday') }}
+            </NuxtLinkLocale>
+          </nav>
           <LangSwitch />
         </div>
       </div>
