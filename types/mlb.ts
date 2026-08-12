@@ -168,7 +168,11 @@ export interface LiveState {
   onSecond: boolean
   onThird: boolean
   currentPitcher: string | null
+  currentPitcherId: number | null // personId, for linking to the pitcher's stats
+  currentPitcherTeamId: number | null // the defending team (pitcher's club)
   currentBatter: string | null
+  currentBatterId: number | null // personId, for linking to the batter's stats
+  currentBatterTeamId: number | null // the batting team (batter's club)
 }
 
 export interface ScoreboardGame {

@@ -38,7 +38,7 @@
     "watchFree": "Gratis · MLB.TV",
     "watchFreeLabel": "Ver {matchup} gratis en MLB.TV",
     "probable": "Pícheres probables",
-    "viewPitcher": "Ver las estadísticas de {name}",
+    "viewPlayer": "Ver las estadísticas de {name}",
     "tbd": "Por definir",
     "basesEmpty": "bases vacías",
     "liveSummary": "{balls} bolas, {strikes} strikes, {outs} out, {bases}.",

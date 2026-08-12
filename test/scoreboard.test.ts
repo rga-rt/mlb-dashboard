@@ -64,8 +64,8 @@ describe('flattenScoreboardGame', () => {
       balls: 2,
       strikes: 1,
       outs: 2,
-      offense: { batter: { fullName: 'Rafael Devers' }, first: { id: 1 }, third: { id: 2 } },
-      defense: { pitcher: { fullName: 'Gerrit Cole' } },
+      offense: { batter: { id: 646240, fullName: 'Rafael Devers' }, team: { id: 111 }, first: { id: 1 }, third: { id: 2 } },
+      defense: { pitcher: { id: 543037, fullName: 'Gerrit Cole' }, team: { id: 147 } },
     },
     broadcasts: [
       { name: 'ESPN', type: 'TV', isNational: true, homeAway: 'national', freeGame: true },
@@ -88,7 +88,11 @@ describe('flattenScoreboardGame', () => {
       onSecond: false, // second base absent from offense ⇒ empty
       onThird: true,
       currentPitcher: 'Gerrit Cole',
+      currentPitcherId: 543037,
+      currentPitcherTeamId: 147, // defending team
       currentBatter: 'Rafael Devers',
+      currentBatterId: 646240,
+      currentBatterTeamId: 111, // batting team
     })
     expect(g.broadcasts.map(b => b.name)).toEqual(['ESPN', 'YES Network'])
     expect(g.freeGame).toBe(true) // ESPN entry carried freeGame: true

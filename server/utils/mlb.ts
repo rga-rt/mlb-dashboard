@@ -212,7 +212,11 @@ export function flattenScoreboardGame(
       onSecond: pick(offense, 'second', null) != null,
       onThird: pick(offense, 'third', null) != null,
       currentPitcher: pick<string>(pick(defense, 'pitcher', {}), 'fullName', null),
+      currentPitcherId: pick<number>(pick(defense, 'pitcher', {}), 'id', null),
+      currentPitcherTeamId: pick<number>(pick(defense, 'team', {}), 'id', null),
       currentBatter: pick<string>(pick(offense, 'batter', {}), 'fullName', null),
+      currentBatterId: pick<number>(pick(offense, 'batter', {}), 'id', null),
+      currentBatterTeamId: pick<number>(pick(offense, 'team', {}), 'id', null),
     }
   }
 

@@ -184,15 +184,29 @@ function hideBrokenLogo(e: Event) {
         </dl>
       </div>
 
-      <!-- Current matchup: pitcher on the mound, batter at the plate -->
+      <!-- Current matchup: pitcher on the mound, batter at the plate. Each name
+           links to that player's stats (on their own club's page) when the feed
+           gives us both the personId and their team. -->
       <div v-if="game.live.currentPitcher || game.live.currentBatter" class="mt-2.5 space-y-0.5 text-[11px] leading-snug">
         <p v-if="game.live.currentPitcher" class="truncate text-chalk-dim">
           <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.pitcher') }}</span>
-          {{ game.live.currentPitcher }}
+          <NuxtLinkLocale
+            v-if="game.live.currentPitcherId != null && game.live.currentPitcherTeamId != null"
+            :to="{ path: `/team/${game.live.currentPitcherTeamId}`, query: { player: String(game.live.currentPitcherId), ...(from ? { from } : {}) } }"
+            class="underline decoration-dotted decoration-chalk-dim/50 underline-offset-2 transition-colors hover:text-bulb hover:decoration-bulb focus-visible:text-bulb focus:outline-none"
+            :aria-label="$t('scoreboard.viewPlayer', { name: game.live.currentPitcher })"
+          >{{ game.live.currentPitcher }}</NuxtLinkLocale>
+          <template v-else>{{ game.live.currentPitcher }}</template>
         </p>
         <p v-if="game.live.currentBatter" class="truncate text-chalk-dim">
           <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.batter') }}</span>
-          {{ game.live.currentBatter }}
+          <NuxtLinkLocale
+            v-if="game.live.currentBatterId != null && game.live.currentBatterTeamId != null"
+            :to="{ path: `/team/${game.live.currentBatterTeamId}`, query: { player: String(game.live.currentBatterId), ...(from ? { from } : {}) } }"
+            class="underline decoration-dotted decoration-chalk-dim/50 underline-offset-2 transition-colors hover:text-bulb hover:decoration-bulb focus-visible:text-bulb focus:outline-none"
+            :aria-label="$t('scoreboard.viewPlayer', { name: game.live.currentBatter })"
+          >{{ game.live.currentBatter }}</NuxtLinkLocale>
+          <template v-else>{{ game.live.currentBatter }}</template>
         </p>
       </div>
     </div>
@@ -211,7 +225,7 @@ function hideBrokenLogo(e: Event) {
           v-if="game[side].probablePitcher && game[side].probablePitcherId != null"
           :to="{ path: `/team/${game[side].teamId}`, query: { player: String(game[side].probablePitcherId), ...(from ? { from } : {}) } }"
           class="underline decoration-dotted decoration-chalk-dim/50 underline-offset-2 transition-colors hover:text-bulb hover:decoration-bulb focus-visible:text-bulb focus:outline-none"
-          :aria-label="$t('scoreboard.viewPitcher', { name: game[side].probablePitcher })"
+          :aria-label="$t('scoreboard.viewPlayer', { name: game[side].probablePitcher })"
         >{{ game[side].probablePitcher }}</NuxtLinkLocale>
         <template v-else>{{ game[side].probablePitcher ?? $t('scoreboard.tbd') }}</template>
       </p>
