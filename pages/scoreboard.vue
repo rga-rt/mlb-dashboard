@@ -169,7 +169,7 @@ useHead({ title: 'Live Today — MLB scoreboard' })
           <span class="h-0.5 flex-1 bg-seam" aria-hidden="true" />
         </div>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <GameCard v-for="game in section.games" :key="game.gamePk" :game="game" />
+          <GameCard v-for="game in section.games" :key="game.gamePk" :game="game" from="scoreboard" />
         </div>
       </section>
     </div>

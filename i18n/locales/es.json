@@ -115,6 +115,8 @@
   },
   "team": {
     "back": "Volver al tablero",
+    "backScoreboard": "Volver a En Vivo Hoy",
+    "backUpcoming": "Volver a Próximos",
     "loading": "Cargando…",
     "rosterErrTitle": "No se pudo cargar ese roster",
     "rosterErrBody": "El id del equipo puede ser incorrecto, o la API no responde.",

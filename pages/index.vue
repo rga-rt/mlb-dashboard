@@ -186,7 +186,7 @@ useHead({
 
         <!-- Games in progress: reuse the scoreboard card, capped at three -->
         <div v-if="livePreview.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <GameCard v-for="game in livePreview" :key="game.gamePk" :game="game" />
+          <GameCard v-for="game in livePreview" :key="game.gamePk" :game="game" from="scoreboard" />
         </div>
 
         <!-- Nothing live this minute: a quiet plate, not an empty hole -->

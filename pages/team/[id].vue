@@ -7,6 +7,17 @@ const route = useRoute()
 const router = useRouter()
 const teamId = computed(() => route.params.id as string)
 
+// Which page sent us here (?from=standings|scoreboard|upcoming), captured once
+// at setup so the back link stays stable even as selecting a player rewrites the
+// query. Unknown or absent → the standings board, the long-standing default.
+const BACK_TARGETS: Record<string, { to: string; key: string }> = {
+  standings: { to: '/standings', key: 'team.back' },
+  scoreboard: { to: '/scoreboard', key: 'team.backScoreboard' },
+  upcoming: { to: '/upcoming', key: 'team.backUpcoming' },
+}
+const originFrom = String(route.query.from ?? '')
+const back = BACK_TARGETS[originFrom] ?? BACK_TARGETS.standings
+
 // Type-ahead over a ~40-name roster: match on name, jersey, or position.
 const rosterFilter = ref('')
 function matchesFilter(p: RosterPlayer): boolean {
@@ -244,6 +255,8 @@ function revealDetail() {
 function buildQuery(): Record<string, string> {
   const q: Record<string, string> = { season: String(season.value) }
   if (selectedId.value != null) q.player = String(selectedId.value)
+  // Preserve where we came from so the back link survives reloads/shares.
+  if (originFrom) q.from = originFrom
   return q
 }
 function syncUrl(mode: 'push' | 'replace') {
@@ -287,10 +300,10 @@ function onAnalyticsToggle(e: Event) {
 <template>
   <div>
     <NuxtLinkLocale
-      to="/standings"
+      :to="back.to"
       class="nameplate mb-6 inline-flex items-center gap-2 text-xs tracking-wider text-chalk-dim transition-colors hover:text-bulb"
     >
-      ← {{ $t('team.back') }}
+      ← {{ $t(back.key) }}
     </NuxtLinkLocale>
 
     <div v-if="error" class="border border-clay/50 bg-panel px-5 py-6">

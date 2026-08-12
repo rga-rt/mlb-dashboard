@@ -146,7 +146,7 @@ useHead({ title: 'Upcoming — MLB schedule, probables & TV' })
           <span class="nameplate shrink-0 text-[11px] tracking-wider text-chalk-dim">{{ day.games.length }}</span>
         </div>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <GameCard v-for="game in day.games" :key="game.gamePk" :game="game" />
+          <GameCard v-for="game in day.games" :key="game.gamePk" :game="game" from="upcoming" />
         </div>
       </section>
     </div>

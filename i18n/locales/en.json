@@ -115,6 +115,8 @@
   },
   "team": {
     "back": "Back to the board",
+    "backScoreboard": "Back to Live Today",
+    "backUpcoming": "Back to Upcoming",
     "loading": "Loading…",
     "rosterErrTitle": "Couldn't load that roster",
     "rosterErrBody": "The team id may be wrong, or the API is unreachable.",

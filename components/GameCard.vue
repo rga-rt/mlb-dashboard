@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { ScoreboardGame } from '~/types/mlb'
 
-const props = defineProps<{ game: ScoreboardGame }>()
+// `from` tags the probable-pitcher links so the team page's back button can
+// return to the page the card was shown on (scoreboard / upcoming).
+const props = defineProps<{ game: ScoreboardGame, from?: string }>()
 
 const { t } = useI18n()
 
@@ -207,7 +209,7 @@ function hideBrokenLogo(e: Event) {
              ?player=id) when we have their personId; plain text otherwise. -->
         <NuxtLinkLocale
           v-if="game[side].probablePitcher && game[side].probablePitcherId != null"
-          :to="{ path: `/team/${game[side].teamId}`, query: { player: String(game[side].probablePitcherId) } }"
+          :to="{ path: `/team/${game[side].teamId}`, query: { player: String(game[side].probablePitcherId), ...(from ? { from } : {}) } }"
           class="underline decoration-dotted decoration-chalk-dim/50 underline-offset-2 transition-colors hover:text-bulb hover:decoration-bulb focus-visible:text-bulb focus:outline-none"
           :aria-label="$t('scoreboard.viewPitcher', { name: game[side].probablePitcher })"
         >{{ game[side].probablePitcher }}</NuxtLinkLocale>
