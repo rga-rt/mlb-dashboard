@@ -14,6 +14,7 @@ const BACK_TARGETS: Record<string, { to: string; key: string }> = {
   standings: { to: '/standings', key: 'team.back' },
   scoreboard: { to: '/scoreboard', key: 'team.backScoreboard' },
   upcoming: { to: '/upcoming', key: 'team.backUpcoming' },
+  news: { to: '/news', key: 'team.backNews' },
 }
 const originFrom = String(route.query.from ?? '')
 const back = BACK_TARGETS[originFrom] ?? BACK_TARGETS.standings
@@ -89,6 +90,10 @@ const detailPanel = ref<HTMLElement | null>(null)
 const analyticsOpen = ref(true)
 const selectedName = computed(() =>
   roster.value?.players.find((p: RosterPlayer) => p.personId === selectedId.value)?.name ?? '')
+// The open player's roster status, for the injury/status badge in the detail
+// header — read off the roster we already have, so no extra fetch.
+const selectedStatus = computed(() =>
+  roster.value?.players.find((p: RosterPlayer) => p.personId === selectedId.value)?.status ?? null)
 const statusMsg = computed(() => {
   if (playerPending.value) return `Loading ${selectedName.value || 'player'}…`
   if (playerError.value) return `Couldn’t load ${selectedName.value || 'that player'}`
@@ -448,7 +453,10 @@ function onAnalyticsToggle(e: Event) {
             <div v-else-if="player">
               <div class="mb-5 flex items-start justify-between gap-4 border-b border-line pb-3">
                 <div class="min-w-0">
-                  <h3 class="nameplate text-3xl leading-[0.95] text-chalk">{{ player.name }}</h3>
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <h3 class="nameplate text-3xl leading-[0.95] text-chalk">{{ player.name }}</h3>
+                    <PlayerStatusBadge v-if="selectedStatus" :status="selectedStatus" />
+                  </div>
                   <p class="mt-1.5 text-xs text-chalk-dim">
                     {{ player.position }}
                     <template v-if="player.bats || player.throws">

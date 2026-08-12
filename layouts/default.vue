@@ -34,6 +34,13 @@
             >
               {{ $t('nav.upcoming') }}
             </NuxtLinkLocale>
+            <NuxtLinkLocale
+              to="/news"
+              class="nameplate px-2.5 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
+              active-class="text-bulb"
+            >
+              {{ $t('nav.news') }}
+            </NuxtLinkLocale>
           </nav>
           <LangSwitch />
         </div>

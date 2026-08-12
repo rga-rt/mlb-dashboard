@@ -9,7 +9,34 @@
     "primary": "Principal",
     "board": "Tablero",
     "liveToday": "En Vivo Hoy",
-    "upcoming": "Próximos"
+    "upcoming": "Próximos",
+    "news": "Noticias"
+  },
+  "news": {
+    "eyebrow": "En el Cable",
+    "title": "Noticias",
+    "intro": "Cada movimiento de roster en las Grandes Ligas de los últimos tres días — cambios, firmas, movimientos a la lista de lesionados, llamados y más, directo del feed oficial de transacciones.",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "viewStats": "Perfil",
+    "emptyTitle": "Sin movimientos",
+    "emptyBody": "No han llegado transacciones en los últimos días. Vuelve tras el próximo ajuste de roster.",
+    "type": {
+      "TR": "Cambio",
+      "SGN": "Firmado",
+      "SFA": "Firmado (AL)",
+      "DES": "DFA",
+      "DFA": "Agencia Libre",
+      "REL": "Liberado",
+      "CLW": "Reclamado",
+      "OPT": "Enviado",
+      "CU": "Llamado",
+      "ASG": "Asignado",
+      "SE": "Seleccionado",
+      "OUT": "Outright",
+      "SC": "Estatus",
+      "IL": "IL"
+    }
   },
   "upcoming": {
     "eyebrow": "Próximos Tres Días",
@@ -117,6 +144,7 @@
     "back": "Volver al Tablero",
     "backScoreboard": "Volver a En Vivo Hoy",
     "backUpcoming": "Volver a Próximos",
+    "backNews": "Volver a Noticias",
     "loading": "Cargando…",
     "rosterErrTitle": "No se pudo cargar ese roster",
     "rosterErrBody": "El id del equipo puede ser incorrecto, o la API no responde.",

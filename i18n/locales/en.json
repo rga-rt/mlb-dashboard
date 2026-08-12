@@ -9,7 +9,34 @@
     "primary": "Primary",
     "board": "Board",
     "liveToday": "Live Today",
-    "upcoming": "Upcoming"
+    "upcoming": "Upcoming",
+    "news": "News"
+  },
+  "news": {
+    "eyebrow": "Off the Wire",
+    "title": "News",
+    "intro": "Every roster move across the majors from the last three days — trades, signings, injured-list moves, call-ups and more, straight from the official transactions feed.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "viewStats": "Stats",
+    "emptyTitle": "No moves posted",
+    "emptyBody": "No transactions have come across the wire in the last few days. Check back after the next roster shuffle.",
+    "type": {
+      "TR": "Trade",
+      "SGN": "Signed",
+      "SFA": "Signed (FA)",
+      "DES": "DFA",
+      "DFA": "Free Agency",
+      "REL": "Released",
+      "CLW": "Claimed",
+      "OPT": "Optioned",
+      "CU": "Recalled",
+      "ASG": "Assigned",
+      "SE": "Selected",
+      "OUT": "Outrighted",
+      "SC": "Status",
+      "IL": "IL"
+    }
   },
   "upcoming": {
     "eyebrow": "Next Three Days",
@@ -117,6 +144,7 @@
     "back": "Back to the Board",
     "backScoreboard": "Back to Live Today",
     "backUpcoming": "Back to Upcoming",
+    "backNews": "Back to News",
     "loading": "Loading…",
     "rosterErrTitle": "Couldn't load that roster",
     "rosterErrBody": "The team id may be wrong, or the API is unreachable.",

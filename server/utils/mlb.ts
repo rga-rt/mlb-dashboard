@@ -10,6 +10,7 @@ import type {
   LiveState,
   ScoreboardGame,
   TeamRecord,
+  Transaction,
 } from '~/types/mlb'
 
 /** Fetch a path off the MLB base URL and return parsed JSON. */
@@ -254,4 +255,27 @@ export function sortScoreboard(games: ScoreboardGame[]): ScoreboardGame[] {
     // tiebreak.
     return (a.startTime ?? '').localeCompare(b.startTime ?? '')
   })
+}
+
+// --- News (transactions) --------------------------------------------------
+
+/**
+ * Flatten one raw /transactions entry into our Transaction shape. `toTeam` is
+ * the acting/destination club (the team that made the move); `person` carries
+ * the player's id + name so the move can link to their stats.
+ */
+export function flattenTransaction(tx: any): Transaction {
+  const person = pick(tx, 'person', {}) as any
+  const toTeam = pick(tx, 'toTeam', {}) as any
+  return {
+    id: pick<number>(tx, 'id', 0) as number,
+    date: pick<string>(tx, 'date', '') as string,
+    type: pick<string>(tx, 'typeDesc', '') as string,
+    typeCode: pick<string>(tx, 'typeCode', '') as string,
+    description: pick<string>(tx, 'description', '') as string,
+    playerName: pick<string>(person, 'fullName', null),
+    playerId: pick<number>(person, 'id', null),
+    teamName: pick<string>(toTeam, 'name', null),
+    teamId: pick<number>(toTeam, 'id', null),
+  }
 }

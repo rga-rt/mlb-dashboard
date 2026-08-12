@@ -206,6 +206,33 @@ export interface UpcomingResponse {
   days: UpcomingDay[] // only days that have games, in date order
 }
 
+// --- News (transactions) --------------------------------------------------
+// One roster move from MLB's /transactions feed, flattened for the News tab.
+// `description` is the feed's ready-made sentence; the player/team ids let the
+// move link to the player's stats.
+export interface Transaction {
+  id: number
+  date: string // YYYY-MM-DD
+  type: string // typeDesc, e.g. "Trade", "Signed", "Status Change"
+  typeCode: string // e.g. "TR", "SC", "OPT"
+  description: string
+  playerName: string | null
+  playerId: number | null
+  teamName: string | null
+  teamId: number | null // the acting / destination club (toTeam)
+}
+
+export interface NewsDay {
+  date: string // YYYY-MM-DD
+  transactions: Transaction[]
+}
+
+export interface NewsResponse {
+  start: string // YYYY-MM-DD (inclusive)
+  end: string // YYYY-MM-DD (inclusive)
+  days: NewsDay[] // newest day first
+}
+
 // Club + ballpark info shown on the team page header.
 export interface TeamInfoResponse {
   teamId: number
