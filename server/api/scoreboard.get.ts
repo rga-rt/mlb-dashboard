@@ -16,7 +16,9 @@ export default defineEventHandler(async (event): Promise<ScoreboardResponse> => 
   const results = await Promise.allSettled(
     SCOREBOARD_SPORTS.map(sport =>
       mlbFetch<any>('/schedule', {
-        sportId: sport.id,
+        sportId: sport.sportId,
+        // Narrow the umbrella sports (Independent / Winter) to their Mexican clubs.
+        ...(sport.leagueId ? { leagueId: sport.leagueId } : {}),
         date,
         hydrate: 'linescore,team,probablePitcher,broadcasts(all)',
       }).then(raw => ({ raw, sport })),

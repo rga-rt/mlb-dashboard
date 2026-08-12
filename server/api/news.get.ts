@@ -15,10 +15,16 @@ export default defineEventHandler(async (event): Promise<NewsResponse> => {
   const start = addDays(end, -(span - 1))
 
   const results = await Promise.allSettled(
-    SCOREBOARD_SPORTS.map(sport =>
-      mlbFetch<any>('/transactions', { sportId: sport.id, startDate: start, endDate: end })
-        .then(raw => ({ raw, sport })),
-    ),
+    SCOREBOARD_SPORTS.map((sport) => {
+      // /transactions accepts leagueId on its own, which pins the Mexican
+      // leagues to their clubs (sportId 23/17 would drag in unrelated
+      // independent/winter circuits). MLB has no single leagueId, so use its
+      // sportId.
+      const query: Record<string, string | number> = { startDate: start, endDate: end }
+      if (sport.leagueId) query.leagueId = sport.leagueId
+      else query.sportId = sport.sportId
+      return mlbFetch<any>('/transactions', query).then(raw => ({ raw, sport }))
+    }),
   )
 
   const byDate = new Map<string, Transaction[]>()

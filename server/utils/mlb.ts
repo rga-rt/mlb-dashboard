@@ -119,12 +119,18 @@ export function orderDivisions(divisions: Division[]): Division[] {
 
 // --- Live Today (scoreboard) ---------------------------------------------
 
-// The leagues the scoreboard covers, each its own sportId in the schedule feed.
-// MLB=1, Mexican League (LMB)=23, LMP=17 — same ids the roster/stats routes use.
-export const SCOREBOARD_SPORTS = [
-  { id: 1, label: 'MLB' as const },
-  { id: 23, label: 'LMB' as const },
-  { id: 17, label: 'LMP' as const },
+// The leagues our boards cover. Each is a sportId, but the two Mexican leagues
+// live inside broad umbrella sports — 23 = Independent Leagues, 17 = Winter
+// Leagues — that also carry unrelated circuits (US independent ball, the
+// Australian league, Venezuelan/Dominican winter ball, ...). The precise
+// leagueId narrows each to its Mexican clubs only: 125 = Liga Mexicana de
+// Béisbol (LMB), 132 = Liga Mexicana del Pacífico (LMP) — the same ids the
+// standings route keys off. Endpoints accept leagueId alongside sportId (or, for
+// /transactions, on its own) to filter to just those clubs.
+export const SCOREBOARD_SPORTS: { label: ScoreboardGame['sport']; sportId: number; leagueId?: number }[] = [
+  { label: 'MLB', sportId: 1 },
+  { label: 'LMB', sportId: 23, leagueId: 125 },
+  { label: 'LMP', sportId: 17, leagueId: 132 },
 ]
 
 /**
