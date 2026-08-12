@@ -8,7 +8,17 @@
     "exploreTeam": "Explorar un equipo",
     "primary": "Principal",
     "board": "Tablero",
-    "liveToday": "En Vivo Hoy"
+    "liveToday": "En Vivo Hoy",
+    "upcoming": "Próximos"
+  },
+  "upcoming": {
+    "eyebrow": "Próximos Tres Días",
+    "title": "Próximos",
+    "intro": "Los próximos tres días del calendario — MLB y las ligas mexicanas — con horas del primer lanzamiento, pícheres probables y dónde ver o escuchar. Los finales desaparecen; esto es lo que viene.",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "emptyTitle": "Nada en el calendario",
+    "emptyBody": "No hay juegos publicados para los próximos días en MLB ni en las ligas mexicanas. Vuelve cuando se anuncie la próxima cartelera."
   },
   "scoreboard": {
     "eyebrow": "Alrededor de la Liga",
@@ -21,6 +31,8 @@
     "finalTag": "FINAL",
     "pitcher": "P",
     "batter": "B",
+    "tv": "TV",
+    "radio": "Radio",
     "probable": "Pícheres probables",
     "tbd": "Por definir",
     "basesEmpty": "bases vacías",

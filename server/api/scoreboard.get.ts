@@ -18,7 +18,7 @@ export default defineEventHandler(async (event): Promise<ScoreboardResponse> => 
       mlbFetch<any>('/schedule', {
         sportId: sport.id,
         date,
-        hydrate: 'linescore,team,probablePitcher',
+        hydrate: 'linescore,team,probablePitcher,broadcasts(all)',
       }).then(raw => ({ raw, sport })),
     ),
   )

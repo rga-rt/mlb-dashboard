@@ -8,7 +8,17 @@
     "exploreTeam": "Explore a team",
     "primary": "Primary",
     "board": "Board",
-    "liveToday": "Live Today"
+    "liveToday": "Live Today",
+    "upcoming": "Upcoming"
+  },
+  "upcoming": {
+    "eyebrow": "Next Three Days",
+    "title": "Upcoming",
+    "intro": "The next three days on the schedule — MLB and the Mexican leagues — with first-pitch times, probable pitchers, and where to watch or listen. Finals drop off; this is the look-ahead.",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "emptyTitle": "Nothing on the schedule",
+    "emptyBody": "No games are posted for the next few days across MLB or the Mexican leagues. Check back when the next slate is announced."
   },
   "scoreboard": {
     "eyebrow": "Around the League",
@@ -21,6 +31,8 @@
     "finalTag": "FINAL",
     "pitcher": "P",
     "batter": "AB",
+    "tv": "TV",
+    "radio": "Radio",
     "probable": "Probable pitchers",
     "tbd": "TBD",
     "basesEmpty": "bases empty",

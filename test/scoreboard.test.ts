@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { flattenScoreboardGame, gameStatus, sortScoreboard } from '~/server/utils/mlb'
+import { flattenBroadcasts, flattenScoreboardGame, gameStatus, sortScoreboard } from '~/server/utils/mlb'
 import type { ScoreboardGame } from '~/types/mlb'
 
 describe('gameStatus', () => {
@@ -13,6 +13,37 @@ describe('gameStatus', () => {
     expect(gameStatus('Suspended')).toBe('other')
     expect(gameStatus('')).toBe('other')
     expect(gameStatus(null)).toBe('other')
+  })
+})
+
+describe('flattenBroadcasts', () => {
+  it('normalizes medium (TV/AM/FM) and marks national vs local side', () => {
+    const out = flattenBroadcasts([
+      { name: 'ESPN', type: 'TV', isNational: true, homeAway: 'national' },
+      { name: 'Bally Sports West', type: 'TV', isNational: false, homeAway: 'away' },
+      { name: 'WSCR', type: 'FM', isNational: false, homeAway: 'home' },
+      { name: 'KLAA', type: 'AM', isNational: false, homeAway: 'away' },
+    ])
+    expect(out).toEqual([
+      { name: 'ESPN', medium: 'TV', national: true, side: 'national' },
+      { name: 'Bally Sports West', medium: 'TV', national: false, side: 'away' },
+      { name: 'WSCR', medium: 'radio', national: false, side: 'home' },
+      { name: 'KLAA', medium: 'radio', national: false, side: 'away' },
+    ])
+  })
+
+  it('collapses a national carrier duplicated across sides into one entry', () => {
+    const out = flattenBroadcasts([
+      { name: 'MLBN (out-of-market only)', type: 'TV', isNational: true, homeAway: 'away' },
+      { name: 'MLBN (out-of-market only)', type: 'TV', isNational: true, homeAway: 'home' },
+    ])
+    expect(out).toHaveLength(1)
+    expect(out[0]).toMatchObject({ name: 'MLBN (out-of-market only)', side: 'national' })
+  })
+
+  it('skips nameless entries and tolerates a missing list', () => {
+    expect(flattenBroadcasts([{ type: 'TV' }])).toEqual([])
+    expect(flattenBroadcasts(undefined)).toEqual([])
   })
 })
 
@@ -36,6 +67,10 @@ describe('flattenScoreboardGame', () => {
       offense: { batter: { fullName: 'Rafael Devers' }, first: { id: 1 }, third: { id: 2 } },
       defense: { pitcher: { fullName: 'Gerrit Cole' } },
     },
+    broadcasts: [
+      { name: 'ESPN', type: 'TV', isNational: true, homeAway: 'national' },
+      { name: 'YES Network', type: 'TV', isNational: false, homeAway: 'away' },
+    ],
   }
 
   it('builds the live quick-state, deriving on-base from offense corners', () => {
@@ -55,6 +90,16 @@ describe('flattenScoreboardGame', () => {
       currentPitcher: 'Gerrit Cole',
       currentBatter: 'Rafael Devers',
     })
+    expect(g.broadcasts.map(b => b.name)).toEqual(['ESPN', 'YES Network'])
+  })
+
+  it('defaults broadcasts to an empty list when the feed omits them (e.g. LMB)', () => {
+    const g = flattenScoreboardGame({
+      gamePk: 950,
+      status: { abstractGameState: 'Preview', detailedState: 'Scheduled' },
+      teams: { away: { team: { id: 1, name: 'A' } }, home: { team: { id: 2, name: 'B' } } },
+    }, 'LMB')
+    expect(g.broadcasts).toEqual([])
   })
 
   it('leaves live null and runs null for a scheduled game, keeping probables', () => {
@@ -98,6 +143,7 @@ describe('sortScoreboard', () => {
     home: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null },
     away: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null },
     live: null,
+    broadcasts: [],
   })
 
   it('orders live first, then scheduled by start time, then finals', () => {

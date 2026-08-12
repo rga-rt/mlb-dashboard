@@ -146,6 +146,17 @@ export interface GameSide {
   probablePitcher: string | null // scheduled games only
 }
 
+// A single TV / radio / streaming broadcast for a game. `medium` normalizes the
+// feed's raw types (TV / AM / FM) down to what a viewer cares about; `side` is
+// which club's feed it is (or 'national'). Mexican-league games often carry no
+// broadcasts at all — the card simply omits the line then.
+export interface Broadcast {
+  name: string // e.g. "ESPN", "Bally Sports West", "MLB.TV", "104.3 The Score"
+  medium: 'TV' | 'radio'
+  national: boolean
+  side: 'home' | 'away' | 'national'
+}
+
 export interface LiveState {
   inning: number
   inningState: string // "Top" | "Bottom" | "Middle" | "End"
@@ -168,11 +179,25 @@ export interface ScoreboardGame {
   home: GameSide
   away: GameSide
   live: LiveState | null // present only when status === 'live'
+  broadcasts: Broadcast[] // TV / radio carriers; empty when the feed lists none
 }
 
 export interface ScoreboardResponse {
   date: string // YYYY-MM-DD
   games: ScoreboardGame[]
+}
+
+// A single day of the upcoming feed: its date and that day's games (finals
+// filtered out — it's a look-ahead).
+export interface UpcomingDay {
+  date: string // YYYY-MM-DD
+  games: ScoreboardGame[]
+}
+
+export interface UpcomingResponse {
+  start: string // YYYY-MM-DD (inclusive)
+  end: string // YYYY-MM-DD (inclusive)
+  days: UpcomingDay[] // only days that have games, in date order
 }
 
 // Club + ballpark info shown on the team page header.

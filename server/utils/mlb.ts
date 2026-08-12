@@ -2,6 +2,7 @@
 // Runs inside Nitro (server), so there is no CORS restriction here — the
 // browser only ever talks to our own /api routes.
 import type {
+  Broadcast,
   Division,
   GameSide,
   GameStatus,
@@ -139,6 +140,34 @@ export function gameStatus(abstractGameState: string | null): GameStatus {
   }
 }
 
+/**
+ * Flatten the raw `game.broadcasts` list (from hydrate=broadcasts(all)) into our
+ * Broadcast shape. Normalizes the feed's medium (TV / AM / FM → TV / radio) and
+ * de-duplicates: the same national carrier is often listed once per side (e.g.
+ * "MLBN" for home and away), which we collapse to a single national entry.
+ */
+export function flattenBroadcasts(raw: any[] | null | undefined): Broadcast[] {
+  const out: Broadcast[] = []
+  const seen = new Set<string>()
+  for (const b of (raw ?? [])) {
+    const name = pick<string>(b, 'name', '') as string
+    if (!name) continue
+    const type = pick<string>(b, 'type', '') as string
+    const medium: Broadcast['medium'] = type === 'TV' ? 'TV' : 'radio'
+    const national = pick<boolean>(b, 'isNational', false) as boolean
+    // National carriers dedupe by name alone (drop the per-side duplication);
+    // local ones stay distinct per side so both clubs' feeds show.
+    const side: Broadcast['side'] = national
+      ? 'national'
+      : (pick<string>(b, 'homeAway', 'home') as Broadcast['side'])
+    const key = national ? `${medium}|${name}` : `${medium}|${name}|${side}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push({ name, medium, national, side })
+  }
+  return out
+}
+
 /** Read a side's flat shape off a raw schedule `game.teams.home|away` node. */
 function flattenSide(rawSide: any): GameSide {
   const team = pick(rawSide, 'team', {}) as any
@@ -194,6 +223,7 @@ export function flattenScoreboardGame(
     home: flattenSide(pick(game?.teams, 'home', {})),
     away: flattenSide(pick(game?.teams, 'away', {})),
     live,
+    broadcasts: flattenBroadcasts(pick(game, 'broadcasts', []) as any[]),
   }
 }
 

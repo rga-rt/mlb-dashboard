@@ -43,6 +43,20 @@ const liveSummary = computed(() => {
   })
 })
 
+// Broadcasts split into TV and radio for display. National TV sorts ahead of
+// local, and identical names collapse — so a card reads "ESPN · Bally Sports
+// West" rather than repeating a shared carrier.
+const tvBroadcasts = computed(() => {
+  const names = props.game.broadcasts
+    .filter(b => b.medium === 'TV')
+    .sort((a, b) => Number(b.national) - Number(a.national))
+    .map(b => b.name)
+  return [...new Set(names)]
+})
+const radioBroadcasts = computed(() =>
+  [...new Set(props.game.broadcasts.filter(b => b.medium === 'radio').map(b => b.name))],
+)
+
 function hideBrokenLogo(e: Event) {
   ;(e.target as HTMLImageElement).style.visibility = 'hidden'
 }
@@ -168,6 +182,25 @@ function hideBrokenLogo(e: Event) {
       <p class="nameplate mb-1 text-[9px] tracking-widest text-chalk-dim">{{ $t('scoreboard.probable') }}</p>
       <p class="truncate">{{ game.away.abbr }} · {{ game.away.probablePitcher ?? $t('scoreboard.tbd') }}</p>
       <p class="truncate">{{ game.home.abbr }} · {{ game.home.probablePitcher ?? $t('scoreboard.tbd') }}</p>
+    </div>
+
+    <!-- Where to watch/listen: its own strip so it shows for any game that has
+         carriers, including ones with no probables (e.g. LMP). Omitted entirely
+         when the feed lists none (e.g. LMB). -->
+    <div
+      v-if="tvBroadcasts.length || radioBroadcasts.length"
+      class="border-t border-seam bg-field-deep/30 px-3 py-2 text-[11px] leading-snug"
+    >
+      <dl class="space-y-0.5">
+        <div v-if="tvBroadcasts.length" class="flex gap-2">
+          <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.tv') }}</dt>
+          <dd class="min-w-0 truncate text-chalk">{{ tvBroadcasts.join(' · ') }}</dd>
+        </div>
+        <div v-if="radioBroadcasts.length" class="flex gap-2">
+          <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.radio') }}</dt>
+          <dd class="min-w-0 truncate text-chalk-dim">{{ radioBroadcasts.join(' · ') }}</dd>
+        </div>
+      </dl>
     </div>
   </section>
 </template>
