@@ -68,7 +68,7 @@ describe('flattenScoreboardGame', () => {
       defense: { pitcher: { fullName: 'Gerrit Cole' } },
     },
     broadcasts: [
-      { name: 'ESPN', type: 'TV', isNational: true, homeAway: 'national' },
+      { name: 'ESPN', type: 'TV', isNational: true, homeAway: 'national', freeGame: true },
       { name: 'YES Network', type: 'TV', isNational: false, homeAway: 'away' },
     ],
   }
@@ -91,15 +91,17 @@ describe('flattenScoreboardGame', () => {
       currentBatter: 'Rafael Devers',
     })
     expect(g.broadcasts.map(b => b.name)).toEqual(['ESPN', 'YES Network'])
+    expect(g.freeGame).toBe(true) // ESPN entry carried freeGame: true
   })
 
-  it('defaults broadcasts to an empty list when the feed omits them (e.g. LMB)', () => {
+  it('defaults broadcasts empty and freeGame false when the feed omits them (e.g. LMB)', () => {
     const g = flattenScoreboardGame({
       gamePk: 950,
       status: { abstractGameState: 'Preview', detailedState: 'Scheduled' },
       teams: { away: { team: { id: 1, name: 'A' } }, home: { team: { id: 2, name: 'B' } } },
     }, 'LMB')
     expect(g.broadcasts).toEqual([])
+    expect(g.freeGame).toBe(false)
   })
 
   it('leaves live null and runs null for a scheduled game, keeping probables', () => {
@@ -144,6 +146,7 @@ describe('sortScoreboard', () => {
     away: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null },
     live: null,
     broadcasts: [],
+    freeGame: false,
   })
 
   it('orders live first, then scheduled by start time, then finals', () => {

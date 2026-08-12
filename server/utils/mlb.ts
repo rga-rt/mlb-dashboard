@@ -194,6 +194,7 @@ export function flattenScoreboardGame(
   sport: ScoreboardGame['sport'],
 ): ScoreboardGame {
   const status = gameStatus(pick<string>(game?.status, 'abstractGameState', null))
+  const rawBroadcasts = pick(game, 'broadcasts', []) as any[]
   const line = pick(game, 'linescore', {}) as any
   const offense = pick(line, 'offense', {}) as any
   const defense = pick(line, 'defense', {}) as any
@@ -223,7 +224,10 @@ export function flattenScoreboardGame(
     home: flattenSide(pick(game?.teams, 'home', {})),
     away: flattenSide(pick(game?.teams, 'away', {})),
     live,
-    broadcasts: flattenBroadcasts(pick(game, 'broadcasts', []) as any[]),
+    broadcasts: flattenBroadcasts(rawBroadcasts),
+    // A game is "free" if any carrier flags it — MLB's free game of the day
+    // streams on MLB.TV with no subscription.
+    freeGame: rawBroadcasts.some(b => pick<boolean>(b, 'freeGame', false)),
   }
 }
 

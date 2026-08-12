@@ -57,6 +57,16 @@ const radioBroadcasts = computed(() =>
   [...new Set(props.game.broadcasts.filter(b => b.medium === 'radio').map(b => b.name))],
 )
 
+// Per-game links. Gameday resolves off the MLB gamePk (a bare id 301-redirects
+// to the canonical page), so it's offered for MLB games only — the Mexican
+// leagues aren't on mlb.com/gameday. The free-game badge points at the MLB.TV
+// watch page and shows only when the feed flags the game as free to stream.
+const gamedayUrl = computed(() =>
+  props.game.sport === 'MLB' ? `https://www.mlb.com/gameday/${props.game.gamePk}` : null,
+)
+const mlbtvUrl = computed(() => `https://www.mlb.com/tv/g${props.game.gamePk}`)
+const matchup = computed(() => `${props.game.away.abbr} @ ${props.game.home.abbr}`)
+
 function hideBrokenLogo(e: Event) {
   ;(e.target as HTMLImageElement).style.visibility = 'hidden'
 }
@@ -201,6 +211,36 @@ function hideBrokenLogo(e: Event) {
           <dd class="min-w-0 truncate text-chalk-dim">{{ radioBroadcasts.join(' · ') }}</dd>
         </div>
       </dl>
+    </div>
+
+    <!-- Watch links: a Gameday link for MLB games, and a lit "free on MLB.TV"
+         badge on the feed's free game of the day. Both open on mlb.com. -->
+    <div
+      v-if="gamedayUrl || game.freeGame"
+      class="flex flex-wrap items-center gap-2 border-t border-seam px-3 py-2"
+    >
+      <a
+        v-if="game.freeGame"
+        :href="mlbtvUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nameplate inline-flex items-center gap-1.5 border border-bulb bg-bulb/10 px-2 py-1 text-[10px] tracking-widest text-bulb transition-colors hover:bg-bulb hover:text-field-deep focus:outline-none focus-visible:bg-bulb focus-visible:text-field-deep"
+        :aria-label="$t('scoreboard.watchFreeLabel', { matchup })"
+      >
+        <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
+        {{ $t('scoreboard.watchFree') }}
+      </a>
+      <a
+        v-if="gamedayUrl"
+        :href="gamedayUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nameplate inline-flex items-center gap-1 px-2 py-1 text-[10px] tracking-widest text-chalk-dim transition-colors hover:text-bulb focus:outline-none focus-visible:text-bulb"
+        :aria-label="$t('scoreboard.gamedayLabel', { matchup })"
+      >
+        {{ $t('scoreboard.gameday') }}
+        <span aria-hidden="true">↗</span>
+      </a>
     </div>
   </section>
 </template>

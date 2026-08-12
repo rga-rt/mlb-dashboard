@@ -180,6 +180,7 @@ export interface ScoreboardGame {
   away: GameSide
   live: LiveState | null // present only when status === 'live'
   broadcasts: Broadcast[] // TV / radio carriers; empty when the feed lists none
+  freeGame: boolean // streams free on MLB.TV without a subscription/login
 }
 
 export interface ScoreboardResponse {
