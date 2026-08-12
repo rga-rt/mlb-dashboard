@@ -50,6 +50,24 @@ function addDays(date: string, n: number): string {
   return d.toISOString().slice(0, 10)
 }
 
+// Split the wire into two league sections — MLB and the Mexican leagues — each
+// keeping its own newest-first date grouping. Section order follows the locale,
+// mirroring the standings board: MLB first for English, the Mexican leagues
+// first for Spanish. A section only appears when it has moves.
+const MEXICAN = new Set(['LMB', 'LMP'])
+const sections = computed(() => {
+  const days = data.value?.days ?? []
+  const daysFor = (inMexican: boolean) =>
+    days
+      .map(d => ({ date: d.date, transactions: d.transactions.filter(t => MEXICAN.has(t.league) === inMexican) }))
+      .filter(d => d.transactions.length > 0)
+
+  const mlb = { key: 'mlb', days: daysFor(false) }
+  const mex = { key: 'mex', days: daysFor(true) }
+  const ordered = locale.value === 'es' ? [mex, mlb] : [mlb, mex]
+  return ordered.filter(s => s.days.length > 0)
+})
+
 useHead({ title: 'News — MLB transactions & roster moves' })
 </script>
 
@@ -127,7 +145,7 @@ useHead({ title: 'News — MLB transactions & roster moves' })
     </div>
 
     <!-- Loaded, but no moves in the window -->
-    <div v-else-if="data && !data.days.length" class="border border-seam bg-panel px-5 py-6">
+    <div v-else-if="data && !sections.length" class="border border-seam bg-panel px-5 py-6">
       <h2 class="nameplate flex items-center gap-2 text-lg text-chalk">
         <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-seam ring-1 ring-line" aria-hidden="true" />
         {{ $t('news.emptyTitle') }}
@@ -135,22 +153,36 @@ useHead({ title: 'News — MLB transactions & roster moves' })
       <p class="mt-1 text-sm text-chalk-dim">{{ $t('news.emptyBody') }}</p>
     </div>
 
-    <!-- The wire, grouped by day -->
-    <div v-else-if="data" class="space-y-10">
-      <section v-for="day in data.days" :key="day.date">
-        <div class="mb-3 flex items-center gap-3">
+    <!-- The wire, split into league sections (locale-ordered), each grouped by day -->
+    <div v-else-if="data" class="space-y-12">
+      <section v-for="section in sections" :key="section.key">
+        <!-- League section banner -->
+        <div class="mb-5 flex items-center gap-3">
           <span class="bulb inline-block h-2 w-2 shrink-0" aria-hidden="true" />
-          <h2 class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk">{{ dayLabel(day.date) }}</h2>
+          <h2 class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk">
+            {{ $t(section.key === 'mex' ? 'board.sectionMexican' : 'board.sectionMlb') }}
+          </h2>
           <span class="h-0.5 flex-1 bg-seam" aria-hidden="true" />
-          <span class="nameplate shrink-0 text-[11px] tracking-wider text-chalk-dim">{{ day.transactions.length }}</span>
         </div>
-        <div class="divide-y divide-seam border border-seam bg-panel px-3">
-          <TransactionRow
-            v-for="tx in day.transactions"
-            :key="tx.id"
-            :tx="tx"
-            from="news"
-          />
+
+        <!-- Date sub-groups within the section -->
+        <div class="space-y-8">
+          <section v-for="day in section.days" :key="day.date">
+            <div class="mb-3 flex items-center gap-3">
+              <span class="inline-block h-1.5 w-1.5 shrink-0 bg-chalk-dim/50" aria-hidden="true" />
+              <h3 class="nameplate shrink-0 text-[11px] tracking-[0.25em] text-chalk-dim">{{ dayLabel(day.date) }}</h3>
+              <span class="h-px flex-1 bg-seam" aria-hidden="true" />
+              <span class="nameplate shrink-0 text-[11px] tracking-wider text-chalk-dim">{{ day.transactions.length }}</span>
+            </div>
+            <div class="divide-y divide-seam border border-seam bg-panel px-3">
+              <TransactionRow
+                v-for="tx in day.transactions"
+                :key="tx.id"
+                :tx="tx"
+                from="news"
+              />
+            </div>
+          </section>
         </div>
       </section>
     </div>
