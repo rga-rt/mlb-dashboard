@@ -21,3 +21,12 @@ export function rosterStatusLabel(status: string): string {
   if (s.includes('suspend')) return 'Suspended'
   return status
 }
+
+/**
+ * How prominently to flag a status. Injuries get the clay accent so a hurt
+ * player stands out; administrative moves (minors, DFA, traded, ...) stay
+ * neutral.
+ */
+export function rosterStatusTone(status: string): 'injury' | 'neutral' {
+  return status.toLowerCase().includes('injur') ? 'injury' : 'neutral'
+}

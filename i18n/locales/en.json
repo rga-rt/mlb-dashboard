@@ -8,7 +8,44 @@
     "exploreTeam": "Explore a team",
     "primary": "Primary",
     "board": "Board",
-    "liveToday": "Live Today"
+    "liveToday": "Live Today",
+    "upcoming": "Upcoming",
+    "news": "News"
+  },
+  "news": {
+    "eyebrow": "Off the Wire",
+    "title": "News",
+    "intro": "Every roster move across the majors from the last three days — trades, signings, injured-list moves, call-ups and more, straight from the official transactions feed.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "viewStats": "Stats",
+    "emptyTitle": "No moves posted",
+    "emptyBody": "No transactions have come across the wire in the last few days. Check back after the next roster shuffle.",
+    "type": {
+      "TR": "Trade",
+      "SGN": "Signed",
+      "SFA": "Signed (FA)",
+      "DES": "DFA",
+      "DFA": "Free Agency",
+      "REL": "Released",
+      "CLW": "Claimed",
+      "OPT": "Optioned",
+      "CU": "Recalled",
+      "ASG": "Assigned",
+      "SE": "Selected",
+      "OUT": "Outrighted",
+      "SC": "Status",
+      "IL": "IL"
+    }
+  },
+  "upcoming": {
+    "eyebrow": "Next Three Days",
+    "title": "Upcoming",
+    "intro": "The next three days on the schedule — MLB and the Mexican leagues — with first-pitch times, probable pitchers, and where to watch or listen. Finals drop off; this is the look-ahead.",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "emptyTitle": "Nothing on the schedule",
+    "emptyBody": "No games are posted for the next few days across MLB or the Mexican leagues. Check back when the next slate is announced."
   },
   "scoreboard": {
     "eyebrow": "Around the League",
@@ -21,7 +58,14 @@
     "finalTag": "FINAL",
     "pitcher": "P",
     "batter": "AB",
+    "tv": "TV",
+    "radio": "Radio",
+    "gameday": "Gameday",
+    "gamedayLabel": "Open the {matchup} game on MLB Gameday",
+    "watchFree": "Free · MLB.TV",
+    "watchFreeLabel": "Watch {matchup} free on MLB.TV",
     "probable": "Probable pitchers",
+    "viewPlayer": "View {name}'s stats",
     "tbd": "TBD",
     "basesEmpty": "bases empty",
     "liveSummary": "{balls} balls, {strikes} strikes, {outs} out, {bases}.",
@@ -97,7 +141,10 @@
     "view": "View {team}"
   },
   "team": {
-    "back": "Back to the board",
+    "back": "Back to the Board",
+    "backScoreboard": "Back to Live Today",
+    "backUpcoming": "Back to Upcoming",
+    "backNews": "Back to News",
     "loading": "Loading…",
     "rosterErrTitle": "Couldn't load that roster",
     "rosterErrBody": "The team id may be wrong, or the API is unreachable.",

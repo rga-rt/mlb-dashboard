@@ -1,46 +1,12 @@
 <script setup lang="ts">
-import type { ScoreboardGame, ScoreboardResponse } from '~/types/mlb'
+import type { NewsResponse } from '~/types/mlb'
 
-const { data, pending, error, refresh } = await useFetch<ScoreboardResponse>('/api/scoreboard')
+const { t, locale } = useI18n()
 
-// The board polls itself so scores tick over without a manual reload. It runs
-// only in the browser, only while the tab is visible, and clears on unmount —
-// a hidden tab shouldn't keep hammering the API.
-const POLL_MS = 30_000
-let pollTimer: ReturnType<typeof setInterval> | undefined
+const { data, pending, error, refresh } = await useFetch<NewsResponse>('/api/news')
 
-function startPolling() {
-  stopPolling()
-  pollTimer = setInterval(() => {
-    // Don't stack a fetch on top of one already in flight.
-    if (!pending.value) refresh()
-  }, POLL_MS)
-}
-function stopPolling() {
-  if (pollTimer) clearInterval(pollTimer)
-  pollTimer = undefined
-}
-function onVisibility() {
-  if (document.hidden) {
-    stopPolling()
-  }
-  else {
-    refresh() // catch up immediately on return, then resume the interval
-    startPolling()
-  }
-}
-
-onMounted(() => {
-  startPolling()
-  document.addEventListener('visibilitychange', onVisibility)
-})
-onBeforeUnmount(() => {
-  stopPolling()
-  document.removeEventListener('visibilitychange', onVisibility)
-})
-
-// "Posted HH:MM" freshness stamp, set client-side only so the time never
-// mismatches between server and client render. Flashes amber when a poll lands.
+// "Posted HH:MM" freshness stamp, client-side only so the time never mismatches
+// between server and client render.
 const lastUpdated = ref<Date | null>(null)
 const justUpdated = ref(false)
 let flashTimer: ReturnType<typeof setTimeout> | undefined
@@ -63,19 +29,46 @@ const postedLabel = computed(() =>
     : null,
 )
 
-// The day's games split into labeled sections, in reading order: what's on now,
-// what's coming, what's done. A section only appears when it has games.
+// Day label: "Today" / "Yesterday" for the two most recent days, else weekday +
+// date. Anchored on the response's `end` (the server's today), so the string is
+// identical on server and client — no hydration mismatch.
+const yesterday = computed(() => (data.value ? addDays(data.value.end, -1) : ''))
+function dayLabel(date: string): string {
+  if (data.value && date === data.value.end) return t('news.today')
+  if (date === yesterday.value) return t('news.yesterday')
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString(locale.value, {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
+}
+
+function addDays(date: string, n: number): string {
+  const d = new Date(`${date}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + n)
+  return d.toISOString().slice(0, 10)
+}
+
+// Split the wire into two league sections — MLB and the Mexican leagues — each
+// keeping its own newest-first date grouping. Section order follows the locale,
+// mirroring the standings board: MLB first for English, the Mexican leagues
+// first for Spanish. A section only appears when it has moves.
+const MEXICAN = new Set(['LMB', 'LMP'])
 const sections = computed(() => {
-  const games = data.value?.games ?? []
-  const groups: { key: string; label: string; games: ScoreboardGame[] }[] = [
-    { key: 'live', label: 'scoreboard.live', games: games.filter(g => g.status === 'live') },
-    { key: 'upcoming', label: 'scoreboard.upcoming', games: games.filter(g => g.status === 'scheduled' || g.status === 'other') },
-    { key: 'final', label: 'scoreboard.final', games: games.filter(g => g.status === 'final') },
-  ]
-  return groups.filter(s => s.games.length > 0)
+  const days = data.value?.days ?? []
+  const daysFor = (inMexican: boolean) =>
+    days
+      .map(d => ({ date: d.date, transactions: d.transactions.filter(t => MEXICAN.has(t.league) === inMexican) }))
+      .filter(d => d.transactions.length > 0)
+
+  const mlb = { key: 'mlb', days: daysFor(false) }
+  const mex = { key: 'mex', days: daysFor(true) }
+  const ordered = locale.value === 'es' ? [mex, mlb] : [mlb, mex]
+  return ordered.filter(s => s.days.length > 0)
 })
 
-useHead({ title: 'Live Today — MLB scoreboard' })
+useHead({ title: 'News — MLB transactions & roster moves' })
 </script>
 
 <template>
@@ -85,10 +78,10 @@ useHead({ title: 'Live Today — MLB scoreboard' })
       <div>
         <p class="nameplate flex items-center gap-2 text-xs tracking-[0.3em] text-chalk-dim">
           <span class="bulb inline-block h-2 w-2" aria-hidden="true" />
-          {{ $t('scoreboard.eyebrow') }}
+          {{ $t('news.eyebrow') }}
         </p>
         <h1 class="nameplate mt-2 text-5xl leading-[0.85] text-chalk md:text-6xl">
-          {{ $t('scoreboard.title') }}
+          {{ $t('news.title') }}
         </h1>
       </div>
       <div class="flex flex-col items-end gap-1.5">
@@ -111,10 +104,10 @@ useHead({ title: 'Live Today — MLB scoreboard' })
     </div>
 
     <p v-if="!error || data" class="mb-6 max-w-2xl text-sm text-chalk-dim">
-      {{ $t('scoreboard.intro') }}
+      {{ $t('news.intro') }}
     </p>
 
-    <!-- Poll/refresh failed but we still have a board: keep it, banner above. -->
+    <!-- Refresh failed but we still have a feed: keep it, banner above. -->
     <div
       v-if="error && data"
       role="alert"
@@ -132,11 +125,11 @@ useHead({ title: 'Live Today — MLB scoreboard' })
     </div>
 
     <!-- Loading -->
-    <div v-if="pending && !data" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <div v-for="n in 6" :key="n" class="h-40 animate-pulse border border-seam bg-panel/50" />
+    <div v-if="pending && !data" class="space-y-3">
+      <div v-for="n in 8" :key="n" class="h-12 animate-pulse border border-seam bg-panel/50" />
     </div>
 
-    <!-- First-load error: no board to fall back to -->
+    <!-- First-load error: no feed to fall back to -->
     <div v-else-if="error && !data" role="alert" class="border border-clay/50 bg-panel px-5 py-6">
       <h2 class="nameplate flex items-center gap-2 text-lg text-clay">
         <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-clay/80 ring-1 ring-clay" aria-hidden="true" />
@@ -151,25 +144,45 @@ useHead({ title: 'Live Today — MLB scoreboard' })
       </button>
     </div>
 
-    <!-- Loaded, but the schedule is empty (off-day, or too early) -->
+    <!-- Loaded, but no moves in the window -->
     <div v-else-if="data && !sections.length" class="border border-seam bg-panel px-5 py-6">
       <h2 class="nameplate flex items-center gap-2 text-lg text-chalk">
         <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-seam ring-1 ring-line" aria-hidden="true" />
-        {{ $t('scoreboard.emptyTitle') }}
+        {{ $t('news.emptyTitle') }}
       </h2>
-      <p class="mt-1 text-sm text-chalk-dim">{{ $t('scoreboard.emptyBody') }}</p>
+      <p class="mt-1 text-sm text-chalk-dim">{{ $t('news.emptyBody') }}</p>
     </div>
 
-    <!-- The board, split into Live / Upcoming / Final sections -->
-    <div v-else-if="data" class="space-y-10">
+    <!-- The wire, split into league sections (locale-ordered), each grouped by day -->
+    <div v-else-if="data" class="space-y-12">
       <section v-for="section in sections" :key="section.key">
-        <div class="mb-4 flex items-center gap-3">
+        <!-- League section banner -->
+        <div class="mb-5 flex items-center gap-3">
           <span class="bulb inline-block h-2 w-2 shrink-0" aria-hidden="true" />
-          <h2 class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk">{{ $t(section.label) }}</h2>
+          <h2 class="nameplate shrink-0 text-xs tracking-[0.28em] text-chalk">
+            {{ $t(section.key === 'mex' ? 'board.sectionMexican' : 'board.sectionMlb') }}
+          </h2>
           <span class="h-0.5 flex-1 bg-seam" aria-hidden="true" />
         </div>
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <GameCard v-for="game in section.games" :key="game.gamePk" :game="game" from="scoreboard" />
+
+        <!-- Date sub-groups within the section -->
+        <div class="space-y-8">
+          <section v-for="day in section.days" :key="day.date">
+            <div class="mb-3 flex items-center gap-3">
+              <span class="inline-block h-1.5 w-1.5 shrink-0 bg-chalk-dim/50" aria-hidden="true" />
+              <h3 class="nameplate shrink-0 text-[11px] tracking-[0.25em] text-chalk-dim">{{ dayLabel(day.date) }}</h3>
+              <span class="h-px flex-1 bg-seam" aria-hidden="true" />
+              <span class="nameplate shrink-0 text-[11px] tracking-wider text-chalk-dim">{{ day.transactions.length }}</span>
+            </div>
+            <div class="divide-y divide-seam border border-seam bg-panel px-3">
+              <TransactionRow
+                v-for="tx in day.transactions"
+                :key="tx.id"
+                :tx="tx"
+                from="news"
+              />
+            </div>
+          </section>
         </div>
       </section>
     </div>

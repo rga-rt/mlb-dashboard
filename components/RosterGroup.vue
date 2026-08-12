@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { RosterPlayer } from '~/types/mlb'
-import { rosterStatusLabel } from '~/utils/roster'
 
 defineProps<{
   group: { type: string, list: RosterPlayer[] }
@@ -11,16 +10,11 @@ defineEmits<{ select: [id: number] }>()
 
 const { t, te } = useI18n()
 
-// Localize the position-group header and the status badge, falling back to the
-// raw MLB value when the feed sends something we don't have a translation for.
+// Localize the position-group header, falling back to the raw MLB value when the
+// feed sends something we don't have a translation for.
 function posLabel(type: string): string {
   const key = `positions.${type}`
   return te(key) ? t(key) : type
-}
-function statusLabel(status: string): string {
-  const abbr = rosterStatusLabel(status)
-  const key = `status.${abbr}`
-  return te(key) ? t(key) : abbr
 }
 </script>
 
@@ -49,12 +43,7 @@ function statusLabel(status: string): string {
           <span class="nameplate flex-1 truncate text-[15px] tracking-wide text-chalk" :title="p.name">
             {{ p.name }}
           </span>
-          <span
-            v-if="p.status !== 'Active'"
-            class="nameplate shrink-0 border border-line/50 px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"
-          >
-            {{ statusLabel(p.status) }}
-          </span>
+          <PlayerStatusBadge :status="p.status" />
           <span
             class="nameplate shrink-0 border border-line px-1.5 py-0.5 text-[10px] tracking-wider text-chalk-dim"
           >

@@ -144,6 +144,18 @@ export interface GameSide {
   abbr: string // e.g. "NYY" (falls back to name when the feed omits it)
   runs: number | null // null before first pitch
   probablePitcher: string | null // scheduled games only
+  probablePitcherId: number | null // personId, for linking to the player's stats
+}
+
+// A single TV / radio / streaming broadcast for a game. `medium` normalizes the
+// feed's raw types (TV / AM / FM) down to what a viewer cares about; `side` is
+// which club's feed it is (or 'national'). Mexican-league games often carry no
+// broadcasts at all — the card simply omits the line then.
+export interface Broadcast {
+  name: string // e.g. "ESPN", "Bally Sports West", "MLB.TV", "104.3 The Score"
+  medium: 'TV' | 'radio'
+  national: boolean
+  side: 'home' | 'away' | 'national'
 }
 
 export interface LiveState {
@@ -156,7 +168,11 @@ export interface LiveState {
   onSecond: boolean
   onThird: boolean
   currentPitcher: string | null
+  currentPitcherId: number | null // personId, for linking to the pitcher's stats
+  currentPitcherTeamId: number | null // the defending team (pitcher's club)
   currentBatter: string | null
+  currentBatterId: number | null // personId, for linking to the batter's stats
+  currentBatterTeamId: number | null // the batting team (batter's club)
 }
 
 export interface ScoreboardGame {
@@ -168,11 +184,54 @@ export interface ScoreboardGame {
   home: GameSide
   away: GameSide
   live: LiveState | null // present only when status === 'live'
+  broadcasts: Broadcast[] // TV / radio carriers; empty when the feed lists none
+  freeGame: boolean // streams free on MLB.TV without a subscription/login
 }
 
 export interface ScoreboardResponse {
   date: string // YYYY-MM-DD
   games: ScoreboardGame[]
+}
+
+// A single day of the upcoming feed: its date and that day's games (finals
+// filtered out — it's a look-ahead).
+export interface UpcomingDay {
+  date: string // YYYY-MM-DD
+  games: ScoreboardGame[]
+}
+
+export interface UpcomingResponse {
+  start: string // YYYY-MM-DD (inclusive)
+  end: string // YYYY-MM-DD (inclusive)
+  days: UpcomingDay[] // only days that have games, in date order
+}
+
+// --- News (transactions) --------------------------------------------------
+// One roster move from MLB's /transactions feed, flattened for the News tab.
+// `description` is the feed's ready-made sentence; the player/team ids let the
+// move link to the player's stats.
+export interface Transaction {
+  id: number
+  league: 'MLB' | 'LMB' | 'LMP' // which league's wire this move came off
+  date: string // YYYY-MM-DD
+  type: string // typeDesc, e.g. "Trade", "Signed", "Status Change"
+  typeCode: string // e.g. "TR", "SC", "OPT"
+  description: string
+  playerName: string | null
+  playerId: number | null
+  teamName: string | null
+  teamId: number | null // the acting / destination club (toTeam)
+}
+
+export interface NewsDay {
+  date: string // YYYY-MM-DD
+  transactions: Transaction[]
+}
+
+export interface NewsResponse {
+  start: string // YYYY-MM-DD (inclusive)
+  end: string // YYYY-MM-DD (inclusive)
+  days: NewsDay[] // newest day first
 }
 
 // Club + ballpark info shown on the team page header.

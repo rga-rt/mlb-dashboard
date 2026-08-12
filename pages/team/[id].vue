@@ -7,6 +7,18 @@ const route = useRoute()
 const router = useRouter()
 const teamId = computed(() => route.params.id as string)
 
+// Which page sent us here (?from=standings|scoreboard|upcoming), captured once
+// at setup so the back link stays stable even as selecting a player rewrites the
+// query. Unknown or absent → the standings board, the long-standing default.
+const BACK_TARGETS: Record<string, { to: string; key: string }> = {
+  standings: { to: '/standings', key: 'team.back' },
+  scoreboard: { to: '/scoreboard', key: 'team.backScoreboard' },
+  upcoming: { to: '/upcoming', key: 'team.backUpcoming' },
+  news: { to: '/news', key: 'team.backNews' },
+}
+const originFrom = String(route.query.from ?? '')
+const back = BACK_TARGETS[originFrom] ?? BACK_TARGETS.standings
+
 // Type-ahead over a ~40-name roster: match on name, jersey, or position.
 const rosterFilter = ref('')
 function matchesFilter(p: RosterPlayer): boolean {
@@ -78,6 +90,10 @@ const detailPanel = ref<HTMLElement | null>(null)
 const analyticsOpen = ref(true)
 const selectedName = computed(() =>
   roster.value?.players.find((p: RosterPlayer) => p.personId === selectedId.value)?.name ?? '')
+// The open player's roster status, for the injury/status badge in the detail
+// header — read off the roster we already have, so no extra fetch.
+const selectedStatus = computed(() =>
+  roster.value?.players.find((p: RosterPlayer) => p.personId === selectedId.value)?.status ?? null)
 const statusMsg = computed(() => {
   if (playerPending.value) return `Loading ${selectedName.value || 'player'}…`
   if (playerError.value) return `Couldn’t load ${selectedName.value || 'that player'}`
@@ -244,6 +260,8 @@ function revealDetail() {
 function buildQuery(): Record<string, string> {
   const q: Record<string, string> = { season: String(season.value) }
   if (selectedId.value != null) q.player = String(selectedId.value)
+  // Preserve where we came from so the back link survives reloads/shares.
+  if (originFrom) q.from = originFrom
   return q
 }
 function syncUrl(mode: 'push' | 'replace') {
@@ -287,10 +305,10 @@ function onAnalyticsToggle(e: Event) {
 <template>
   <div>
     <NuxtLinkLocale
-      to="/standings"
+      :to="back.to"
       class="nameplate mb-6 inline-flex items-center gap-2 text-xs tracking-wider text-chalk-dim transition-colors hover:text-bulb"
     >
-      ← {{ $t('team.back') }}
+      ← {{ $t(back.key) }}
     </NuxtLinkLocale>
 
     <div v-if="error" class="border border-clay/50 bg-panel px-5 py-6">
@@ -435,7 +453,10 @@ function onAnalyticsToggle(e: Event) {
             <div v-else-if="player">
               <div class="mb-5 flex items-start justify-between gap-4 border-b border-line pb-3">
                 <div class="min-w-0">
-                  <h3 class="nameplate text-3xl leading-[0.95] text-chalk">{{ player.name }}</h3>
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <h3 class="nameplate text-3xl leading-[0.95] text-chalk">{{ player.name }}</h3>
+                    <PlayerStatusBadge v-if="selectedStatus" :status="selectedStatus" />
+                  </div>
                   <p class="mt-1.5 text-xs text-chalk-dim">
                     {{ player.position }}
                     <template v-if="player.bats || player.throws">

@@ -8,7 +8,44 @@
     "exploreTeam": "Explorar un equipo",
     "primary": "Principal",
     "board": "Tablero",
-    "liveToday": "En Vivo Hoy"
+    "liveToday": "En Vivo Hoy",
+    "upcoming": "Próximos",
+    "news": "Noticias"
+  },
+  "news": {
+    "eyebrow": "En el Cable",
+    "title": "Noticias",
+    "intro": "Cada movimiento de roster en las Grandes Ligas de los últimos tres días — cambios, firmas, movimientos a la lista de lesionados, llamados y más, directo del feed oficial de transacciones.",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "viewStats": "Perfil",
+    "emptyTitle": "Sin movimientos",
+    "emptyBody": "No han llegado transacciones en los últimos días. Vuelve tras el próximo ajuste de roster.",
+    "type": {
+      "TR": "Cambio",
+      "SGN": "Firmado",
+      "SFA": "Firmado (AL)",
+      "DES": "DFA",
+      "DFA": "Agencia Libre",
+      "REL": "Liberado",
+      "CLW": "Reclamado",
+      "OPT": "Enviado",
+      "CU": "Llamado",
+      "ASG": "Asignado",
+      "SE": "Seleccionado",
+      "OUT": "Outright",
+      "SC": "Estatus",
+      "IL": "IL"
+    }
+  },
+  "upcoming": {
+    "eyebrow": "Próximos Tres Días",
+    "title": "Próximos",
+    "intro": "Los próximos tres días del calendario — MLB y las ligas mexicanas — con horas del primer lanzamiento, pícheres probables y dónde ver o escuchar. Los finales desaparecen; esto es lo que viene.",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "emptyTitle": "Nada en el calendario",
+    "emptyBody": "No hay juegos publicados para los próximos días en MLB ni en las ligas mexicanas. Vuelve cuando se anuncie la próxima cartelera."
   },
   "scoreboard": {
     "eyebrow": "Alrededor de la Liga",
@@ -21,7 +58,14 @@
     "finalTag": "FINAL",
     "pitcher": "P",
     "batter": "B",
+    "tv": "TV",
+    "radio": "Radio",
+    "gameday": "Gameday",
+    "gamedayLabel": "Abrir el juego {matchup} en MLB Gameday",
+    "watchFree": "Gratis · MLB.TV",
+    "watchFreeLabel": "Ver {matchup} gratis en MLB.TV",
     "probable": "Pícheres probables",
+    "viewPlayer": "Ver las estadísticas de {name}",
     "tbd": "Por definir",
     "basesEmpty": "bases vacías",
     "liveSummary": "{balls} bolas, {strikes} strikes, {outs} out, {bases}.",
@@ -97,7 +141,10 @@
     "view": "Ver {team}"
   },
   "team": {
-    "back": "Volver al tablero",
+    "back": "Volver al Tablero",
+    "backScoreboard": "Volver a En Vivo Hoy",
+    "backUpcoming": "Volver a Próximos",
+    "backNews": "Volver a Noticias",
     "loading": "Cargando…",
     "rosterErrTitle": "No se pudo cargar ese roster",
     "rosterErrBody": "El id del equipo puede ser incorrecto, o la API no responde.",

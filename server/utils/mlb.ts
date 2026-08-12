@@ -2,6 +2,7 @@
 // Runs inside Nitro (server), so there is no CORS restriction here — the
 // browser only ever talks to our own /api routes.
 import type {
+  Broadcast,
   Division,
   GameSide,
   GameStatus,
@@ -9,6 +10,7 @@ import type {
   LiveState,
   ScoreboardGame,
   TeamRecord,
+  Transaction,
 } from '~/types/mlb'
 
 /** Fetch a path off the MLB base URL and return parsed JSON. */
@@ -117,12 +119,18 @@ export function orderDivisions(divisions: Division[]): Division[] {
 
 // --- Live Today (scoreboard) ---------------------------------------------
 
-// The leagues the scoreboard covers, each its own sportId in the schedule feed.
-// MLB=1, Mexican League (LMB)=23, LMP=17 — same ids the roster/stats routes use.
-export const SCOREBOARD_SPORTS = [
-  { id: 1, label: 'MLB' as const },
-  { id: 23, label: 'LMB' as const },
-  { id: 17, label: 'LMP' as const },
+// The leagues our boards cover. Each is a sportId, but the two Mexican leagues
+// live inside broad umbrella sports — 23 = Independent Leagues, 17 = Winter
+// Leagues — that also carry unrelated circuits (US independent ball, the
+// Australian league, Venezuelan/Dominican winter ball, ...). The precise
+// leagueId narrows each to its Mexican clubs only: 125 = Liga Mexicana de
+// Béisbol (LMB), 132 = Liga Mexicana del Pacífico (LMP) — the same ids the
+// standings route keys off. Endpoints accept leagueId alongside sportId (or, for
+// /transactions, on its own) to filter to just those clubs.
+export const SCOREBOARD_SPORTS: { label: ScoreboardGame['sport']; sportId: number; leagueId?: number }[] = [
+  { label: 'MLB', sportId: 1 },
+  { label: 'LMB', sportId: 23, leagueId: 125 },
+  { label: 'LMP', sportId: 17, leagueId: 132 },
 ]
 
 /**
@@ -139,6 +147,34 @@ export function gameStatus(abstractGameState: string | null): GameStatus {
   }
 }
 
+/**
+ * Flatten the raw `game.broadcasts` list (from hydrate=broadcasts(all)) into our
+ * Broadcast shape. Normalizes the feed's medium (TV / AM / FM → TV / radio) and
+ * de-duplicates: the same national carrier is often listed once per side (e.g.
+ * "MLBN" for home and away), which we collapse to a single national entry.
+ */
+export function flattenBroadcasts(raw: any[] | null | undefined): Broadcast[] {
+  const out: Broadcast[] = []
+  const seen = new Set<string>()
+  for (const b of (raw ?? [])) {
+    const name = pick<string>(b, 'name', '') as string
+    if (!name) continue
+    const type = pick<string>(b, 'type', '') as string
+    const medium: Broadcast['medium'] = type === 'TV' ? 'TV' : 'radio'
+    const national = pick<boolean>(b, 'isNational', false) as boolean
+    // National carriers dedupe by name alone (drop the per-side duplication);
+    // local ones stay distinct per side so both clubs' feeds show.
+    const side: Broadcast['side'] = national
+      ? 'national'
+      : (pick<string>(b, 'homeAway', 'home') as Broadcast['side'])
+    const key = national ? `${medium}|${name}` : `${medium}|${name}|${side}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push({ name, medium, national, side })
+  }
+  return out
+}
+
 /** Read a side's flat shape off a raw schedule `game.teams.home|away` node. */
 function flattenSide(rawSide: any): GameSide {
   const team = pick(rawSide, 'team', {}) as any
@@ -152,6 +188,7 @@ function flattenSide(rawSide: any): GameSide {
       ?? pick<string>(team, 'name', 'TBD')) as string,
     runs: pick<number>(rawSide, 'score', null),
     probablePitcher: pick<string>(probable, 'fullName', null),
+    probablePitcherId: pick<number>(probable, 'id', null),
   }
 }
 
@@ -165,6 +202,7 @@ export function flattenScoreboardGame(
   sport: ScoreboardGame['sport'],
 ): ScoreboardGame {
   const status = gameStatus(pick<string>(game?.status, 'abstractGameState', null))
+  const rawBroadcasts = pick(game, 'broadcasts', []) as any[]
   const line = pick(game, 'linescore', {}) as any
   const offense = pick(line, 'offense', {}) as any
   const defense = pick(line, 'defense', {}) as any
@@ -181,7 +219,11 @@ export function flattenScoreboardGame(
       onSecond: pick(offense, 'second', null) != null,
       onThird: pick(offense, 'third', null) != null,
       currentPitcher: pick<string>(pick(defense, 'pitcher', {}), 'fullName', null),
+      currentPitcherId: pick<number>(pick(defense, 'pitcher', {}), 'id', null),
+      currentPitcherTeamId: pick<number>(pick(defense, 'team', {}), 'id', null),
       currentBatter: pick<string>(pick(offense, 'batter', {}), 'fullName', null),
+      currentBatterId: pick<number>(pick(offense, 'batter', {}), 'id', null),
+      currentBatterTeamId: pick<number>(pick(offense, 'team', {}), 'id', null),
     }
   }
 
@@ -194,6 +236,10 @@ export function flattenScoreboardGame(
     home: flattenSide(pick(game?.teams, 'home', {})),
     away: flattenSide(pick(game?.teams, 'away', {})),
     live,
+    broadcasts: flattenBroadcasts(rawBroadcasts),
+    // A game is "free" if any carrier flags it — MLB's free game of the day
+    // streams on MLB.TV with no subscription.
+    freeGame: rawBroadcasts.some(b => pick<boolean>(b, 'freeGame', false)),
   }
 }
 
@@ -215,4 +261,28 @@ export function sortScoreboard(games: ScoreboardGame[]): ScoreboardGame[] {
     // tiebreak.
     return (a.startTime ?? '').localeCompare(b.startTime ?? '')
   })
+}
+
+// --- News (transactions) --------------------------------------------------
+
+/**
+ * Flatten one raw /transactions entry into our Transaction shape. `toTeam` is
+ * the acting/destination club (the team that made the move); `person` carries
+ * the player's id + name so the move can link to their stats.
+ */
+export function flattenTransaction(tx: any, league: Transaction['league']): Transaction {
+  const person = pick(tx, 'person', {}) as any
+  const toTeam = pick(tx, 'toTeam', {}) as any
+  return {
+    id: pick<number>(tx, 'id', 0) as number,
+    league,
+    date: pick<string>(tx, 'date', '') as string,
+    type: pick<string>(tx, 'typeDesc', '') as string,
+    typeCode: pick<string>(tx, 'typeCode', '') as string,
+    description: pick<string>(tx, 'description', '') as string,
+    playerName: pick<string>(person, 'fullName', null),
+    playerId: pick<number>(person, 'id', null),
+    teamName: pick<string>(toTeam, 'name', null),
+    teamId: pick<number>(toTeam, 'id', null),
+  }
 }

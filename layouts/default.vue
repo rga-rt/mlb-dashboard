@@ -27,6 +27,20 @@
               <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
               {{ $t('nav.liveToday') }}
             </NuxtLinkLocale>
+            <NuxtLinkLocale
+              to="/upcoming"
+              class="nameplate px-2.5 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
+              active-class="text-bulb"
+            >
+              {{ $t('nav.upcoming') }}
+            </NuxtLinkLocale>
+            <NuxtLinkLocale
+              to="/news"
+              class="nameplate px-2.5 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
+              active-class="text-bulb"
+            >
+              {{ $t('nav.news') }}
+            </NuxtLinkLocale>
           </nav>
           <LangSwitch />
         </div>

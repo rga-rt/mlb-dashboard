@@ -183,7 +183,7 @@ function hideBrokenLogo(e: Event) {
               >{{ isPinned(team.teamId) ? '★' : '☆' }}</button>
             </span>
             <NuxtLinkLocale
-              :to="`/team/${team.teamId}?season=${season}`"
+              :to="`/team/${team.teamId}?season=${season}&from=standings`"
               :aria-label="$t('division.view', { team: team.name })"
               class="absolute inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-bulb"
             />
