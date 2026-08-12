@@ -126,6 +126,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;
+    /* Also zero stagger delays, or a delayed entrance holds its hidden
+       (fill: both) start state for the delay window before snapping in. */
+    animation-delay: 0ms !important;
     transition-duration: 0.001ms !important;
   }
 }

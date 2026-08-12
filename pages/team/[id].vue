@@ -120,7 +120,13 @@ const compareRows = computed(() => {
   return compareToTeam(comparePool.value, selectedId.value, group === 'pitching' ? PITCHING_COMPARE : HITTING_COMPARE)
 })
 
-async function loadTeamStats() {
+// A monotonic token supersedes in-flight fetches: only the latest selection or
+// season change commits its results, so a slow or stale-season response can't
+// overwrite the current player's data. Manual retries pass no token and default
+// to the current one, so they always commit.
+let requestId = 0
+
+async function loadTeamStats(rid = requestId) {
   const group = compareGroup.value
   teamStatsError.value = false
   if (!group) {
@@ -138,19 +144,21 @@ async function loadTeamStats() {
     const res = await $fetch<TeamStatsResponse>(`/api/team-stats/${teamId.value}`, {
       query: { season: season.value, group, sportId },
     })
-    teamStatsCache.value[key] = res.players
+    teamStatsCache.value[key] = res.players // valid for this key regardless of supersession
+    if (rid !== requestId) return
     teamStats.value = res.players
   } catch {
+    if (rid !== requestId) return
     teamStats.value = null
     teamStatsError.value = true
   } finally {
-    teamStatsPending.value = false
+    if (rid === requestId) teamStatsPending.value = false
   }
 }
 
 // Advanced sabermetrics + ZiPS for the open player. Rank/forecast use the same
 // group, so key off compareGroup; a null result just hides the panel.
-async function loadAdvanced(id: number) {
+async function loadAdvanced(id: number, rid = requestId) {
   const group = compareGroup.value
   advancedError.value = false
   if (!group) {
@@ -162,14 +170,14 @@ async function loadAdvanced(id: number) {
     const res = await $fetch<PlayerAdvancedResponse>(`/api/player-advanced/${id}`, {
       query: { season: season.value, group, sportId: roster.value?.sportId ?? 1 },
     })
-    if (selectedId.value === id) advanced.value = res
+    if (rid === requestId) advanced.value = res
   } catch {
-    if (selectedId.value === id) {
+    if (rid === requestId) {
       advanced.value = null
       advancedError.value = true
     }
   } finally {
-    if (selectedId.value === id) advancedPending.value = false
+    if (rid === requestId) advancedPending.value = false
   }
 }
 
@@ -179,6 +187,7 @@ function hideBrokenLogo(e: Event) {
 }
 
 async function selectPlayer(id: number, opts: { fromUrl?: boolean } = {}) {
+  const rid = ++requestId
   selectedId.value = id
   playerPending.value = true
   playerError.value = false
@@ -192,22 +201,25 @@ async function selectPlayer(id: number, opts: { fromUrl?: boolean } = {}) {
   if (!opts.fromUrl) syncUrl('push')
   revealDetail()
   try {
-    player.value = await $fetch<PlayerResponse>(`/api/player/${id}`, {
+    const res = await $fetch<PlayerResponse>(`/api/player/${id}`, {
       query: { season: season.value, sportId: roster.value?.sportId ?? 1 },
     })
+    if (rid !== requestId) return // a newer selection/season change superseded this one
+    player.value = res
     // compareGroup now reflects the loaded player; pull the pool to rank against.
-    await loadTeamStats()
+    await loadTeamStats(rid)
     // Advanced metrics + ZiPS are a bonus panel — a failure here shouldn't
     // knock out the whole player view, so load them separately and swallow.
-    loadAdvanced(id)
+    loadAdvanced(id, rid)
   } catch {
-    playerError.value = true
+    if (rid === requestId) playerError.value = true
   } finally {
-    playerPending.value = false
+    if (rid === requestId) playerPending.value = false
   }
 }
 
 function deselect(opts: { fromUrl?: boolean } = {}) {
+  requestId++ // invalidate any in-flight selection so it can't commit after deselect
   selectedId.value = null
   player.value = null
   advanced.value = null

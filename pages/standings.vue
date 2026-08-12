@@ -48,8 +48,10 @@ const sections = computed(() => {
   const divisions = data.value?.divisions ?? []
   const mex = { key: 'mex', divisions: divisions.filter(d => MEXICAN.has(d.league)) }
   const mlb = { key: 'mlb', divisions: divisions.filter(d => !MEXICAN.has(d.league)) }
-  // Lead with the league that matters most to the reader: MLB for English,
-  // the Mexican leagues for Spanish.
+  // Regroup the server's division list into two labeled league sections and
+  // order the *sections* by locale — MLB first for English, the Mexican leagues
+  // first for Spanish. Division order *within* each section still comes from the
+  // server (DIVISION_ORDER in server/utils/mlb.ts); this only reorders the two.
   const ordered = locale.value === 'es' ? [mex, mlb] : [mlb, mex]
   return ordered.filter(s => s.divisions.length > 0)
 })
