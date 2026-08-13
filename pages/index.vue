@@ -57,37 +57,8 @@ useHead({
 
 <template>
   <div>
-    <!-- Nav: single line, under 72px -->
-    <header class="sticky top-0 z-40 border-b border-seam bg-field/85 backdrop-blur">
-      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <NuxtLinkLocale to="/" class="flex items-center gap-2.5">
-          <span class="bulb inline-block h-3 w-3" aria-hidden="true" />
-          <span class="nameplate text-sm tracking-[0.2em] text-chalk">Scoreboard</span>
-        </NuxtLinkLocale>
-        <div class="flex items-center gap-2">
-          <NuxtLinkLocale
-            :to="`/team/${sampleTeamId}`"
-            class="nameplate hidden px-3 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb sm:inline-block"
-          >
-            {{ $t('nav.exploreTeam') }}
-          </NuxtLinkLocale>
-          <NuxtLinkLocale
-            to="/scoreboard"
-            class="nameplate flex items-center gap-1.5 px-3 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
-          >
-            <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-            {{ $t('nav.liveToday') }}
-          </NuxtLinkLocale>
-          <NuxtLinkLocale
-            to="/standings"
-            class="nameplate border border-bulb bg-bulb px-3.5 py-2 text-[11px] tracking-widest text-field-deep transition-colors hover:bg-bulb-core"
-          >
-            {{ $t('nav.openBoard') }}
-          </NuxtLinkLocale>
-          <LangSwitch class="lg:ml-4" />
-        </div>
-      </nav>
-    </header>
+    <!-- Same masthead as every other page, so the header never mismatches -->
+    <SiteMasthead />
 
     <!-- Hero: asymmetric split, copy left, live board right -->
     <section class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 md:px-6 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14 lg:py-0">
