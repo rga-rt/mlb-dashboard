@@ -11,6 +11,8 @@ export interface TeamRecord {
   streak: string // e.g. "W3"
   divisionRank: string
   divisionLeader: boolean
+  lastTenWins: number // record over the last 10 games — the hot/cold signal
+  lastTenLosses: number
 }
 
 // AL/NL are the two MLB leagues; LMB (Mexican League) and LMP (Liga

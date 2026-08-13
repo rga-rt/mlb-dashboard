@@ -19,6 +19,8 @@ function team(over: Partial<TeamRecord> & { teamId: number }): TeamRecord {
     streak: 'W1',
     divisionRank: '1',
     divisionLeader: false,
+    lastTenWins: 5,
+    lastTenLosses: 5,
     ...over,
   }
 }

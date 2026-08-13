@@ -92,6 +92,8 @@
     "liveSeeAll": "Full scoreboard",
     "liveQuiet": "No games are live this minute. First pitches light up the board the moment they're thrown — until then, take a look at what's on today's card.",
     "liveSeeSlate": "See today's slate",
+    "formEyebrow": "Form Guide",
+    "formHeading": "Who's hot, who's slipping",
     "boardLive": "live",
     "boardLegend": "W / L / GB",
     "boardSeeAll": "See all six divisions",
@@ -110,6 +112,18 @@
     "deepDiveBody": "Tap a club, walk its roster like a lineup card, and open a player to see the numbers behind the number.",
     "ctaTitle": "Step up to the board.",
     "ctaBody": "Six divisions, thirty clubs, every stat line. No account, no paywall."
+  },
+  "form": {
+    "hotColdTitle": "Hot & Cold",
+    "hot": "Hot",
+    "cold": "Cold",
+    "last10": "L10",
+    "streak": "STRK",
+    "record": "W-L",
+    "matchupsTitle": "Division Races",
+    "gamesBack": "GB",
+    "tied": "Tied",
+    "leader": "Division leader"
   },
   "board": {
     "eyebrow": "Regular Season",

@@ -81,6 +81,9 @@ export function flattenStandings(records: any[]): Division[] {
     const teams: TeamRecord[] = (pick(rec, 'teamRecords', []) as any[]).map((tr) => {
       const team = pick(tr, 'team', {}) as any
       const streak = pick(tr, 'streak', {}) as any
+      // Last-10 record lives among the split records (home/away/lastTen/...).
+      const splits = pick(pick(tr, 'records', {}), 'splitRecords', []) as any[]
+      const l10 = splits.find(s => pick<string>(s, 'type', '') === 'lastTen') ?? {}
       return {
         teamId: pick<number>(team, 'id', 0) as number,
         name: pick<string>(team, 'name', 'Unknown') as string,
@@ -91,6 +94,8 @@ export function flattenStandings(records: any[]): Division[] {
         streak: pick<string>(streak, 'streakCode', '-') as string,
         divisionRank: pick<string>(tr, 'divisionRank', '-') as string,
         divisionLeader: pick<boolean>(tr, 'divisionLeader', false) as boolean,
+        lastTenWins: pick<number>(l10, 'wins', 0) as number,
+        lastTenLosses: pick<number>(l10, 'losses', 0) as number,
       }
     })
     teams.sort((a, b) => Number(a.divisionRank) - Number(b.divisionRank))
