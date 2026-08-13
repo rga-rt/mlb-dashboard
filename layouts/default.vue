@@ -14,7 +14,7 @@
           </span>
         </NuxtLinkLocale>
         <nav
-          class="order-last -mx-4 flex w-full items-center gap-1 overflow-x-auto px-4 sm:order-none sm:mx-0 sm:w-auto sm:overflow-visible sm:px-0"
+          class="order-last -mx-4 flex w-full items-center justify-end gap-1 overflow-x-auto px-4 sm:order-none sm:mx-0 sm:w-auto sm:justify-normal sm:overflow-visible sm:px-0"
           :aria-label="$t('nav.primary')"
         >
           <NuxtLinkLocale
