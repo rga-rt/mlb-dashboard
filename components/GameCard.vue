@@ -86,7 +86,11 @@ function hideBrokenLogo(e: Event) {
 </script>
 
 <template>
-  <section class="border border-seam bg-panel">
+  <!-- min-w-0 lets the card shrink to its grid column: without it, a nowrap
+       line (a long probable name, or an LMB club whose abbr is its full name)
+       sets a min-width wider than a phone and scrolls the page sideways. The
+       inner truncate rules then clip cleanly. -->
+  <section class="min-w-0 border border-seam bg-panel">
     <!-- Top strip: league tag left, status readout right -->
     <div class="flex items-center justify-between border-b-2 border-seam bg-field-deep px-3 py-2">
       <span class="nameplate border border-line px-1.5 py-0.5 text-[10px] tracking-widest text-chalk-dim">
