@@ -41,7 +41,7 @@
           </NuxtLinkLocale>
           <NuxtLinkLocale
             to="/news"
-            class="nameplate shrink-0 whitespace-nowrap px-2.5 py-2 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb"
+            class="nameplate shrink-0 whitespace-nowrap py-2 pl-2.5 pr-0 text-[11px] tracking-widest text-chalk-dim transition-colors hover:text-bulb sm:pr-2.5"
             active-class="text-bulb"
           >
             {{ $t('nav.news') }}
