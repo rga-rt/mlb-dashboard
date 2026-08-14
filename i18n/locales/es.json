@@ -47,6 +47,10 @@
     "emptyTitle": "Nada en el calendario",
     "emptyBody": "No hay juegos publicados para los próximos días en MLB ni en las ligas mexicanas. Vuelve cuando se anuncie la próxima cartelera."
   },
+  "ticker": {
+    "label": "Marcadores de hoy",
+    "final": "F"
+  },
   "scoreboard": {
     "eyebrow": "Alrededor de la Liga",
     "title": "En Vivo Hoy",

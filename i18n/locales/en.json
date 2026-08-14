@@ -47,6 +47,10 @@
     "emptyTitle": "Nothing on the schedule",
     "emptyBody": "No games are posted for the next few days across MLB or the Mexican leagues. Check back when the next slate is announced."
   },
+  "ticker": {
+    "label": "Today's scores",
+    "final": "F"
+  },
   "scoreboard": {
     "eyebrow": "Around the League",
     "title": "Live Today",

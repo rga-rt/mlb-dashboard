@@ -80,6 +80,10 @@ useHead({ title: 'Live Today — MLB scoreboard' })
 
 <template>
   <div>
+    <!-- Ribbon board across the top: today's slate drifting by. Bleeds past the
+         page padding to span the content edge-to-edge. -->
+    <ScoreTicker v-if="data && data.games.length" :games="data.games" class="-mx-4 mb-8 md:-mx-6" />
+
     <!-- Hero: headline plus a manual refresh and the freshness stamp -->
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>

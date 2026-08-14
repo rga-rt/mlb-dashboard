@@ -138,13 +138,16 @@ describe('flattenScoreboardGame', () => {
       gameDate: '2026-08-12T23:05:00Z',
       status: { abstractGameState: 'Preview', detailedState: 'Scheduled' },
       teams: {
-        away: { team: { id: 147, name: 'New York Yankees', abbreviation: 'NYY' }, probablePitcher: { id: 605400, fullName: 'Carlos Rodón' } },
-        home: { team: { id: 111, name: 'Boston Red Sox', abbreviation: 'BOS' } },
+        // The schedule feed reports score: 0 for games that haven't started;
+        // we null it so nothing paints a phantom "0 – 0" on a game hours away.
+        away: { team: { id: 147, name: 'New York Yankees', abbreviation: 'NYY' }, score: 0, probablePitcher: { id: 605400, fullName: 'Carlos Rodón' } },
+        home: { team: { id: 111, name: 'Boston Red Sox', abbreviation: 'BOS' }, score: 0 },
       },
     }, 'MLB')
     expect(g.status).toBe('scheduled')
     expect(g.live).toBeNull()
     expect(g.away.runs).toBeNull()
+    expect(g.home.runs).toBeNull()
     expect(g.away.probablePitcher).toBe('Carlos Rodón')
     expect(g.away.probablePitcherId).toBe(605400)
     expect(g.home.probablePitcher).toBeNull()
