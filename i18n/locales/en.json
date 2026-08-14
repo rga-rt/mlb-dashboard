@@ -64,6 +64,8 @@
     "gamedayLabel": "Open the {matchup} game on MLB Gameday",
     "watchFree": "Free · MLB.TV",
     "watchFreeLabel": "Watch {matchup} free on MLB.TV",
+    "findStream": "Find Stream",
+    "findStreamLabel": "Find where to stream {matchup} on MLB.TV",
     "probable": "Probable pitchers",
     "viewPlayer": "View {name}'s stats",
     "tbd": "TBD",

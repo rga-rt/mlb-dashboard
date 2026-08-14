@@ -56,15 +56,21 @@ const liveSummary = computed(() => {
   })
 })
 
-// Broadcasts split into TV and radio for display. National TV sorts ahead of
-// local, and identical names collapse — so a card reads "ESPN · Bally Sports
-// West" rather than repeating a shared carrier.
+// Broadcasts split into TV and radio for display. TV keeps the national flag so
+// national carriers (ESPN, MLBN, MLB.TV) render as accented badges and local
+// RSNs as neutral ones. National sorts ahead of local, and duplicate names
+// collapse.
 const tvBroadcasts = computed(() => {
-  const names = props.game.broadcasts
+  const seen = new Set<string>()
+  return props.game.broadcasts
     .filter(b => b.medium === 'TV')
     .sort((a, b) => Number(b.national) - Number(a.national))
-    .map(b => b.name)
-  return [...new Set(names)]
+    .filter((b) => {
+      if (seen.has(b.name)) return false
+      seen.add(b.name)
+      return true
+    })
+    .map(b => ({ name: b.name, national: b.national }))
 })
 const radioBroadcasts = computed(() =>
   [...new Set(props.game.broadcasts.filter(b => b.medium === 'radio').map(b => b.name))],
@@ -242,10 +248,17 @@ function hideBrokenLogo(e: Event) {
       v-if="tvBroadcasts.length || radioBroadcasts.length"
       class="border-t border-seam bg-field-deep/30 px-3 py-2 text-[11px] leading-snug"
     >
-      <dl class="space-y-0.5">
-        <div v-if="tvBroadcasts.length" class="flex gap-2">
-          <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.tv') }}</dt>
-          <dd class="min-w-0 break-words text-chalk">{{ tvBroadcasts.join(' · ') }}</dd>
+      <dl class="space-y-1">
+        <div v-if="tvBroadcasts.length" class="flex items-start gap-2">
+          <dt class="nameplate mt-0.5 shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.tv') }}</dt>
+          <dd class="flex min-w-0 flex-wrap gap-1">
+            <span
+              v-for="b in tvBroadcasts"
+              :key="b.name"
+              class="nameplate border px-1.5 py-0.5 text-[10px] leading-none tracking-wider"
+              :class="b.national ? 'border-bulb/50 bg-bulb/10 text-bulb' : 'border-line/60 text-chalk'"
+            >{{ b.name }}</span>
+          </dd>
         </div>
         <div v-if="radioBroadcasts.length" class="flex gap-2">
           <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.radio') }}</dt>
@@ -270,6 +283,19 @@ function hideBrokenLogo(e: Event) {
       >
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
         {{ $t('scoreboard.watchFree') }}
+      </a>
+      <!-- Find Stream: the MLB.TV game page (blackout/where-to-watch) for MLB
+           games not already flagged free. -->
+      <a
+        v-if="gamedayUrl && !game.freeGame"
+        :href="mlbtvUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nameplate inline-flex items-center gap-1 border border-line/60 px-2 py-1 text-[10px] tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb focus:outline-none focus-visible:border-bulb focus-visible:text-bulb"
+        :aria-label="$t('scoreboard.findStreamLabel', { matchup })"
+      >
+        {{ $t('scoreboard.findStream') }}
+        <span aria-hidden="true">↗</span>
       </a>
       <a
         v-if="gamedayUrl"
