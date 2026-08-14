@@ -49,7 +49,8 @@
   },
   "ticker": {
     "label": "Today's scores",
-    "final": "F"
+    "final": "F",
+    "count": "{b}-{s}, {o} out"
   },
   "scoreboard": {
     "eyebrow": "Around the League",

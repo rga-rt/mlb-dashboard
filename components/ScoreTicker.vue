@@ -45,6 +45,36 @@ const loop = computed(() => [...props.games, ...props.games])
 function hideBrokenLogo(e: Event) {
   ;(e.target as HTMLImageElement).style.visibility = 'hidden'
 }
+
+// Hover peek: a chit is a terse summary, so a tooltip fills in the rest — the
+// live count and who's up, or the probables and where to watch. Teleported to
+// <body> and fixed-positioned from the chit's rect, since the ticker itself is
+// overflow-hidden and its track is transform-animated (both would clip/shift a
+// tooltip nested inside).
+const active = ref<ScoreboardGame | null>(null)
+const tip = reactive({ left: 0, top: 0 })
+const TIP_W = 244
+function showTip(e: MouseEvent, g: ScoreboardGame) {
+  const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  tip.left = Math.min(Math.max(8, r.left), window.innerWidth - TIP_W - 8)
+  tip.top = r.bottom + 6
+  active.value = g
+}
+function hideTip() {
+  active.value = null
+}
+
+// The status line inside the tooltip, spelled out more than the chit's glyph.
+function tipStatus(g: ScoreboardGame): string {
+  if (g.status === 'live') return `${t('scoreboard.liveTag')} · ${inning(g)}`
+  if (g.status === 'final') return t('scoreboard.finalTag')
+  if (g.status === 'scheduled') return timeLabel(g)
+  return g.statusDetail
+}
+// Distinct TV carriers, in feed order — "where to watch" at a glance.
+function tvNetworks(g: ScoreboardGame): string {
+  return [...new Set(g.broadcasts.filter(b => b.medium === 'TV').map(b => b.name))].join(', ')
+}
 </script>
 
 <template>
@@ -57,8 +87,10 @@ function hideBrokenLogo(e: Event) {
       <div
         v-for="(g, i) in loop"
         :key="`${g.gamePk}-${i}`"
-        class="flex items-center gap-1.5 whitespace-nowrap border-r border-seam px-4 py-2"
+        class="flex cursor-default items-center gap-1.5 whitespace-nowrap border-r border-seam px-4 py-2"
         :aria-hidden="i >= games.length ? 'true' : undefined"
+        @mouseenter="showTip($event, g)"
+        @mouseleave="hideTip"
       >
         <span class="logo-tile"><img :src="teamLogo(g.away.teamId)" alt="" width="16" height="16" class="h-4 w-4 object-contain" @error="hideBrokenLogo"></span>
         <template v-if="hasScore(g)">
@@ -73,10 +105,116 @@ function hideBrokenLogo(e: Event) {
         >{{ statusLabel(g) }}</span>
       </div>
     </div>
+
+    <!-- Hover peek, at <body> level so the ticker's overflow/transform can't clip
+         or drag it. Non-interactive: it never steals the hover off the chit. -->
+    <Teleport to="body">
+      <div
+        v-if="active"
+        class="ticker-tip"
+        role="tooltip"
+        :style="{ left: `${tip.left}px`, top: `${tip.top}px` }"
+      >
+        <p class="tip-teams">
+          {{ active.away.name }}<span class="tip-at"> @ </span>{{ active.home.name }}
+        </p>
+        <p v-if="hasScore(active)" class="tip-score">
+          <span class="digit" :class="isLeading(active, 'away') ? 'lit' : 'text-chalk'">{{ active.away.runs }}</span>
+          <span class="digit text-chalk-dim"> – </span>
+          <span class="digit" :class="isLeading(active, 'home') ? 'lit' : 'text-chalk'">{{ active.home.runs }}</span>
+          <span class="tip-status">{{ tipStatus(active) }}</span>
+        </p>
+        <p v-else class="tip-status tip-status--solo">{{ tipStatus(active) }}</p>
+
+        <template v-if="active.status === 'live' && active.live">
+          <p class="tip-count">{{ t('ticker.count', { b: active.live.balls, s: active.live.strikes, o: active.live.outs }) }}</p>
+          <p v-if="active.live.currentPitcher" class="tip-line">
+            <span class="tip-label">{{ t('scoreboard.pitcher') }}</span>{{ active.live.currentPitcher }}
+          </p>
+          <p v-if="active.live.currentBatter" class="tip-line">
+            <span class="tip-label">{{ t('scoreboard.batter') }}</span>{{ active.live.currentBatter }}
+          </p>
+        </template>
+
+        <template v-else-if="active.status === 'scheduled'">
+          <p class="tip-line">
+            <span class="tip-label">{{ active.away.abbr }}</span>{{ active.away.probablePitcher || t('scoreboard.tbd') }}
+          </p>
+          <p class="tip-line">
+            <span class="tip-label">{{ active.home.abbr }}</span>{{ active.home.probablePitcher || t('scoreboard.tbd') }}
+          </p>
+        </template>
+
+        <p v-if="tvNetworks(active)" class="tip-line">
+          <span class="tip-label">{{ t('scoreboard.tv') }}</span>{{ tvNetworks(active) }}
+        </p>
+      </div>
+    </Teleport>
   </section>
 </template>
 
 <style scoped>
+/* Hover peek. Teleported to <body>, but Vue keeps the scoped attribute on the
+   node, so these styles still reach it. */
+.ticker-tip {
+  position: fixed;
+  z-index: 60;
+  width: 244px;
+  max-width: calc(100vw - 16px);
+  padding: 0.6rem 0.7rem;
+  pointer-events: none;
+  border: 1px solid var(--color-seam);
+  background: var(--color-panel);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 0.5);
+}
+.tip-teams {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--color-chalk);
+}
+.tip-at { color: var(--color-chalk-dim); }
+.tip-score {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  font-size: 15px;
+}
+.tip-status {
+  margin-left: auto;
+  align-self: center;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 9px;
+  color: var(--color-chalk-dim);
+}
+.tip-status--solo { margin-top: 0.35rem; margin-left: 0; }
+.tip-count {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--color-chalk);
+}
+.tip-line {
+  margin-top: 0.3rem;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--color-chalk-dim);
+}
+.tip-label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 9px;
+  color: var(--color-bulb);
+  margin-right: 0.4rem;
+}
+
 /* Each logo rides a small light enamel tile. Many MLB marks are navy or black
    and vanish against the dark ribbon; the tile gives every one a consistent,
    readable backing — like a painted panel on the board. */
