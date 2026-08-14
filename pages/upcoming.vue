@@ -55,7 +55,10 @@ useHead({ title: 'Upcoming — MLB schedule, probables & TV' })
           <span class="bulb inline-block h-2 w-2" aria-hidden="true" />
           {{ $t('upcoming.eyebrow') }}
         </p>
-        <h1 class="nameplate mt-2 text-5xl leading-[0.85] text-chalk md:text-6xl">
+        <!-- mt-4 (vs mt-2 elsewhere): the Spanish title "PRÓXIMOS" carries an
+             accent on the capital Ó that, with the tight leading, would otherwise
+             crowd the eyebrow above it. -->
+        <h1 class="nameplate mt-4 text-5xl leading-[0.85] text-chalk md:text-6xl">
           {{ $t('upcoming.title') }}
         </h1>
       </div>
