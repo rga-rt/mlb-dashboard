@@ -255,14 +255,24 @@ export function flattenScoreboardGame(
     }
   }
 
+  const home = flattenSide(pick(game?.teams, 'home', {}))
+  const away = flattenSide(pick(game?.teams, 'away', {}))
+  // The schedule feed reports score: 0 for games that haven't started. A
+  // scheduled game has no score yet, so null it out — otherwise the board and
+  // ticker paint a phantom "0 – 0" on a game that's hours away.
+  if (status === 'scheduled') {
+    home.runs = null
+    away.runs = null
+  }
+
   return {
     gamePk: pick<number>(game, 'gamePk', 0) as number,
     status,
     statusDetail: pick<string>(game?.status, 'detailedState', '') as string,
     startTime: pick<string>(game, 'gameDate', null),
     sport,
-    home: flattenSide(pick(game?.teams, 'home', {})),
-    away: flattenSide(pick(game?.teams, 'away', {})),
+    home,
+    away,
     live,
     broadcasts: flattenBroadcasts(rawBroadcasts),
     // A game is "free" if any carrier flags it — MLB's free game of the day

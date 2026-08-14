@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { ScoreboardGame, ScoreboardResponse } from '~/types/mlb'
 
-const { data, pending, error, refresh } = await useFetch<ScoreboardResponse>('/api/scoreboard')
+// Keyed 'scoreboard' so the site-wide SiteTicker shares this exact fetch — its
+// ribbon rides this page's polling instead of firing a second request.
+const { data, pending, error, refresh } = await useFetch<ScoreboardResponse>('/api/scoreboard', {
+  key: 'scoreboard',
+})
 
 // The board polls itself so scores tick over without a manual reload. It runs
 // only in the browser, only while the tab is visible, and clears on unmount —

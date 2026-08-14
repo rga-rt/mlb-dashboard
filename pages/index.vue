@@ -60,6 +60,9 @@ useHead({
     <!-- Same masthead as every other page, so the header never mismatches -->
     <SiteMasthead />
 
+    <!-- Site-wide scores ribbon, matching the app pages' layout -->
+    <SiteTicker />
+
     <!-- Hero: asymmetric split, copy left, live board right -->
     <section class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 md:px-6 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14 lg:py-0">
       <div class="reveal">

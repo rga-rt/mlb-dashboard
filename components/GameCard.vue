@@ -34,9 +34,11 @@ const inningArrow = computed(() => {
   return '·'
 })
 
-// Final games bold the winner's run total; a tie (or pre-game) bolds neither.
-function isWinner(side: 'home' | 'away'): boolean {
-  if (props.game.status !== 'final') return false
+// The team ahead gets a lit run total — amber while the game is in progress (the
+// live number is the hero) and on the winner once it's final. A tie, or a game
+// not yet started, lights neither.
+function isLeading(side: 'home' | 'away'): boolean {
+  if (props.game.status !== 'live' && props.game.status !== 'final') return false
   const h = props.game.home.runs ?? -1
   const a = props.game.away.runs ?? -1
   return side === 'home' ? h > a : a > h
@@ -154,7 +156,7 @@ function hideBrokenLogo(e: Event) {
         <span class="nameplate truncate text-[13px] tracking-wide text-chalk">{{ game[side].abbr }}</span>
         <span
           class="digit text-right text-lg leading-none"
-          :class="game[side].runs == null ? 'text-chalk-dim' : (isWinner(side) ? 'lit' : 'text-chalk')"
+          :class="game[side].runs == null ? 'text-chalk-dim' : (isLeading(side) ? 'lit' : 'text-chalk')"
         >{{ game[side].runs ?? '–' }}</span>
       </div>
     </div>
