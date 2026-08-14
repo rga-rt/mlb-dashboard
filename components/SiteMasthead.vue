@@ -70,7 +70,7 @@ function isCurrent(to: string): boolean {
       <!-- Mobile: burger toggle -->
       <button
         type="button"
-        class="tap-target -mr-1.5 flex items-center p-1.5 text-chalk transition-colors hover:text-bulb focus-visible:text-bulb focus:outline-none sm:hidden"
+        class="tap-target relative -mr-1.5 flex items-center p-1.5 text-chalk transition-colors hover:text-bulb focus-visible:text-bulb focus:outline-none sm:hidden"
         :aria-expanded="open"
         aria-controls="mobile-nav"
         :aria-label="$t('nav.menu')"
