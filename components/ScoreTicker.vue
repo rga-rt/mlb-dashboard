@@ -60,13 +60,13 @@ function hideBrokenLogo(e: Event) {
         class="flex items-center gap-1.5 whitespace-nowrap border-r border-seam px-4 py-2"
         :aria-hidden="i >= games.length ? 'true' : undefined"
       >
-        <img :src="teamLogo(g.away.teamId)" alt="" width="18" height="18" class="h-[18px] w-[18px] shrink-0 object-contain" @error="hideBrokenLogo">
+        <span class="logo-tile"><img :src="teamLogo(g.away.teamId)" alt="" width="16" height="16" class="h-4 w-4 object-contain" @error="hideBrokenLogo"></span>
         <template v-if="hasScore(g)">
           <span class="digit text-sm leading-none" :class="isLeading(g, 'away') ? 'lit' : 'text-chalk'">{{ g.away.runs }}</span>
           <span class="digit text-[11px] leading-none text-chalk-dim">–</span>
           <span class="digit text-sm leading-none" :class="isLeading(g, 'home') ? 'lit' : 'text-chalk'">{{ g.home.runs }}</span>
         </template>
-        <img :src="teamLogo(g.home.teamId)" alt="" width="18" height="18" class="h-[18px] w-[18px] shrink-0 object-contain" @error="hideBrokenLogo">
+        <span class="logo-tile"><img :src="teamLogo(g.home.teamId)" alt="" width="16" height="16" class="h-4 w-4 object-contain" @error="hideBrokenLogo"></span>
         <span
           class="nameplate ml-1 text-[10px] tracking-widest"
           :class="g.status === 'live' ? 'text-bulb' : 'text-chalk-dim'"
@@ -77,6 +77,21 @@ function hideBrokenLogo(e: Event) {
 </template>
 
 <style scoped>
+/* Each logo rides a small light enamel tile. Many MLB marks are navy or black
+   and vanish against the dark ribbon; the tile gives every one a consistent,
+   readable backing — like a painted panel on the board. */
+.logo-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 22px;
+  width: 22px;
+  border-radius: 3px;
+  background: var(--color-chalk);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+}
+
 /* A steady, readable drift — like the ribbon board circling a stadium. Pauses on
    hover; the global reduced-motion reset zeroes the duration so it holds still. */
 .ticker-track {
