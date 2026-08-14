@@ -1,6 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { flattenBroadcasts, flattenScoreboardGame, gameStatus, sortScoreboard } from '~/server/utils/mlb'
+import { addScheduleDays, flattenBroadcasts, flattenScoreboardGame, gameStatus, scheduleToday, sortScoreboard } from '~/server/utils/mlb'
 import type { ScoreboardGame } from '~/types/mlb'
+
+describe('schedule date helpers', () => {
+  it('scheduleToday returns a YYYY-MM-DD date (US Pacific, not UTC)', () => {
+    expect(scheduleToday()).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    // In the US evening, UTC has rolled to the next day but the Pacific-anchored
+    // schedule date must not be ahead of it.
+    expect(scheduleToday() <= new Date().toISOString().slice(0, 10)).toBe(true)
+  })
+
+  it('addScheduleDays does calendar arithmetic on the date string', () => {
+    expect(addScheduleDays('2026-08-13', 2)).toBe('2026-08-15')
+    expect(addScheduleDays('2026-08-13', -2)).toBe('2026-08-11')
+    expect(addScheduleDays('2026-08-31', 1)).toBe('2026-09-01') // month rollover
+    expect(addScheduleDays('2026-08-13', 0)).toBe('2026-08-13')
+  })
+})
 
 describe('gameStatus', () => {
   it('maps the feed\'s abstractGameState to our enum', () => {

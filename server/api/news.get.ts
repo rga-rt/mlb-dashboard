@@ -1,5 +1,5 @@
 import type { NewsDay, NewsResponse, Transaction } from '~/types/mlb'
-import { SCOREBOARD_SPORTS, flattenTransaction, mlbFetch, pick } from '~/server/utils/mlb'
+import { SCOREBOARD_SPORTS, addScheduleDays, flattenTransaction, mlbFetch, pick, scheduleToday } from '~/server/utils/mlb'
 
 // GET /api/news?days=3
 // Recent roster transactions (all types) over the last N days (default 3,
@@ -11,8 +11,8 @@ export default defineEventHandler(async (event): Promise<NewsResponse> => {
   const q = getQuery(event)
   // Clamp the window: "all transactions" is high-volume, so keep it bounded.
   const span = Math.min(Math.max(Number(q.days) || 3, 1), 7)
-  const end = today()
-  const start = addDays(end, -(span - 1))
+  const end = scheduleToday()
+  const start = addScheduleDays(end, -(span - 1))
 
   const results = await Promise.allSettled(
     SCOREBOARD_SPORTS.map((sport) => {
@@ -45,15 +45,3 @@ export default defineEventHandler(async (event): Promise<NewsResponse> => {
 
   return { start, end, days }
 })
-
-/** Today's date as YYYY-MM-DD, in the server's local zone. */
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
-/** Add `n` days (may be negative) to a YYYY-MM-DD string, returning YYYY-MM-DD. */
-function addDays(date: string, n: number): string {
-  const d = new Date(`${date}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}
