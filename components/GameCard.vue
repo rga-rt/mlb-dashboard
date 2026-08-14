@@ -202,7 +202,7 @@ function hideBrokenLogo(e: Event) {
            gives us both the personId and their team. -->
       <div v-if="game.live.currentPitcher || game.live.currentBatter" class="mt-2.5 space-y-0.5 text-[11px] leading-snug">
         <p v-if="game.live.currentPitcher" class="break-words text-chalk-dim">
-          <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.pitcher') }}</span>
+          <span class="nameplate mr-1.5 tracking-wider text-chalk">{{ $t('scoreboard.pitcher') }}</span>
           <NuxtLinkLocale
             v-if="game.live.currentPitcherId != null && game.live.currentPitcherTeamId != null"
             :to="{ path: `/team/${game.live.currentPitcherTeamId}`, query: { player: String(game.live.currentPitcherId), ...(from ? { from } : {}) } }"
@@ -212,7 +212,7 @@ function hideBrokenLogo(e: Event) {
           <template v-else>{{ game.live.currentPitcher }}</template>
         </p>
         <p v-if="game.live.currentBatter" class="break-words text-chalk-dim">
-          <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.batter') }}</span>
+          <span class="nameplate mr-1.5 tracking-wider text-chalk">{{ $t('scoreboard.batter') }}</span>
           <NuxtLinkLocale
             v-if="game.live.currentBatterId != null && game.live.currentBatterTeamId != null"
             :to="{ path: `/team/${game.live.currentBatterTeamId}`, query: { player: String(game.live.currentBatterId), ...(from ? { from } : {}) } }"
