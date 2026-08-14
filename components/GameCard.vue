@@ -5,7 +5,7 @@ import type { ScoreboardGame } from '~/types/mlb'
 // return to the page the card was shown on (scoreboard / upcoming).
 const props = defineProps<{ game: ScoreboardGame, from?: string }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // A game's start time is the viewer's local clock, so it can only be resolved in
 // the browser — the server's timezone would differ. We hold off until mounted so
@@ -56,28 +56,44 @@ const liveSummary = computed(() => {
   })
 })
 
-// Broadcasts split into TV and radio for display. National TV sorts ahead of
-// local, and identical names collapse — so a card reads "ESPN · Bally Sports
-// West" rather than repeating a shared carrier.
+// Broadcasts split into TV and radio for display. TV keeps the national flag so
+// national carriers (ESPN, MLBN, MLB.TV) render as accented badges and local
+// RSNs as neutral ones. National sorts ahead of local, and duplicate names
+// collapse.
 const tvBroadcasts = computed(() => {
-  const names = props.game.broadcasts
+  const seen = new Set<string>()
+  return props.game.broadcasts
     .filter(b => b.medium === 'TV')
     .sort((a, b) => Number(b.national) - Number(a.national))
-    .map(b => b.name)
-  return [...new Set(names)]
+    .filter((b) => {
+      if (seen.has(b.name)) return false
+      seen.add(b.name)
+      return true
+    })
+    .map(b => ({ name: b.name, national: b.national }))
 })
 const radioBroadcasts = computed(() =>
   [...new Set(props.game.broadcasts.filter(b => b.medium === 'radio').map(b => b.name))],
 )
 
-// Per-game links. Gameday resolves off the MLB gamePk (a bare id 301-redirects
-// to the canonical page), so it's offered for MLB games only — the Mexican
-// leagues aren't on mlb.com/gameday. The free-game badge points at the MLB.TV
-// watch page and shows only when the feed flags the game as free to stream.
+// Gameday (a live pitch-by-pitch tracker) resolves off the StatsAPI gamePk for
+// EVERY league — MLB and the Mexican leagues alike (a bare id 301-redirects to
+// the canonical page; /es works too).
 const gamedayUrl = computed(() =>
-  props.game.sport === 'MLB' ? `https://www.mlb.com/gameday/${props.game.gamePk}` : null,
+  props.game.gamePk
+    ? `https://www.mlb.com/${locale.value === 'es' ? 'es/' : ''}gameday/${props.game.gamePk}`
+    : null,
 )
+// The MLB.TV game page (used only by the free-game badge below — free games need
+// no login). "Find Stream" instead points at a web search for the matchup: the
+// MLB.TV page otherwise requires a subscription, whereas a search surfaces the
+// actual (free or paid) options and works for every league.
 const mlbtvUrl = computed(() => `https://www.mlb.com/tv/g${props.game.gamePk}`)
+const findStreamUrl = computed(() =>
+  // "how to watch" steers the search toward official streaming options rather
+  // than "live stream" bait sites.
+  `https://www.google.com/search?q=${encodeURIComponent(`how to watch ${props.game.away.name} vs ${props.game.home.name}`)}`,
+)
 const matchup = computed(() => `${props.game.away.abbr} @ ${props.game.home.abbr}`)
 
 function hideBrokenLogo(e: Event) {
@@ -193,7 +209,7 @@ function hideBrokenLogo(e: Event) {
            gives us both the personId and their team. -->
       <div v-if="game.live.currentPitcher || game.live.currentBatter" class="mt-2.5 space-y-0.5 text-[11px] leading-snug">
         <p v-if="game.live.currentPitcher" class="break-words text-chalk-dim">
-          <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.pitcher') }}</span>
+          <span class="nameplate mr-1.5 tracking-wider text-chalk">{{ $t('scoreboard.pitcher') }}</span>
           <NuxtLinkLocale
             v-if="game.live.currentPitcherId != null && game.live.currentPitcherTeamId != null"
             :to="{ path: `/team/${game.live.currentPitcherTeamId}`, query: { player: String(game.live.currentPitcherId), ...(from ? { from } : {}) } }"
@@ -203,7 +219,7 @@ function hideBrokenLogo(e: Event) {
           <template v-else>{{ game.live.currentPitcher }}</template>
         </p>
         <p v-if="game.live.currentBatter" class="break-words text-chalk-dim">
-          <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.batter') }}</span>
+          <span class="nameplate mr-1.5 tracking-wider text-chalk">{{ $t('scoreboard.batter') }}</span>
           <NuxtLinkLocale
             v-if="game.live.currentBatterId != null && game.live.currentBatterTeamId != null"
             :to="{ path: `/team/${game.live.currentBatterTeamId}`, query: { player: String(game.live.currentBatterId), ...(from ? { from } : {}) } }"
@@ -242,10 +258,17 @@ function hideBrokenLogo(e: Event) {
       v-if="tvBroadcasts.length || radioBroadcasts.length"
       class="border-t border-seam bg-field-deep/30 px-3 py-2 text-[11px] leading-snug"
     >
-      <dl class="space-y-0.5">
-        <div v-if="tvBroadcasts.length" class="flex gap-2">
-          <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.tv') }}</dt>
-          <dd class="min-w-0 break-words text-chalk">{{ tvBroadcasts.join(' · ') }}</dd>
+      <dl class="space-y-1">
+        <div v-if="tvBroadcasts.length" class="flex items-start gap-2">
+          <dt class="nameplate mt-0.5 shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.tv') }}</dt>
+          <dd class="flex min-w-0 flex-wrap gap-1">
+            <span
+              v-for="b in tvBroadcasts"
+              :key="b.name"
+              class="nameplate border px-1.5 py-0.5 text-[10px] leading-none tracking-wider"
+              :class="b.national ? 'border-bulb/50 bg-bulb/10 text-bulb' : 'border-line/60 text-chalk'"
+            >{{ b.name }}</span>
+          </dd>
         </div>
         <div v-if="radioBroadcasts.length" class="flex gap-2">
           <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.radio') }}</dt>
@@ -270,6 +293,19 @@ function hideBrokenLogo(e: Event) {
       >
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
         {{ $t('scoreboard.watchFree') }}
+      </a>
+      <!-- Find Stream: a web search for the matchup (any league), except games
+           already flagged free-on-MLB.TV or already finished. -->
+      <a
+        v-if="!game.freeGame && game.status !== 'final'"
+        :href="findStreamUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nameplate inline-flex items-center gap-1 border border-line/60 px-2 py-1 text-[10px] tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb focus:outline-none focus-visible:border-bulb focus-visible:text-bulb"
+        :aria-label="$t('scoreboard.findStreamLabel', { matchup })"
+      >
+        {{ $t('scoreboard.findStream') }}
+        <span aria-hidden="true">↗</span>
       </a>
       <a
         v-if="gamedayUrl"

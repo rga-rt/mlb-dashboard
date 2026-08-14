@@ -19,15 +19,23 @@ describe('schedule date helpers', () => {
 })
 
 describe('gameStatus', () => {
-  it('maps the feed\'s abstractGameState to our enum', () => {
-    expect(gameStatus('Live')).toBe('live')
-    expect(gameStatus('Final')).toBe('final')
-    expect(gameStatus('Preview')).toBe('scheduled')
+  it('maps the feed\'s status to our enum', () => {
+    expect(gameStatus('Live', 'In Progress')).toBe('live')
+    expect(gameStatus('Final', 'Final')).toBe('final')
+    expect(gameStatus('Preview', 'Scheduled')).toBe('scheduled')
+  })
+
+  it('only counts an actually in-progress game as live', () => {
+    // "Live" is a bucket: a suspended/delayed game lives there with a frozen line
+    // score, so it must NOT show as live.
+    expect(gameStatus('Live', 'Suspended')).toBe('other')
+    expect(gameStatus('Live', 'Delayed: Rain')).toBe('other')
+    expect(gameStatus('Live', 'In Progress - Manager Challenge')).toBe('live')
   })
 
   it('falls back to "other" for anything unexpected or missing', () => {
-    expect(gameStatus('Suspended')).toBe('other')
-    expect(gameStatus('')).toBe('other')
+    expect(gameStatus('Postponed', 'Postponed')).toBe('other')
+    expect(gameStatus('', '')).toBe('other')
     expect(gameStatus(null)).toBe('other')
   })
 })

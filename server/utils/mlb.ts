@@ -156,17 +156,20 @@ export const SCOREBOARD_SPORTS: { label: ScoreboardGame['sport']; sportId: numbe
 ]
 
 /**
- * Map MLB's `status.abstractGameState` to our small enum. The feed reports
- * "Live" / "Final" / "Preview"; anything else (Suspended, Postponed, …) lands
- * in "other" so the card can still show a status detail without a live block.
+ * Map MLB's game status to our small enum. `abstractGameState` is the high-level
+ * bucket ("Preview" / "Live" / "Final"), but "Live" is a category, not proof the
+ * game is being played — a Suspended or Delayed game sits there too, with a
+ * frozen line score. So only count it live when `detailedState` says it's
+ * actually in progress; otherwise it falls to "other" and the card shows the
+ * detail ("Suspended", …) instead of a stale live block.
  */
-export function gameStatus(abstractGameState: string | null): GameStatus {
-  switch (abstractGameState) {
-    case 'Live': return 'live'
-    case 'Final': return 'final'
-    case 'Preview': return 'scheduled'
-    default: return 'other'
+export function gameStatus(abstractGameState: string | null, detailedState: string | null = null): GameStatus {
+  if (abstractGameState === 'Final') return 'final'
+  if (abstractGameState === 'Preview') return 'scheduled'
+  if (abstractGameState === 'Live') {
+    return (detailedState || '').toLowerCase().startsWith('in progress') ? 'live' : 'other'
   }
+  return 'other'
 }
 
 /**
@@ -223,7 +226,10 @@ export function flattenScoreboardGame(
   game: any,
   sport: ScoreboardGame['sport'],
 ): ScoreboardGame {
-  const status = gameStatus(pick<string>(game?.status, 'abstractGameState', null))
+  const status = gameStatus(
+    pick<string>(game?.status, 'abstractGameState', null),
+    pick<string>(game?.status, 'detailedState', null),
+  )
   const rawBroadcasts = pick(game, 'broadcasts', []) as any[]
   const line = pick(game, 'linescore', {}) as any
   const offense = pick(line, 'offense', {}) as any
