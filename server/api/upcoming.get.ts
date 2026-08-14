@@ -1,5 +1,5 @@
 import type { ScoreboardGame, UpcomingDay, UpcomingResponse } from '~/types/mlb'
-import { SCOREBOARD_SPORTS, flattenScoreboardGame, mlbFetch, pick, sortScoreboard } from '~/server/utils/mlb'
+import { SCOREBOARD_SPORTS, addScheduleDays, flattenScoreboardGame, mlbFetch, pick, scheduleToday, sortScoreboard } from '~/server/utils/mlb'
 
 // GET /api/upcoming?days=3
 // A look-ahead feed: the next N days (today inclusive, default 3) of games —
@@ -13,8 +13,9 @@ export default defineEventHandler(async (event): Promise<UpcomingResponse> => {
   const q = getQuery(event)
   // Clamp to a sane window so a stray ?days=999 can't fan out a huge range.
   const span = Math.min(Math.max(Number(q.days) || 3, 1), 7)
-  const start = today()
-  const end = addDays(start, span - 1)
+  // Start tomorrow — today's games belong to the Live Today board, not here.
+  const start = addScheduleDays(scheduleToday(), 1)
+  const end = addScheduleDays(start, span - 1)
 
   const results = await Promise.allSettled(
     SCOREBOARD_SPORTS.map(sport =>
@@ -53,15 +54,3 @@ export default defineEventHandler(async (event): Promise<UpcomingResponse> => {
 
   return { start, end, days }
 })
-
-/** Today's date as YYYY-MM-DD, in the server's local zone. */
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
-/** Add `n` days to a YYYY-MM-DD string, returning YYYY-MM-DD. */
-function addDays(date: string, n: number): string {
-  const d = new Date(`${date}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}

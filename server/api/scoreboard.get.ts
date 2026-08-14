@@ -1,5 +1,5 @@
 import type { ScoreboardGame, ScoreboardResponse } from '~/types/mlb'
-import { SCOREBOARD_SPORTS, flattenScoreboardGame, mlbFetch, pick, sortScoreboard } from '~/server/utils/mlb'
+import { SCOREBOARD_SPORTS, flattenScoreboardGame, mlbFetch, pick, scheduleToday, sortScoreboard } from '~/server/utils/mlb'
 
 // GET /api/scoreboard?date=YYYY-MM-DD
 // Returns the day's games — MLB plus the Mexican leagues (LMB, LMP) — with full
@@ -11,7 +11,7 @@ import { SCOREBOARD_SPORTS, flattenScoreboardGame, mlbFetch, pick, sortScoreboar
 // renders for the leagues that answered.
 export default defineEventHandler(async (event): Promise<ScoreboardResponse> => {
   const q = getQuery(event)
-  const date = typeof q.date === 'string' && q.date ? q.date : today()
+  const date = typeof q.date === 'string' && q.date ? q.date : scheduleToday()
 
   const results = await Promise.allSettled(
     SCOREBOARD_SPORTS.map(sport =>
@@ -41,8 +41,3 @@ export default defineEventHandler(async (event): Promise<ScoreboardResponse> => 
 
   return { date, games: sortScoreboard(games) }
 })
-
-/** Today's date as YYYY-MM-DD, in the server's local zone. */
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
-}

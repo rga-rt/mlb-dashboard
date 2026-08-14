@@ -67,6 +67,23 @@ export function currentSeason(): number {
   return new Date().getFullYear()
 }
 
+// "Today" for the schedule, anchored to US Pacific rather than the server's
+// timezone (UTC on most hosts). Using UTC rolls to the next calendar day during
+// the US evening and shows tomorrow's slate as "today"; Pacific keeps the
+// baseball day as "today" through the evening and late night — it only rolls at
+// midnight PT (~3am ET), by which every game is final — and never jumps ahead of
+// any US viewer. en-CA formats as YYYY-MM-DD.
+export function scheduleToday(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
+}
+
+/** Add n days (may be negative) to a YYYY-MM-DD string, returning YYYY-MM-DD. */
+export function addScheduleDays(date: string, n: number): string {
+  const d = new Date(`${date}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + n)
+  return d.toISOString().slice(0, 10)
+}
+
 /**
  * Flatten the raw MLB `/standings` records into our Division shape. Divisionless
  * leagues (LMP) report a null division id, so we key their metadata and their
