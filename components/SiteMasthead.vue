@@ -17,6 +17,7 @@ const links = [
 // Close the menu whenever we navigate (a tapped link changes the route), and on
 // Escape while it's open.
 const route = useRoute()
+const localePath = useLocalePath()
 watch(() => route.fullPath, () => { open.value = false })
 
 function onKeydown(e: KeyboardEvent) {
@@ -25,12 +26,16 @@ function onKeydown(e: KeyboardEvent) {
 onMounted(() => document.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
-// Close the menu on the NEXT frame after a link tap, not synchronously:
-// collapsing it mid-tap moves the tapped link out from under the finger and can
-// cancel the navigation on touch. (Cross-page taps also get closed by the route
-// watcher above; this also covers tapping a link to the current page.)
-function closeAfterTap() {
-  requestAnimationFrame(() => { open.value = false })
+// Navigate from the mobile menu explicitly. NuxtLink's own click-to-navigate
+// wasn't firing on touch here — the tap closed the menu but never changed pages
+// — while our @click handler clearly did fire. So we do the navigation in our
+// handler, which is reliable, and close the menu ourselves.
+function goTo(to: string) {
+  open.value = false
+  navigateTo(localePath(to))
+}
+function isCurrent(to: string): boolean {
+  return route.path === localePath(to)
 }
 </script>
 
@@ -96,15 +101,18 @@ function closeAfterTap() {
     >
       <ul class="mx-auto max-w-6xl divide-y divide-seam border-t border-seam px-4 md:px-6">
         <li v-for="l in links" :key="l.to">
-          <NuxtLinkLocale
-            :to="l.to"
-            class="nameplate flex items-center gap-2 py-3.5 text-xs tracking-widest text-chalk-dim transition-colors hover:text-bulb"
-            active-class="text-bulb"
-            @click="closeAfterTap"
+          <!-- Plain <a> with an explicit handler: keeps the href for semantics
+               and right-click, but navigation runs through goTo (reliable on
+               touch) rather than NuxtLink's own click handling. -->
+          <a
+            :href="localePath(l.to)"
+            class="nameplate flex items-center gap-2 py-3.5 text-xs tracking-widest transition-colors hover:text-bulb"
+            :class="isCurrent(l.to) ? 'text-bulb' : 'text-chalk-dim'"
+            @click.prevent="goTo(l.to)"
           >
             <span v-if="l.bulb" class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
             {{ $t(l.key) }}
-          </NuxtLinkLocale>
+          </a>
         </li>
       </ul>
     </nav>
