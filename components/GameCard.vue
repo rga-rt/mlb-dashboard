@@ -5,7 +5,7 @@ import type { ScoreboardGame } from '~/types/mlb'
 // return to the page the card was shown on (scoreboard / upcoming).
 const props = defineProps<{ game: ScoreboardGame, from?: string }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // A game's start time is the viewer's local clock, so it can only be resolved in
 // the browser — the server's timezone would differ. We hold off until mounted so
@@ -76,12 +76,15 @@ const radioBroadcasts = computed(() =>
   [...new Set(props.game.broadcasts.filter(b => b.medium === 'radio').map(b => b.name))],
 )
 
-// Per-game links. Gameday resolves off the MLB gamePk (a bare id 301-redirects
-// to the canonical page), so it's offered for MLB games only — the Mexican
-// leagues aren't on mlb.com/gameday. The free-game badge points at the MLB.TV
-// watch page and shows only when the feed flags the game as free to stream.
+// Gameday (a live pitch-by-pitch tracker) resolves off the StatsAPI gamePk for
+// EVERY league — MLB and the Mexican leagues alike (a bare id 301-redirects to
+// the canonical page; /es works too). Streaming (MLB.TV) is MLB-only: LMB/LMP
+// carry no broadcasts and aren't on MLB.TV.
+const isMlb = computed(() => props.game.sport === 'MLB')
 const gamedayUrl = computed(() =>
-  props.game.sport === 'MLB' ? `https://www.mlb.com/gameday/${props.game.gamePk}` : null,
+  props.game.gamePk
+    ? `https://www.mlb.com/${locale.value === 'es' ? 'es/' : ''}gameday/${props.game.gamePk}`
+    : null,
 )
 const mlbtvUrl = computed(() => `https://www.mlb.com/tv/g${props.game.gamePk}`)
 const matchup = computed(() => `${props.game.away.abbr} @ ${props.game.home.abbr}`)
@@ -285,9 +288,10 @@ function hideBrokenLogo(e: Event) {
         {{ $t('scoreboard.watchFree') }}
       </a>
       <!-- Find Stream: the MLB.TV game page (blackout/where-to-watch) for MLB
-           games not already flagged free. -->
+           games not already flagged free. MLB-only — the Mexican leagues aren't
+           on MLB.TV. -->
       <a
-        v-if="gamedayUrl && !game.freeGame"
+        v-if="isMlb && !game.freeGame"
         :href="mlbtvUrl"
         target="_blank"
         rel="noopener noreferrer"
