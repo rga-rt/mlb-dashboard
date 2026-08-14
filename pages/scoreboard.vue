@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { ScoreboardGame, ScoreboardResponse } from '~/types/mlb'
 
-const { data, pending, error, refresh } = await useFetch<ScoreboardResponse>('/api/scoreboard')
+// Keyed 'scoreboard' so the site-wide SiteTicker shares this exact fetch — its
+// ribbon rides this page's polling instead of firing a second request.
+const { data, pending, error, refresh } = await useFetch<ScoreboardResponse>('/api/scoreboard', {
+  key: 'scoreboard',
+})
 
 // The board polls itself so scores tick over without a manual reload. It runs
 // only in the browser, only while the tab is visible, and clears on unmount —
@@ -80,10 +84,6 @@ useHead({ title: 'Live Today — MLB scoreboard' })
 
 <template>
   <div>
-    <!-- Ribbon board across the top: today's slate drifting by. Bleeds past the
-         page padding to span the content edge-to-edge. -->
-    <ScoreTicker v-if="data && data.games.length" :games="data.games" class="-mx-4 mb-8 md:-mx-6" />
-
     <!-- Hero: headline plus a manual refresh and the freshness stamp -->
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>

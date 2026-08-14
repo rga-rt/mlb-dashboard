@@ -2,6 +2,9 @@
   <div class="min-h-screen">
     <SiteMasthead />
 
+    <!-- Site-wide scores ribbon: today's slate on every page, under the nav. -->
+    <SiteTicker />
+
     <main class="mx-auto max-w-6xl px-4 py-8 md:px-6">
       <slot />
     </main>

@@ -50,7 +50,7 @@ function hideBrokenLogo(e: Event) {
 <template>
   <section
     v-if="games.length"
-    class="ticker overflow-hidden border-y-2 border-seam bg-field-deep"
+    class="ticker overflow-hidden border-b-2 border-seam bg-field-deep"
     :aria-label="$t('ticker.label')"
   >
     <div class="ticker-track flex w-max items-stretch">
