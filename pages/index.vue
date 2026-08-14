@@ -175,6 +175,25 @@ useHead({
       </div>
     </section>
 
+    <!-- Form guide: hot/cold + division races, from the same standings feed -->
+    <section v-if="standings?.divisions?.length" class="border-t border-seam bg-field">
+      <div class="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-20">
+        <div class="mb-8">
+          <p class="nameplate flex items-center gap-2 text-xs tracking-[0.3em] text-chalk-dim">
+            <span class="bulb inline-block h-2 w-2" aria-hidden="true" />
+            {{ $t('landing.formEyebrow') }}
+          </p>
+          <h2 class="nameplate mt-2 text-3xl leading-none text-chalk md:text-4xl">
+            {{ $t('landing.formHeading') }}
+          </h2>
+        </div>
+        <div class="space-y-6">
+          <HotColdPanel :divisions="standings.divisions" :count="4" />
+          <DivisionMatchups :divisions="standings.divisions" />
+        </div>
+      </div>
+    </section>
+
     <!-- Features: asymmetric bento, four cells, no empty slots -->
     <section class="border-t border-seam bg-field-deep/40">
       <div class="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28">

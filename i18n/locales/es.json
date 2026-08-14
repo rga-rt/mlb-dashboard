@@ -93,6 +93,8 @@
     "liveSeeAll": "Marcador completo",
     "liveQuiet": "No hay juegos en vivo en este momento. El tablero se enciende en cuanto se lanza el primer pitcheo — mientras tanto, mira lo que hay en la cartelera de hoy.",
     "liveSeeSlate": "Ver la cartelera de hoy",
+    "formEyebrow": "Guía de Forma",
+    "formHeading": "Quién está en racha, quién resbala",
     "boardLive": "en vivo",
     "boardLegend": "G / P / JD",
     "boardSeeAll": "Ver las seis divisiones",
@@ -111,6 +113,18 @@
     "deepDiveBody": "Toca un equipo, recorre su roster como una alineación y abre a un jugador para ver los números detrás del número.",
     "ctaTitle": "Sube al tablero.",
     "ctaBody": "Seis divisiones, treinta equipos, cada línea de estadísticas. Sin cuenta, sin muro de pago."
+  },
+  "form": {
+    "hotColdTitle": "Calientes y Fríos",
+    "hot": "Calientes",
+    "cold": "Fríos",
+    "last10": "U10",
+    "streak": "RA",
+    "record": "G-P",
+    "matchupsTitle": "Carreras Divisionales",
+    "gamesBack": "JD",
+    "tied": "Empatados",
+    "leader": "Líder de división"
   },
   "board": {
     "eyebrow": "Temporada Regular",

@@ -126,6 +126,12 @@ const LEGEND = [
       </div>
     </dl>
 
+    <!-- Form guide: recent-form widgets, above the board -->
+    <div v-if="data && sections.length" class="mb-10 space-y-6">
+      <HotColdPanel :divisions="data.divisions" />
+      <DivisionMatchups :divisions="data.divisions" />
+    </div>
+
     <!--
       Refresh failed but we still have a board to show — never throw away good
       standings for a transient error. A dismissible-feeling banner sits above
