@@ -24,6 +24,14 @@ function onKeydown(e: KeyboardEvent) {
 }
 onMounted(() => document.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
+
+// Close the menu on the NEXT frame after a link tap, not synchronously:
+// collapsing it mid-tap moves the tapped link out from under the finger and can
+// cancel the navigation on touch. (Cross-page taps also get closed by the route
+// watcher above; this also covers tapping a link to the current page.)
+function closeAfterTap() {
+  requestAnimationFrame(() => { open.value = false })
+}
 </script>
 
 <template>
@@ -92,7 +100,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
             :to="l.to"
             class="nameplate flex items-center gap-2 py-3.5 text-xs tracking-widest text-chalk-dim transition-colors hover:text-bulb"
             active-class="text-bulb"
-            @click="open = false"
+            @click="closeAfterTap"
           >
             <span v-if="l.bulb" class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
             {{ $t(l.key) }}
