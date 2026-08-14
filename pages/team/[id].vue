@@ -212,10 +212,16 @@ async function selectPlayer(id: number, opts: { fromUrl?: boolean } = {}) {
   advancedError.value = false
   teamStats.value = null
   teamStatsError.value = false
-  // Mirror the pick into the URL so it survives reload and is shareable, and
-  // bring the (mobile) detail panel into view — its skeleton is the feedback.
-  if (!opts.fromUrl) syncUrl('push')
-  revealDetail()
+  // Bring the (mobile) detail panel into view — its skeleton is the feedback.
+  // A click mirrors the pick into the URL and scrolls once; a deep-link arrival
+  // re-scrolls across the load window since the whole page is shifting.
+  if (opts.fromUrl) {
+    revealDetailDeepLink()
+  }
+  else {
+    syncUrl('push')
+    revealDetail()
+  }
   try {
     const res = await $fetch<PlayerResponse>(`/api/player/${id}`, {
       query: { season: season.value, sportId: roster.value?.sportId ?? 1 },
@@ -252,7 +258,29 @@ function revealDetail() {
   if (!import.meta.client) return
   if (window.matchMedia('(min-width: 1024px)').matches) return
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  nextTick(() => detailPanel.value?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }))
+  nextTick(() => document.getElementById('player-detail')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }))
+}
+
+// Deep-links must land on the player panel, but the whole page (roster,
+// ballpark, and the panel's own async stats) loads and shifts at once, so a
+// single scroll ends up short or overshooting. Re-scroll across the load window
+// until it settles — bailing the instant the user scrolls, so we never fight
+// them. min-h on the panel guarantees the page can reach it.
+function revealDetailDeepLink() {
+  if (!import.meta.client || window.matchMedia('(min-width: 1024px)').matches) return
+  let cancelled = false
+  const cancel = () => { cancelled = true }
+  window.addEventListener('wheel', cancel, { passive: true })
+  window.addEventListener('touchmove', cancel, { passive: true })
+  const scroll = () => {
+    if (!cancelled) document.getElementById('player-detail')?.scrollIntoView({ block: 'start' })
+  }
+  nextTick(scroll)
+  ;[120, 300, 600, 1000].forEach(t => window.setTimeout(scroll, t))
+  window.setTimeout(() => {
+    window.removeEventListener('wheel', cancel)
+    window.removeEventListener('touchmove', cancel)
+  }, 1100)
 }
 
 // Whole view state (season + open player) lives in the query string so links
@@ -417,8 +445,10 @@ function onAnalyticsToggle(e: Event) {
         <!-- Detail panel: selected player's stat lines. Pinned and independently
              scrollable on wide screens so it doesn't run past the viewport. -->
         <div
+          id="player-detail"
           ref="detailPanel"
           class="scroll-mt-4 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1"
+          :class="selectedId ? 'min-h-dvh lg:min-h-0' : ''"
         >
           <p class="sr-only" role="status" aria-live="polite">{{ statusMsg }}</p>
           <div
