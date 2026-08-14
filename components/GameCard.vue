@@ -78,15 +78,22 @@ const radioBroadcasts = computed(() =>
 
 // Gameday (a live pitch-by-pitch tracker) resolves off the StatsAPI gamePk for
 // EVERY league — MLB and the Mexican leagues alike (a bare id 301-redirects to
-// the canonical page; /es works too). Streaming (MLB.TV) is MLB-only: LMB/LMP
-// carry no broadcasts and aren't on MLB.TV.
-const isMlb = computed(() => props.game.sport === 'MLB')
+// the canonical page; /es works too).
 const gamedayUrl = computed(() =>
   props.game.gamePk
     ? `https://www.mlb.com/${locale.value === 'es' ? 'es/' : ''}gameday/${props.game.gamePk}`
     : null,
 )
+// The MLB.TV game page (used only by the free-game badge below — free games need
+// no login). "Find Stream" instead points at a web search for the matchup: the
+// MLB.TV page otherwise requires a subscription, whereas a search surfaces the
+// actual (free or paid) options and works for every league.
 const mlbtvUrl = computed(() => `https://www.mlb.com/tv/g${props.game.gamePk}`)
+const findStreamUrl = computed(() =>
+  // "how to watch" steers the search toward official streaming options rather
+  // than "live stream" bait sites.
+  `https://www.google.com/search?q=${encodeURIComponent(`how to watch ${props.game.away.name} vs ${props.game.home.name}`)}`,
+)
 const matchup = computed(() => `${props.game.away.abbr} @ ${props.game.home.abbr}`)
 
 function hideBrokenLogo(e: Event) {
@@ -287,12 +294,11 @@ function hideBrokenLogo(e: Event) {
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
         {{ $t('scoreboard.watchFree') }}
       </a>
-      <!-- Find Stream: the MLB.TV game page (blackout/where-to-watch) for MLB
-           games not already flagged free. MLB-only — the Mexican leagues aren't
-           on MLB.TV. -->
+      <!-- Find Stream: a web search for the matchup (any league), except games
+           already flagged free-on-MLB.TV or already finished. -->
       <a
-        v-if="isMlb && !game.freeGame"
-        :href="mlbtvUrl"
+        v-if="!game.freeGame && game.status !== 'final'"
+        :href="findStreamUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="nameplate inline-flex items-center gap-1 border border-line/60 px-2 py-1 text-[10px] tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb focus:outline-none focus-visible:border-bulb focus-visible:text-bulb"
