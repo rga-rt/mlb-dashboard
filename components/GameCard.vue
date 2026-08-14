@@ -86,7 +86,11 @@ function hideBrokenLogo(e: Event) {
 </script>
 
 <template>
-  <section class="border border-seam bg-panel">
+  <!-- min-w-0 lets the card shrink to its grid column: without it, a nowrap
+       line (a long probable name, or an LMB club whose abbr is its full name)
+       sets a min-width wider than a phone and scrolls the page sideways. The
+       inner truncate rules then clip cleanly. -->
+  <section class="min-w-0 border border-seam bg-panel">
     <!-- Top strip: league tag left, status readout right -->
     <div class="flex items-center justify-between border-b-2 border-seam bg-field-deep px-3 py-2">
       <span class="nameplate border border-line px-1.5 py-0.5 text-[10px] tracking-widest text-chalk-dim">
@@ -188,7 +192,7 @@ function hideBrokenLogo(e: Event) {
            links to that player's stats (on their own club's page) when the feed
            gives us both the personId and their team. -->
       <div v-if="game.live.currentPitcher || game.live.currentBatter" class="mt-2.5 space-y-0.5 text-[11px] leading-snug">
-        <p v-if="game.live.currentPitcher" class="truncate text-chalk-dim">
+        <p v-if="game.live.currentPitcher" class="break-words text-chalk-dim">
           <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.pitcher') }}</span>
           <NuxtLinkLocale
             v-if="game.live.currentPitcherId != null && game.live.currentPitcherTeamId != null"
@@ -198,7 +202,7 @@ function hideBrokenLogo(e: Event) {
           >{{ game.live.currentPitcher }}</NuxtLinkLocale>
           <template v-else>{{ game.live.currentPitcher }}</template>
         </p>
-        <p v-if="game.live.currentBatter" class="truncate text-chalk-dim">
+        <p v-if="game.live.currentBatter" class="break-words text-chalk-dim">
           <span class="nameplate tracking-wider text-chalk">{{ $t('scoreboard.batter') }}</span>
           <NuxtLinkLocale
             v-if="game.live.currentBatterId != null && game.live.currentBatterTeamId != null"
@@ -217,7 +221,7 @@ function hideBrokenLogo(e: Event) {
       class="border-t border-seam bg-field-deep/50 px-3 py-2.5 text-[11px] leading-snug text-chalk-dim"
     >
       <p class="nameplate mb-1 text-[9px] tracking-widest text-chalk-dim">{{ $t('scoreboard.probable') }}</p>
-      <p v-for="side in (['away', 'home'] as const)" :key="side" class="truncate">
+      <p v-for="side in (['away', 'home'] as const)" :key="side" class="break-words">
         {{ game[side].abbr }} ·
         <!-- Link the probable to their stats on the team page (deep-linked via
              ?player=id) when we have their personId; plain text otherwise. -->
@@ -241,11 +245,11 @@ function hideBrokenLogo(e: Event) {
       <dl class="space-y-0.5">
         <div v-if="tvBroadcasts.length" class="flex gap-2">
           <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.tv') }}</dt>
-          <dd class="min-w-0 truncate text-chalk">{{ tvBroadcasts.join(' · ') }}</dd>
+          <dd class="min-w-0 break-words text-chalk">{{ tvBroadcasts.join(' · ') }}</dd>
         </div>
         <div v-if="radioBroadcasts.length" class="flex gap-2">
           <dt class="nameplate shrink-0 tracking-widest text-chalk-dim">{{ $t('scoreboard.radio') }}</dt>
-          <dd class="min-w-0 truncate text-chalk-dim">{{ radioBroadcasts.join(' · ') }}</dd>
+          <dd class="min-w-0 break-words text-chalk-dim">{{ radioBroadcasts.join(' · ') }}</dd>
         </div>
       </dl>
     </div>
