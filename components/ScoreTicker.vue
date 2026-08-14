@@ -71,10 +71,6 @@ function tipStatus(g: ScoreboardGame): string {
   if (g.status === 'scheduled') return timeLabel(g)
   return g.statusDetail
 }
-// Distinct TV carriers, in feed order — "where to watch" at a glance.
-function tvNetworks(g: ScoreboardGame): string {
-  return [...new Set(g.broadcasts.filter(b => b.medium === 'TV').map(b => b.name))].join(', ')
-}
 </script>
 
 <template>
@@ -144,10 +140,6 @@ function tvNetworks(g: ScoreboardGame): string {
             <span class="tip-label">{{ active.home.abbr }}</span>{{ active.home.probablePitcher || t('scoreboard.tbd') }}
           </p>
         </template>
-
-        <p v-if="tvNetworks(active)" class="tip-line">
-          <span class="tip-label">{{ t('scoreboard.tv') }}</span>{{ tvNetworks(active) }}
-        </p>
       </div>
     </Teleport>
   </section>
