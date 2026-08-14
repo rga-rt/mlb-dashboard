@@ -29,13 +29,11 @@ const postedLabel = computed(() =>
     : null,
 )
 
-// Day label: "Today" / "Tomorrow" for the first two days, else weekday + date.
-// The relative anchor comes from the response's own `start` (server's today), so
-// the same string renders on server and client — no hydration mismatch.
-const tomorrow = computed(() => (data.value ? addDays(data.value.start, 1) : ''))
+// Day label: the feed starts at tomorrow (today's games live on the Live Today
+// board), so the first day is always "Tomorrow"; the rest show weekday + date.
+// Keying off the response's own `start` keeps server and client in sync.
 function dayLabel(date: string): string {
-  if (data.value && date === data.value.start) return t('upcoming.today')
-  if (date === tomorrow.value) return t('upcoming.tomorrow')
+  if (data.value && date === data.value.start) return t('upcoming.tomorrow')
   // Parse at midday UTC and format in UTC so the calendar day never drifts.
   return new Date(`${date}T12:00:00Z`).toLocaleDateString(locale.value, {
     weekday: 'long',
@@ -43,12 +41,6 @@ function dayLabel(date: string): string {
     day: 'numeric',
     timeZone: 'UTC',
   })
-}
-
-function addDays(date: string, n: number): string {
-  const d = new Date(`${date}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
 }
 
 useHead({ title: 'Upcoming — MLB schedule, probables & TV' })

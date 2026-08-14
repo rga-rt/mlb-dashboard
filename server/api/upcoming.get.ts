@@ -13,7 +13,8 @@ export default defineEventHandler(async (event): Promise<UpcomingResponse> => {
   const q = getQuery(event)
   // Clamp to a sane window so a stray ?days=999 can't fan out a huge range.
   const span = Math.min(Math.max(Number(q.days) || 3, 1), 7)
-  const start = scheduleToday()
+  // Start tomorrow — today's games belong to the Live Today board, not here.
+  const start = addScheduleDays(scheduleToday(), 1)
   const end = addScheduleDays(start, span - 1)
 
   const results = await Promise.allSettled(
