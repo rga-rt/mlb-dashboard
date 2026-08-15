@@ -118,5 +118,14 @@ function hideBrokenLogo(e: Event) {
     <div v-else-if="error" class="px-3 py-5 text-center text-[12px] text-chalk-dim">
       {{ $t('nextfive.failed') }}
     </div>
+
+    <!-- What the % chip means — the season record in the header reads .557, a
+         single-game estimate reads 57%, so spell the chip out. -->
+    <p
+      v-if="data && data.games.length"
+      class="border-t border-seam px-3 py-2 text-[10px] leading-snug text-chalk-dim"
+    >
+      {{ $t('nextfive.legend') }}
+    </p>
   </section>
 </template>

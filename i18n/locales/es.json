@@ -61,6 +61,7 @@
   "nextfive": {
     "eyebrow": "Mi Equipo · Próximos 5",
     "probable": "{a} vs {b}",
+    "legend": "El % es la probabilidad estimada de ganar cada juego, según el récord de ambos equipos.",
     "winAria": "{pct}% de probabilidad de ganar",
     "noGames": "No hay juegos próximos en el calendario.",
     "failed": "No se pudieron cargar los próximos cinco ahora mismo."
