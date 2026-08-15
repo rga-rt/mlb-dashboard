@@ -3,6 +3,32 @@
     "label": "Language",
     "switchTo": "Español"
   },
+  "seo": {
+    "home": {
+      "title": "Live MLB Standings, Scores & Stats",
+      "desc": "Live MLB standings, today's scores, the upcoming schedule, roster moves, and deep player stats — painted like a ballpark scoreboard. No account, no paywall."
+    },
+    "standings": {
+      "title": "MLB Standings",
+      "desc": "Live standings for all six MLB divisions and the Mexican leagues — wins, losses, win %, games back, and streaks. Sort any column and follow your club."
+    },
+    "scoreboard": {
+      "title": "Live Scores Today",
+      "desc": "Every MLB game on today's card with live scores, the count, base runners, inning-by-inning line scores, and where to watch."
+    },
+    "upcoming": {
+      "title": "Upcoming Games & Probable Pitchers",
+      "desc": "The next three days of MLB and Mexican-league games, with first-pitch times, probable pitchers, and where to watch or listen."
+    },
+    "news": {
+      "title": "MLB Roster Moves & Transactions",
+      "desc": "Every MLB roster move from the last three days — trades, signings, call-ups, and injured-list moves, straight from the official transactions feed."
+    },
+    "team": {
+      "title": "{team} Roster & Stats",
+      "desc": "The {team} active roster as a lineup card, plus full hitting and pitching stat lines, Statcast advanced metrics, team ranks, and a season forecast for every player."
+    }
+  },
   "nav": {
     "openBoard": "Open the board",
     "exploreTeam": "Explore a team",

@@ -3,6 +3,32 @@
     "label": "Idioma",
     "switchTo": "English"
   },
+  "seo": {
+    "home": {
+      "title": "Posiciones, Marcadores y Estadísticas de MLB en Vivo",
+      "desc": "Posiciones de MLB en vivo, los marcadores de hoy, el calendario, movimientos de roster y estadísticas de jugadores a fondo — pintado como un tablero de estadio. Sin cuenta, sin muro de pago."
+    },
+    "standings": {
+      "title": "Posiciones de MLB",
+      "desc": "Posiciones en vivo de las seis divisiones de MLB y las ligas mexicanas — ganados, perdidos, porcentaje, juegos detrás y rachas. Ordena cualquier columna y sigue a tu equipo."
+    },
+    "scoreboard": {
+      "title": "Marcadores en Vivo de Hoy",
+      "desc": "Cada juego de MLB en la cartelera de hoy con marcadores en vivo, la cuenta, corredores en base, pizarras entrada por entrada y dónde ver."
+    },
+    "upcoming": {
+      "title": "Próximos Juegos y Pícheres Probables",
+      "desc": "Los próximos tres días de juegos de MLB y de las ligas mexicanas, con horas del primer lanzamiento, pícheres probables y dónde ver o escuchar."
+    },
+    "news": {
+      "title": "Movimientos de Roster y Transacciones de MLB",
+      "desc": "Cada movimiento de roster de MLB de los últimos tres días — cambios, firmas, llamados y movimientos a la lista de lesionados, directo del feed oficial de transacciones."
+    },
+    "team": {
+      "title": "Roster y Estadísticas de {team}",
+      "desc": "El roster activo de {team} como alineación, más líneas completas de bateo y pícheo, métricas avanzadas de Statcast, ranking del equipo y un pronóstico de temporada para cada jugador."
+    }
+  },
   "nav": {
     "openBoard": "Abrir el tablero",
     "exploreTeam": "Explorar un equipo",
