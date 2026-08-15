@@ -52,6 +52,12 @@
     "final": "F",
     "count": "{b}-{s}, {o} out"
   },
+  "linescore": {
+    "r": "C",
+    "h": "H",
+    "e": "E",
+    "caption": "Pizarra: carreras por entrada, con totales de carreras, hits y errores"
+  },
   "scoreboard": {
     "eyebrow": "Alrededor de la Liga",
     "title": "En Vivo Hoy",

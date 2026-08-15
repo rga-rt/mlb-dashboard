@@ -88,6 +88,17 @@ describe('flattenScoreboardGame', () => {
       balls: 2,
       strikes: 1,
       outs: 2,
+      scheduledInnings: 9,
+      innings: [
+        { num: 1, away: { runs: 1 }, home: { runs: 0 } },
+        { num: 2, away: { runs: 0 }, home: { runs: 1 } },
+        { num: 3, away: { runs: 2 }, home: { runs: 0 } },
+        { num: 4, away: { runs: 0 }, home: { runs: 0 } },
+        { num: 5, away: { runs: 1 }, home: { runs: 2 } },
+        { num: 6, away: { runs: 0 }, home: { runs: 0 } },
+        { num: 7, away: { runs: 0 } }, // top 7th in progress; home half not batted
+      ],
+      teams: { away: { runs: 4, hits: 9, errors: 0 }, home: { runs: 3, hits: 6, errors: 1 } },
       offense: { batter: { id: 646240, fullName: 'Rafael Devers' }, team: { id: 111 }, first: { id: 1 }, third: { id: 2 } },
       defense: { pitcher: { id: 543037, fullName: 'Gerrit Cole' }, team: { id: 147 } },
     },
@@ -122,6 +133,19 @@ describe('flattenScoreboardGame', () => {
     expect(g.freeGame).toBe(true) // ESPN entry carried freeGame: true
   })
 
+  it('builds the inning-by-inning line score, nulling a half not yet batted', () => {
+    const g = flattenScoreboardGame(liveRaw, 'MLB')
+    expect(g.lineScore).not.toBeNull()
+    const ls = g.lineScore!
+    expect(ls.currentInning).toBe(7)
+    expect(ls.scheduledInnings).toBe(9)
+    expect(ls.innings).toHaveLength(7)
+    // Bottom of the 7th hasn't been batted → home runs is null (a blank cell).
+    expect(ls.innings[6]).toEqual({ num: 7, away: 0, home: null })
+    expect(ls.away).toEqual({ r: 4, h: 9, e: 0 })
+    expect(ls.home).toEqual({ r: 3, h: 6, e: 1 })
+  })
+
   it('defaults broadcasts empty and freeGame false when the feed omits them (e.g. LMB)', () => {
     const g = flattenScoreboardGame({
       gamePk: 950,
@@ -146,6 +170,7 @@ describe('flattenScoreboardGame', () => {
     }, 'MLB')
     expect(g.status).toBe('scheduled')
     expect(g.live).toBeNull()
+    expect(g.lineScore).toBeNull() // no box before first pitch
     expect(g.away.runs).toBeNull()
     expect(g.home.runs).toBeNull()
     expect(g.away.probablePitcher).toBe('Carlos Rodón')
@@ -178,6 +203,7 @@ describe('sortScoreboard', () => {
     home: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null, probablePitcherId: null },
     away: { teamId: 0, name: '', abbr: '', runs: null, probablePitcher: null, probablePitcherId: null },
     live: null,
+    lineScore: null,
     broadcasts: [],
     freeGame: false,
   })

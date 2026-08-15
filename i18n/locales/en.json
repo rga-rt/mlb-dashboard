@@ -52,6 +52,12 @@
     "final": "F",
     "count": "{b}-{s}, {o} out"
   },
+  "linescore": {
+    "r": "R",
+    "h": "H",
+    "e": "E",
+    "caption": "Line score: runs by inning, with runs, hits, and errors totals"
+  },
   "scoreboard": {
     "eyebrow": "Around the League",
     "title": "Live Today",
