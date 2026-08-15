@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import type { NextFiveGame, NextFiveResponse } from '~/types/mlb'
 
-// A micro-view of one club's next five games. With no `teamId` it tracks the
-// first-pinned club ("My Team"); given a `teamId` it shows that club as a
-// featured pick (used to fill the slot when nothing is pinned). The pin is
-// client-only state, so this fetches in the browser and refetches on change.
-const props = defineProps<{ teamId?: number }>()
+// A personalized micro-view of the first-pinned club's next five games. The pin
+// is client-only state, so this fetches in the browser once a team is pinned and
+// refetches when the pin changes. The caller only mounts it when a club is
+// pinned, so `teamId` is set by the time it renders.
 const { t } = useI18n()
 const { pinned } = usePinnedTeams()
-const teamId = computed<number | null>(() => props.teamId ?? pinned.value[0] ?? null)
-const isFeatured = computed(() => props.teamId != null)
+const teamId = computed<number | null>(() => pinned.value[0] ?? null)
 
 const { data, pending, error, refresh } = useLazyFetch<NextFiveResponse>(
   () => `/api/next-five/${teamId.value}`,
@@ -56,7 +54,7 @@ function hideBrokenLogo(e: Event) {
     <div class="border-b-2 border-seam bg-field-deep px-3 py-2.5">
       <p class="nameplate flex items-center gap-2 text-[10px] tracking-[0.28em] text-chalk-dim">
         <span class="bulb inline-block h-1.5 w-1.5" aria-hidden="true" />
-        {{ isFeatured ? $t('nextfive.featured') : $t('nextfive.eyebrow') }}
+        {{ $t('nextfive.eyebrow') }}
       </p>
       <div v-if="data?.team" class="mt-2 flex items-center gap-2.5">
         <img

@@ -60,7 +60,6 @@
   },
   "nextfive": {
     "eyebrow": "Mi Equipo · Próximos 5",
-    "featured": "Alrededor de la Liga · Próximos 5",
     "probable": "{a} vs {b}",
     "winAria": "{pct}% de probabilidad de ganar",
     "noGames": "No hay juegos próximos en el calendario.",

@@ -33,17 +33,8 @@ const marqueeTeams = computed(() => [...allTeams.value, ...allTeams.value]) // d
 const feedLogos = computed(() => allTeams.value.slice(0, 5))
 const sampleTeamId = computed(() => heroDivision.value?.teams[0]?.teamId ?? 147)
 
-// "My Team's Next 5": the pinned club, or — with nothing pinned — the two best
-// clubs by record as featured picks.
+// "My Team's Next 5" shows only when a club is pinned.
 const { pinned } = usePinnedTeams()
-const featuredTeams = computed<number[]>(() =>
-  (standings.value?.divisions ?? [])
-    .filter(d => d.league === 'AL' || d.league === 'NL') // MLB clubs — the default audience
-    .flatMap(d => d.teams)
-    .sort((a, b) => Number.parseFloat(b.pct) - Number.parseFloat(a.pct))
-    .slice(0, 2)
-    .map(t => t.teamId),
-)
 
 // Today's live games power the "on the field right now" strip. Same fail-soft
 // contract as the hero board: if the feed is unreachable, `scoreboard` stays
@@ -147,6 +138,14 @@ useHead({
       </div>
     </section>
 
+    <!-- Personalized: the pinned club's next five, centered. Below the hero,
+         above the live strip; hidden entirely when nothing is pinned. -->
+    <section v-if="pinned.length" class="border-t border-seam bg-field">
+      <div class="mx-auto max-w-7xl px-4 py-12 md:px-6">
+        <NextFive class="mx-auto max-w-md" />
+      </div>
+    </section>
+
     <!-- Live now: today's in-progress games, straight from /api/scoreboard.
          Fails soft — hidden entirely if the feed never answered. When it did
          answer but nothing's live, a quiet line points at the full board. -->
@@ -186,19 +185,6 @@ useHead({
           >
             {{ $t('landing.liveSeeSlate') }}
           </NuxtLinkLocale>
-        </div>
-      </div>
-    </section>
-
-    <!-- Personalized: the pinned club's next five — or, with nothing pinned,
-         two featured clubs. Centered either way. -->
-    <section v-if="pinned.length || featuredTeams.length" class="border-t border-seam bg-field">
-      <div class="mx-auto max-w-7xl px-4 py-12 md:px-6">
-        <div v-if="pinned.length" class="mx-auto max-w-md">
-          <NextFive />
-        </div>
-        <div v-else class="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-          <NextFive v-for="id in featuredTeams" :key="id" :team-id="id" />
         </div>
       </div>
     </section>
