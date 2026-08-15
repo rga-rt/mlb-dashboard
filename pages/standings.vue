@@ -129,10 +129,13 @@ const LEGEND = [
       </div>
     </dl>
 
-    <!-- Personalized: the pinned club's next five, centered. Hidden entirely
-         when nothing is pinned. -->
-    <div v-if="pinned.length" class="mx-auto mb-8 max-w-md">
-      <NextFive />
+    <!-- Personalized: a Next 5 per pinned club — a single one centered, two or
+         more in a grid. Hidden entirely when nothing is pinned. -->
+    <div v-if="pinned.length === 1" class="mx-auto mb-8 max-w-md">
+      <NextFive :team-id="pinned[0]" />
+    </div>
+    <div v-else-if="pinned.length > 1" class="mx-auto mb-8 grid max-w-3xl gap-4 sm:grid-cols-2">
+      <NextFive v-for="id in pinned" :key="id" :team-id="id" />
     </div>
 
     <!-- Form guide: recent-form widgets, above the board -->

@@ -138,11 +138,17 @@ useHead({
       </div>
     </section>
 
-    <!-- Personalized: the pinned club's next five, centered. Below the hero,
-         above the live strip; hidden entirely when nothing is pinned. -->
+    <!-- Personalized: a Next 5 per pinned club — a single one centered, two or
+         more in a grid. Below the hero, above the live strip; hidden when
+         nothing is pinned. -->
     <section v-if="pinned.length" class="border-t border-seam bg-field">
       <div class="mx-auto max-w-7xl px-4 py-12 md:px-6">
-        <NextFive class="mx-auto max-w-md" />
+        <div v-if="pinned.length === 1" class="mx-auto max-w-md">
+          <NextFive :team-id="pinned[0]" />
+        </div>
+        <div v-else class="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
+          <NextFive v-for="id in pinned" :key="id" :team-id="id" />
+        </div>
       </div>
     </section>
 

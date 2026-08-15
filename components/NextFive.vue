@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { NextFiveGame, NextFiveResponse } from '~/types/mlb'
 
-// A personalized micro-view of the first-pinned club's next five games. The pin
-// is client-only state, so this fetches in the browser once a team is pinned and
-// refetches when the pin changes. The caller only mounts it when a club is
-// pinned, so `teamId` is set by the time it renders.
+// A personalized micro-view of one pinned club's next five games. The caller
+// passes the club via `teamId` (rendering one panel per pinned team); it falls
+// back to the first pin when omitted. The pin is client-only state, so this
+// fetches in the browser and refetches if the tracked club changes.
+const props = defineProps<{ teamId?: number }>()
 const { t } = useI18n()
 const { pinned } = usePinnedTeams()
-const teamId = computed<number | null>(() => pinned.value[0] ?? null)
+const teamId = computed<number | null>(() => props.teamId ?? pinned.value[0] ?? null)
 
 const { data, pending, error, refresh } = useLazyFetch<NextFiveResponse>(
   () => `/api/next-five/${teamId.value}`,
