@@ -38,6 +38,13 @@ Requires Node 18.18+ (Node 20+ recommended).
 
 Spanish is served under `/es/*` (see [Internationalization](#internationalization)).
 
+Both the landing and the standings board also show **My Team's Next 5** — for
+any club you've pinned (the ★ follow control on the board), its next five games
+with the probable-pitcher matchup and a per-game win-odds estimate (log5, from
+both clubs' season records). It's centered for a single pin and lays out as a
+grid when you pin more than one; with nothing pinned it's hidden. Pins persist
+in `localStorage`, so the panel is there when you come back.
+
 ## How it works
 
 The browser never talks to MLB directly. Nuxt's server routes (Nitro) proxy the
@@ -52,12 +59,13 @@ API, which does two things:
 ### API routes
 
 Each route proxies the public MLB Stats API and returns a flattened shape from
-`types/mlb.ts`. All accept an optional `?season=YYYY` (defaults to the current
+`types/mlb.ts`. Most accept an optional `?season=YYYY` (defaults to the current
 year).
 
 | Route                      | Returns                                                     |
 | -------------------------- | ---------------------------------------------------------- |
 | `/api/standings`           | Six divisions with flat team records                       |
+| `/api/next-five/:id`       | A pinned club's next five games: opponent, probables, log5 win-odds |
 | `/api/roster/:id`          | Flat active roster plus team name and logo                 |
 | `/api/team/:id`            | Club info and ballpark (venue, dimensions, capacity)       |
 | `/api/team-stats/:id`      | Team-wide hitting/pitching lines, for ranking a player     |
