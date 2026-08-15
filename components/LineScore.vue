@@ -23,10 +23,17 @@ const cols = computed(() => {
   })
 })
 
-const rows = computed(() => [
-  { side: 'away' as const, abbr: props.awayAbbr, ...props.line.away },
-  { side: 'home' as const, abbr: props.homeAbbr, ...props.line.home },
-])
+// The team ahead on runs. On a final game its R total lights amber (the leader
+// cue, like the game card); on a live game we leave it chalk, since the amber
+// lamp there is the current-inning column — two ambers would compete.
+const rows = computed(() => {
+  const a = props.line.away.r
+  const h = props.line.home.r
+  return [
+    { side: 'away' as const, abbr: props.awayAbbr, ...props.line.away, leading: a > h },
+    { side: 'home' as const, abbr: props.homeAbbr, ...props.line.home, leading: h > a },
+  ]
+})
 
 // Only mark a live game's current inning; a finished game's lamp is off.
 const litInning = computed(() => (props.live ? props.line.currentInning : -1))
@@ -59,7 +66,7 @@ const litInning = computed(() => (props.live ? props.line.currentInning : -1))
             class="ls-cell digit"
             :class="c.num === litInning ? 'text-bulb' : 'text-chalk'"
           >{{ c[row.side] ?? '' }}</td>
-          <td class="ls-cell ls-r digit">{{ row.r }}</td>
+          <td class="ls-cell ls-r digit" :class="row.leading && !live ? 'lit' : 'text-chalk'">{{ row.r }}</td>
           <td class="ls-cell digit text-chalk-dim">{{ row.h }}</td>
           <td class="ls-cell digit text-chalk-dim">{{ row.e }}</td>
         </tr>
@@ -106,8 +113,9 @@ const litInning = computed(() => (props.live ? props.line.currentInning : -1))
 .ls-r {
   border-left: 1px solid var(--color-seam);
 }
+/* Weight only — the run total's color comes from the template (lit for the
+   leader, chalk otherwise), matching the game card. */
 .ls-cell.ls-r {
-  color: var(--color-chalk);
   font-weight: 600;
 }
 .ls-tot.ls-r {
