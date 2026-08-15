@@ -61,7 +61,9 @@
   "nextfive": {
     "eyebrow": "My Team · Next 5",
     "probable": "{a} vs {b}",
-    "legend": "The header shows the season record: wins–losses and winning %. Each game's % is the estimated chance of winning it, from both clubs' records.",
+    "legendRecordLabel": "Record",
+    "legendRecord": "season wins–losses and winning %.",
+    "legendWin": "estimated chance of winning each game, from both clubs' records.",
     "winAria": "{pct}% win odds",
     "noGames": "No upcoming games on the schedule.",
     "failed": "Couldn't load the next five just now."

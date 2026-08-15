@@ -119,13 +119,20 @@ function hideBrokenLogo(e: Event) {
       {{ $t('nextfive.failed') }}
     </div>
 
-    <!-- What the % chip means — the season record in the header reads .557, a
-         single-game estimate reads 57%, so spell the chip out. -->
-    <p
+    <!-- Legend, one line per case: the header record (.557) and the per-game
+         chip (57%) look alike, so each is spelled out on its own. -->
+    <dl
       v-if="data && data.games.length"
-      class="border-t border-seam px-3 py-2 text-[10px] leading-snug text-chalk-dim"
+      class="space-y-1 border-t border-seam px-3 py-2 text-[10px] leading-snug text-chalk-dim"
     >
-      {{ $t('nextfive.legend') }}
-    </p>
+      <div class="flex gap-1.5">
+        <dt class="nameplate shrink-0 tracking-wider text-chalk">{{ $t('nextfive.legendRecordLabel') }}</dt>
+        <dd>{{ $t('nextfive.legendRecord') }}</dd>
+      </div>
+      <div class="flex gap-1.5">
+        <dt class="nameplate shrink-0 tracking-wider text-chalk">%</dt>
+        <dd>{{ $t('nextfive.legendWin') }}</dd>
+      </div>
+    </dl>
   </section>
 </template>
