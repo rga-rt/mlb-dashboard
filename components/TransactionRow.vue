@@ -30,8 +30,10 @@ const link = computed(() =>
   <div class="flex gap-2.5 px-1 py-2.5">
     <!-- League tag: which wire this came off (MLB / LMB / LMP) -->
     <span class="nameplate mt-1 w-9 shrink-0 text-[9px] tracking-widest text-chalk-dim/60">{{ tx.league }}</span>
+    <!-- Fixed width so every move badge (Trade / Recalled / Optioned / …) is the
+         same size and the descriptions line up in one column down the feed. -->
     <span
-      class="nameplate mt-0.5 h-fit shrink-0 border px-1.5 py-0.5 text-[10px] tracking-wider"
+      class="nameplate mt-0.5 h-fit min-w-[5.75rem] shrink-0 whitespace-nowrap border px-1.5 py-0.5 text-center text-[10px] tracking-wider"
       :class="injury ? 'border-clay/60 text-clay' : 'border-line/50 text-chalk-dim'"
     >{{ badge }}</span>
     <p class="min-w-0 flex-1 text-[13px] leading-snug text-chalk-dim">
