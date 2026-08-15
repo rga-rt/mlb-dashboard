@@ -58,6 +58,16 @@
     "e": "E",
     "caption": "Pizarra: carreras por entrada, con totales de carreras, hits y errores"
   },
+  "nextfive": {
+    "eyebrow": "Mi Equipo · Próximos 5",
+    "probable": "{a} vs {b}",
+    "winAria": "{pct}% de probabilidad de ganar",
+    "followTitle": "Sigue a tu equipo",
+    "followBody": "Fija un equipo en el tablero para ver sus próximos cinco juegos, pícheres probables y un pronóstico de probabilidad de victoria.",
+    "followCta": "Abrir el tablero",
+    "noGames": "No hay juegos próximos en el calendario.",
+    "failed": "No se pudieron cargar los próximos cinco ahora mismo."
+  },
   "scoreboard": {
     "eyebrow": "Alrededor de la Liga",
     "title": "En Vivo Hoy",

@@ -178,6 +178,13 @@ useHead({
       </div>
     </section>
 
+    <!-- Personalized: the pinned club's next five (empty state invites a follow) -->
+    <section class="border-t border-seam bg-field">
+      <div class="mx-auto max-w-7xl px-4 py-12 md:px-6">
+        <NextFive class="mx-auto max-w-md" />
+      </div>
+    </section>
+
     <!-- Form guide: hot/cold + division races, from the same standings feed -->
     <section v-if="standings?.divisions?.length" class="border-t border-seam bg-field">
       <div class="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-20">

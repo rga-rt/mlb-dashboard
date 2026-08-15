@@ -126,6 +126,9 @@ const LEGEND = [
       </div>
     </dl>
 
+    <!-- Personalized: the pinned club's next five games -->
+    <NextFive class="mb-8 max-w-md" />
+
     <!-- Form guide: recent-form widgets, above the board -->
     <div v-if="data && sections.length" class="mb-10 space-y-6">
       <HotColdPanel :divisions="data.divisions" />

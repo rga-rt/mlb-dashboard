@@ -190,6 +190,20 @@ export interface LineScore {
   home: { r: number, h: number, e: number }
 }
 
+export interface NextFiveGame {
+  gamePk: number
+  date: string | null // ISO first-pitch; the client formats it in local time
+  home: boolean // is the pinned club the home team?
+  opponent: { teamId: number, name: string, abbr: string }
+  myProbable: string | null
+  oppProbable: string | null
+  winProb: number | null // 0..1 log5 estimate for the pinned club; null if unknown
+}
+export interface NextFiveResponse {
+  team: { teamId: number, name: string, abbr: string, wins: number, losses: number, pct: string }
+  games: NextFiveGame[]
+}
+
 export interface ScoreboardGame {
   gamePk: number
   status: GameStatus

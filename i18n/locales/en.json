@@ -58,6 +58,16 @@
     "e": "E",
     "caption": "Line score: runs by inning, with runs, hits, and errors totals"
   },
+  "nextfive": {
+    "eyebrow": "My Team · Next 5",
+    "probable": "{a} vs {b}",
+    "winAria": "{pct}% win odds",
+    "followTitle": "Follow your club",
+    "followBody": "Pin a team on the board to see its next five games, probable pitchers, and a win-odds forecast.",
+    "followCta": "Open the board",
+    "noGames": "No upcoming games on the schedule.",
+    "failed": "Couldn't load the next five just now."
+  },
   "scoreboard": {
     "eyebrow": "Around the League",
     "title": "Live Today",
