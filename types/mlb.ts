@@ -177,6 +177,19 @@ export interface LiveState {
   currentBatterTeamId: number | null // the batting team (batter's club)
 }
 
+export interface LineScoreInning {
+  num: number
+  away: number | null // runs that half-inning; null = not batted (future, or a
+  home: number | null // home side that didn't need to bat)
+}
+export interface LineScore {
+  innings: LineScoreInning[]
+  currentInning: number
+  scheduledInnings: number // usually 9; drives how many columns the box shows
+  away: { r: number, h: number, e: number } // runs / hits / errors totals
+  home: { r: number, h: number, e: number }
+}
+
 export interface ScoreboardGame {
   gamePk: number
   status: GameStatus
@@ -186,6 +199,7 @@ export interface ScoreboardGame {
   home: GameSide
   away: GameSide
   live: LiveState | null // present only when status === 'live'
+  lineScore: LineScore | null // inning-by-inning box; started games (live/final)
   broadcasts: Broadcast[] // TV / radio carriers; empty when the feed lists none
   freeGame: boolean // streams free on MLB.TV without a subscription/login
 }

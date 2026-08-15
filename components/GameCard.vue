@@ -161,6 +161,16 @@ function hideBrokenLogo(e: Event) {
       </div>
     </div>
 
+    <!-- Inning-by-inning line score: the game's shape as it happens (live) or its
+         full story (final). Only started games carry one. -->
+    <LineScore
+      v-if="game.lineScore"
+      :line="game.lineScore"
+      :away-abbr="game.away.abbr"
+      :home-abbr="game.home.abbr"
+      :live="game.status === 'live'"
+    />
+
     <!-- Live quick-state: bases diamond, B/S/O pips, current pitcher & batter -->
     <div v-if="game.status === 'live' && game.live" class="border-t border-seam bg-field-deep/50 px-3 py-2.5">
       <p class="sr-only">{{ liveSummary }}</p>

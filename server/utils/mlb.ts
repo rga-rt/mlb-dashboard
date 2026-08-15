@@ -7,6 +7,7 @@ import type {
   GameSide,
   GameStatus,
   League,
+  LineScore,
   LiveState,
   ScoreboardGame,
   TeamRecord,
@@ -218,6 +219,35 @@ function flattenSide(rawSide: any): GameSide {
 }
 
 /**
+ * Build the inning-by-inning box from the hydrated linescore, for started games
+ * only (live/final). Per-half `runs` is absent until that half is batted, so it
+ * flattens to null (a blank cell) rather than a misleading 0.
+ */
+function flattenLineScore(line: any, status: GameStatus): LineScore | null {
+  if (status !== 'live' && status !== 'final') return null
+  const rawInnings = pick(line, 'innings', []) as any[]
+  if (!rawInnings.length) return null
+
+  const totals = (raw: any) => ({
+    r: pick<number>(raw, 'runs', 0) as number,
+    h: pick<number>(raw, 'hits', 0) as number,
+    e: pick<number>(raw, 'errors', 0) as number,
+  })
+  const teams = pick(line, 'teams', {}) as any
+  return {
+    innings: rawInnings.map(inn => ({
+      num: pick<number>(inn, 'num', 0) as number,
+      away: pick<number>(pick(inn, 'away', {}), 'runs', null),
+      home: pick<number>(pick(inn, 'home', {}), 'runs', null),
+    })),
+    currentInning: pick<number>(line, 'currentInning', 0) as number,
+    scheduledInnings: pick<number>(line, 'scheduledInnings', 9) as number,
+    away: totals(pick(teams, 'away', {})),
+    home: totals(pick(teams, 'home', {})),
+  }
+}
+
+/**
  * Flatten one raw schedule game (hydrated with linescore, team, probablePitcher)
  * into our ScoreboardGame. The live block is only built for in-progress games;
  * runner presence is derived from whether offense.first|second|third exists.
@@ -274,6 +304,7 @@ export function flattenScoreboardGame(
     home,
     away,
     live,
+    lineScore: flattenLineScore(line, status),
     broadcasts: flattenBroadcasts(rawBroadcasts),
     // A game is "free" if any carrier flags it — MLB's free game of the day
     // streams on MLB.TV with no subscription.
