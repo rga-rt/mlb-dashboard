@@ -11,6 +11,18 @@ const { data, pending, error, refresh } = await useFetch<StandingsResponse>(
   { query: { season } },
 )
 
+// "My Team's Next 5" shows the pinned club; with nothing pinned, it falls back
+// to the two best clubs by record as featured picks.
+const { pinned } = usePinnedTeams()
+const featuredTeams = computed<number[]>(() =>
+  (data.value?.divisions ?? [])
+    .filter(d => d.league === 'AL' || d.league === 'NL') // MLB clubs — the default audience
+    .flatMap(d => d.teams)
+    .sort((a, b) => Number.parseFloat(b.pct) - Number.parseFloat(a.pct))
+    .slice(0, 2)
+    .map(t => t.teamId),
+)
+
 // "Posted HH:MM" freshness stamp. On a board reading a live API, freshness IS
 // the status — this is how a user knows a Refresh actually did something.
 // Set client-side only (onMounted + the pending true→false edge) so the time
@@ -126,8 +138,14 @@ const LEGEND = [
       </div>
     </dl>
 
-    <!-- Personalized: the pinned club's next five games -->
-    <NextFive class="mb-8 max-w-md" />
+    <!-- Personalized: the pinned club's next five — or, with nothing pinned,
+         two featured clubs. Centered either way. -->
+    <div v-if="pinned.length" class="mx-auto mb-8 max-w-md">
+      <NextFive />
+    </div>
+    <div v-else-if="featuredTeams.length" class="mx-auto mb-8 grid max-w-3xl gap-4 sm:grid-cols-2">
+      <NextFive v-for="id in featuredTeams" :key="id" :team-id="id" />
+    </div>
 
     <!-- Form guide: recent-form widgets, above the board -->
     <div v-if="data && sections.length" class="mb-10 space-y-6">
