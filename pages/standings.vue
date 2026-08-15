@@ -67,6 +67,8 @@ const LEGEND = [
   { abbr: 'PCT', key: 'board.legendPct' },
   { abbr: 'GB', key: 'board.legendGb' },
 ]
+
+useSeo('standings')
 </script>
 
 <template>

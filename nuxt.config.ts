@@ -32,8 +32,9 @@ export default defineNuxtConfig({
   },
 
   app: {
+    // The title template is a function, so it's set at runtime in app.vue —
+    // nuxt.config is serialized and can't carry a function.
     head: {
-      title: 'The Scoreboard — MLB Stats',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

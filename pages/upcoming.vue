@@ -43,7 +43,7 @@ function dayLabel(date: string): string {
   })
 }
 
-useHead({ title: 'Upcoming — MLB schedule, probables & TV' })
+useSeo('upcoming')
 </script>
 
 <template>

@@ -40,6 +40,10 @@ const { data: roster, pending, error, refresh } = await useFetch<RosterResponse>
   () => `/api/roster/${teamId.value}?season=${season.value}`,
 )
 
+// A per-club title/description ("New York Yankees Roster & Stats"), falling back
+// to a generic label until the roster resolves.
+useSeo('team', () => ({ team: roster.value?.teamName ?? 'MLB' }))
+
 // Club + ballpark info for the header panel. Independent of the roster, so a
 // failure here just hides the panel rather than blocking the page.
 const { data: teamInfo } = await useFetch<TeamInfoResponse>(

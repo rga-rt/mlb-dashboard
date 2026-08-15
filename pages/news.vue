@@ -68,7 +68,7 @@ const sections = computed(() => {
   return ordered.filter(s => s.days.length > 0)
 })
 
-useHead({ title: 'News — MLB transactions & roster moves' })
+useSeo('news')
 </script>
 
 <template>

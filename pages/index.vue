@@ -53,15 +53,7 @@ const liveGames = computed<ScoreboardGame[]>(
 // Keep the landing tight: show at most three live cards, link out for the rest.
 const livePreview = computed(() => liveGames.value.slice(0, 3))
 
-useHead({
-  title: 'Scoreboard - Live MLB standings & player stats',
-  meta: [
-    {
-      name: 'description',
-      content: 'Live MLB standings and deep player stats, painted like a hand-operated ballpark scoreboard. Sort the board, follow your club, and read the forecast.',
-    },
-  ],
-})
+useSeo('home')
 </script>
 
 <template>

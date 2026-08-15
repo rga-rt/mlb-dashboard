@@ -79,7 +79,7 @@ const sections = computed(() => {
   return groups.filter(s => s.games.length > 0)
 })
 
-useHead({ title: 'Live Today — MLB scoreboard' })
+useSeo('scoreboard')
 </script>
 
 <template>
