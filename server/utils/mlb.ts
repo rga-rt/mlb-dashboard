@@ -140,6 +140,17 @@ export function orderDivisions(divisions: Division[]): Division[] {
   )
 }
 
+/**
+ * log5 (Bill James): the probability team A beats team B from each club's win
+ * percentage alone. `pA`, `pB` are win pcts in 0..1. Two .500 clubs return .500;
+ * the stronger side scales up from there. The degenerate 0/0 case returns .500.
+ */
+export function log5(pA: number, pB: number): number {
+  const denom = pA + pB - 2 * pA * pB
+  if (denom <= 0) return 0.5
+  return (pA - pA * pB) / denom
+}
+
 // --- Live Today (scoreboard) ---------------------------------------------
 
 // The leagues our boards cover. Each is a sportId, but the two Mexican leagues

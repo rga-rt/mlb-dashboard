@@ -33,6 +33,15 @@ const marqueeTeams = computed(() => [...allTeams.value, ...allTeams.value]) // d
 const feedLogos = computed(() => allTeams.value.slice(0, 5))
 const sampleTeamId = computed(() => heroDivision.value?.teams[0]?.teamId ?? 147)
 
+// "My Team's Next 5" shows only when a club is pinned.
+const { pinned } = usePinnedTeams()
+
+// "Explore a team" jumps to a pinned club when there is one; otherwise it keeps
+// the default (a top-division club). The pin is client-only, so the link
+// resolves to the default on the server and updates after hydration.
+const exploreTeamId = computed(() => pinned.value[0] ?? sampleTeamId.value)
+const explorePath = computed(() => `/team/${exploreTeamId.value}`)
+
 // Today's live games power the "on the field right now" strip. Same fail-soft
 // contract as the hero board: if the feed is unreachable, `scoreboard` stays
 // null and the section hides itself entirely. When the feed answers but nothing
@@ -81,12 +90,25 @@ useHead({
           >
             {{ $t('nav.openBoard') }}
           </NuxtLinkLocale>
-          <NuxtLinkLocale
-            :to="`/team/${sampleTeamId}`"
-            class="nameplate border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
-          >
-            {{ $t('nav.exploreTeam') }}
-          </NuxtLinkLocale>
+          <!-- The pin is client-only, and a hydrated NuxtLink won't repaint its
+               href once it loads; render this link fresh on the client (default
+               target as the SSR fallback, identical but for the href). -->
+          <ClientOnly>
+            <NuxtLinkLocale
+              :to="explorePath"
+              class="nameplate border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
+            >
+              {{ $t('nav.exploreTeam') }}
+            </NuxtLinkLocale>
+            <template #fallback>
+              <NuxtLinkLocale
+                :to="`/team/${sampleTeamId}`"
+                class="nameplate border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
+              >
+                {{ $t('nav.exploreTeam') }}
+              </NuxtLinkLocale>
+            </template>
+          </ClientOnly>
         </div>
       </div>
 
@@ -131,6 +153,20 @@ useHead({
               {{ $t('landing.boardSeeAll') }}
             </NuxtLinkLocale>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Personalized: a Next 5 per pinned club — a single one centered, two or
+         more in a grid. Below the hero, above the live strip; hidden when
+         nothing is pinned. -->
+    <section v-if="pinned.length" class="border-t border-seam bg-field">
+      <div class="mx-auto max-w-7xl px-4 py-12 md:px-6">
+        <div v-if="pinned.length === 1" class="mx-auto max-w-md">
+          <NextFive :team-id="pinned[0]" />
+        </div>
+        <div v-else class="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
+          <NextFive v-for="id in pinned" :key="id" :team-id="id" />
         </div>
       </div>
     </section>
@@ -276,12 +312,24 @@ useHead({
         <p class="reveal mx-auto mt-6 max-w-xl text-base leading-relaxed text-chalk-dim">
           {{ $t('landing.deepDiveBody') }}
         </p>
-        <NuxtLinkLocale
-          :to="`/team/${sampleTeamId}`"
-          class="reveal nameplate mt-9 inline-block border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
-        >
-          {{ $t('nav.exploreTeam') }}
-        </NuxtLinkLocale>
+        <!-- Client-only for the same reason as the hero CTA: a hydrated NuxtLink
+             won't repaint its href once the client-only pin loads. -->
+        <ClientOnly>
+          <NuxtLinkLocale
+            :to="explorePath"
+            class="reveal nameplate mt-9 inline-block border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
+          >
+            {{ $t('nav.exploreTeam') }}
+          </NuxtLinkLocale>
+          <template #fallback>
+            <NuxtLinkLocale
+              :to="`/team/${sampleTeamId}`"
+              class="reveal nameplate mt-9 inline-block border border-line px-6 py-3 text-xs tracking-widest text-chalk transition-colors hover:border-bulb hover:text-bulb"
+            >
+              {{ $t('nav.exploreTeam') }}
+            </NuxtLinkLocale>
+          </template>
+        </ClientOnly>
       </div>
     </section>
 

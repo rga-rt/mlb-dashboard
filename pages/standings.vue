@@ -11,6 +11,9 @@ const { data, pending, error, refresh } = await useFetch<StandingsResponse>(
   { query: { season } },
 )
 
+// "My Team's Next 5" shows only when a club is pinned.
+const { pinned } = usePinnedTeams()
+
 // "Posted HH:MM" freshness stamp. On a board reading a live API, freshness IS
 // the status — this is how a user knows a Refresh actually did something.
 // Set client-side only (onMounted + the pending true→false edge) so the time
@@ -125,6 +128,15 @@ const LEGEND = [
         <dd class="text-chalk-dim">{{ $t(item.key) }}</dd>
       </div>
     </dl>
+
+    <!-- Personalized: a Next 5 per pinned club — a single one centered, two or
+         more in a grid. Hidden entirely when nothing is pinned. -->
+    <div v-if="pinned.length === 1" class="mx-auto mb-8 max-w-md">
+      <NextFive :team-id="pinned[0]" />
+    </div>
+    <div v-else-if="pinned.length > 1" class="mx-auto mb-8 grid max-w-3xl gap-4 sm:grid-cols-2">
+      <NextFive v-for="id in pinned" :key="id" :team-id="id" />
+    </div>
 
     <!-- Form guide: recent-form widgets, above the board -->
     <div v-if="data && sections.length" class="mb-10 space-y-6">

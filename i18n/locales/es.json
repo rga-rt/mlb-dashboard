@@ -58,6 +58,16 @@
     "e": "E",
     "caption": "Pizarra: carreras por entrada, con totales de carreras, hits y errores"
   },
+  "nextfive": {
+    "eyebrow": "Mi Equipo · Próximos 5",
+    "probable": "{a} vs {b}",
+    "legendRecordLabel": "Récord",
+    "legendRecord": "ganados–perdidos y porcentaje de victorias de la temporada.",
+    "legendWin": "probabilidad estimada de ganar cada juego, según el récord de ambos equipos.",
+    "winAria": "{pct}% de probabilidad de ganar",
+    "noGames": "No hay juegos próximos en el calendario.",
+    "failed": "No se pudieron cargar los próximos cinco ahora mismo."
+  },
   "scoreboard": {
     "eyebrow": "Alrededor de la Liga",
     "title": "En Vivo Hoy",
